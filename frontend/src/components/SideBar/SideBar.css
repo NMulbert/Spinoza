@@ -1,0 +1,12 @@
+.info {
+  color: #0066ff;
+  line-height: 5px;
+  text-align: left;
+}
+
+.user-icon {
+  background: #0066ff;
+  border-radius: 10px;
+  padding: 10px;
+  color: white;
+}

@@ -1,9 +1,11 @@
+import React from "react";
 import "./App.css";
+import NewTest from "./components/NewTest/NewTest";
 
 function App() {
   return (
     <div className="App">
-      <h1>Spinoza</h1>
+      <NewTest />
     </div>
   );
 }
