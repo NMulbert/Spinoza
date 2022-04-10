@@ -118,7 +118,8 @@ const SideBar = () => {
   ));
 
   return (
-    <Navbar height={"100vh"} width={{ sm: 300 }} p="md">
+
+    <>
       <Navbar.Section grow>
         <Group className={classes.header} position="apart">
           <div className="user-icon">
@@ -153,7 +154,7 @@ const SideBar = () => {
           <span>Logout</span>
         </a>
       </Navbar.Section>
-    </Navbar>
+    </>
   );
 };
 
