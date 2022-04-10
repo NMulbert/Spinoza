@@ -1,11 +1,13 @@
 import React from "react";
 import "./App.css";
-import TestsPage from "./components/Tests/TestsPage";
+import AllTestsPage from "./components/Tests/AllTestsPage";
+import TestsPage from "./components/Tests/CreateTestPage";
+import CreateTestPage from "./components/Tests/CreateTestPage";
 
 function App() {
   return (
     <div className="App">
-      <TestsPage />
+      <AllTestsPage />
     </div>
   );
 }
