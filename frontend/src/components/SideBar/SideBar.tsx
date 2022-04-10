@@ -118,6 +118,7 @@ const SideBar = () => {
   ));
 
   return (
+
     <>
       <Navbar.Section grow>
         <Group className={classes.header} position="apart">
