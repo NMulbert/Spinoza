@@ -3,7 +3,7 @@ import { AppShell, Header, Image } from '@mantine/core';
 import CreateTest from './CreateTest';
 import { Sidebar } from '../AppShell/SideBar';
 
-function TestsPage() {
+function CreateTestPage() {
     return (
         <AppShell
         header={<Header height={80} p="xs">{
@@ -25,4 +25,4 @@ function TestsPage() {
     );
 }
 
-export default TestsPage;
+export default CreateTestPage;

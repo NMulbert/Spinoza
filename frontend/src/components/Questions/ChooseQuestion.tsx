@@ -45,9 +45,9 @@ function ChooseQuestion() {
                 </Group>
                 </div>
                 <div>
-                    <ScrollArea style={{ height: 280, width: "100%" }}>
+                    <ScrollArea style={{ height: 450, width: "100%" }}>
                         {
-                            <SimpleGrid style={{textAlign: "center"}} cols={3}>
+                            <SimpleGrid style={{textAlign: "center" }} cols={3}>
                                 <ExistingQuestion/>
                                 <ExistingQuestion/>
                                 <ExistingQuestion/>

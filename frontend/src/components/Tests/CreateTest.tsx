@@ -2,6 +2,7 @@ import React from 'react';
 import { useState } from 'react';
 import { TextInput, Group, Button, SimpleGrid, Modal } from '@mantine/core';
 import ChooseQuestion from '../Questions/ChooseQuestion';
+import NewQuestion from '../Questions/NewQuestion';
 
 function CreateTest() {
     const [openedNQ, setOpenedNQ] = useState(false);
@@ -16,7 +17,7 @@ function CreateTest() {
         size="75%"
         >
         {
-            "<NewQuestion/>"
+           <NewQuestion/>
         }
       </Modal>
       <Modal
