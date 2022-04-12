@@ -1,5 +1,6 @@
 import { AppShell, Header, Image } from "@mantine/core";
-import React, { useState } from "react";
+import { type } from "os";
+import React, { useEffect, useState } from "react";
 import { Sidebar } from "../AppShell/SideBar";
 import AllQuestionsPage from "../Questions/AllQuestionsPage";
 import AllTestsPage from "../Tests/AllTestsPage";
@@ -20,8 +21,9 @@ function Dashboard() {
       Content = <CreateTest />;
       break;
   }
+
   return (
-    <>
+    <div>
       <AppShell
         header={
           <Header height={80} p="xs">
@@ -42,7 +44,7 @@ function Dashboard() {
       >
         {Content}
       </AppShell>
-    </>
+    </div>
   );
 }
 

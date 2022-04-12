@@ -1,16 +1,10 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
-  AppShell,
-  Header,
-  Image,
-  SimpleGrid,
-  Space,
   Grid,
   Card,
   Text,
 } from "@mantine/core";
-import CreateTest from "./CreateTest";
-import { Sidebar } from "../AppShell/SideBar";
+
 import TestCard from "./TestCard";
 
 type AllTestsPageProps = {
@@ -19,6 +13,17 @@ type AllTestsPageProps = {
 };
 
 function AllTestsPage({ active, setActive }: AllTestsPageProps) {
+  const [tests, setTests] = useState([]);
+
+  useEffect(() => {
+    let url = "./TestObject.json";
+    fetch(url)
+      .then((res) => res.json())
+      .then((result) => {
+        setTests(result);
+      });
+  }, []);
+
   return (
     <Grid>
       <Grid.Col md={6} lg={3}>
@@ -46,21 +51,19 @@ function AllTestsPage({ active, setActive }: AllTestsPageProps) {
           </Text>
         </Card>
       </Grid.Col>
-      <Grid.Col md={6} lg={3}>
-        <TestCard />
-      </Grid.Col>
-      <Grid.Col md={6} lg={3}>
-        <TestCard />
-      </Grid.Col>
-      <Grid.Col md={6} lg={3}>
-        <TestCard />
-      </Grid.Col>
-      <Grid.Col md={6} lg={3}>
-        <TestCard />
-      </Grid.Col>
-      <Grid.Col md={6} lg={3}>
-        <TestCard />
-      </Grid.Col>
+      {tests.length !== 0 ? (
+        tests.map((i: object) => {
+          return (
+            <Grid.Col md={6} lg={3}>
+              <TestCard />
+            </Grid.Col>
+          );
+        })
+      ) : (
+        <>
+          <h1>Hi</h1>
+        </>
+      )}
     </Grid>
   );
 }

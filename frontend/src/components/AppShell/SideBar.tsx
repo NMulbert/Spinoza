@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+
 import { createStyles, Navbar, Avatar } from "@mantine/core";
 import {
   Notes,
@@ -8,8 +8,6 @@ import {
   SwitchHorizontal,
   User,
 } from "tabler-icons-react";
-import { Link } from "react-router-dom";
-import { Anchor } from "@mantine/core";
 
 type SideBarProps = {
   active: string;
@@ -124,7 +122,7 @@ export function Sidebar({ active, setActive }: SideBarProps) {
 
   return (
     <Navbar width={{ base: 240 }} height={"90%"} p="md">
-      <Navbar.Section className={classes.header}>
+{     /* <Navbar.Section className={classes.header}>
         <a
           className={cx(classes.link, {
             [classes.linkActive]: "Username" === active,
@@ -139,6 +137,8 @@ export function Sidebar({ active, setActive }: SideBarProps) {
           <span>Username</span>
         </a>
       </Navbar.Section>
+    */
+    }
 
       <Navbar.Section grow>{links}</Navbar.Section>
 
