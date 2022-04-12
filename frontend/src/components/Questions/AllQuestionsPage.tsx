@@ -1,10 +1,21 @@
-import React, { useState } from "react";
-import { Modal, Grid, Card, Text } from "@mantine/core";
+import React, { useState, useEffect } from "react";
+import { Modal, Grid, Card, Text, Loader } from "@mantine/core";
 import QuestionCard from "../Questions/QuestionCard";
 import NewQuestion from "./NewQuestion";
 
 function AllQuestionsPage() {
   const [openedNQ, setOpenedNQ] = useState(false);
+
+  const [questions, setQuestions] = useState([]);
+
+  useEffect(() => {
+      let url = "./QuestionObject.json";
+      fetch(url)
+        .then((res) => res.json())
+        .then((result) => {
+          setQuestions(result);
+        });
+    }, []);
 
   return (
     <>
@@ -41,21 +52,27 @@ function AllQuestionsPage() {
             </Text>
           </Card>
         </Grid.Col>
-        <Grid.Col md={6} lg={3}>
-          <QuestionCard />
-        </Grid.Col>
-        <Grid.Col md={6} lg={3}>
-          <QuestionCard />
-        </Grid.Col>
-        <Grid.Col md={6} lg={3}>
-          <QuestionCard />
-        </Grid.Col>
-        <Grid.Col md={6} lg={3}>
-          <QuestionCard />
-        </Grid.Col>
-        <Grid.Col md={6} lg={3}>
-          <QuestionCard />
-        </Grid.Col>
+        {questions.length !== 0 ? (
+        questions.map((i: any) => {
+          return (
+            <Grid.Col md={6} lg={3} key={i.Id}>
+              <QuestionCard
+                Id={i.Id}
+                Title={i.Title}
+                Description={i.Description}
+                Author={i.Author}
+                Tags={i.Tags}
+                Status={i.Status}
+                Version={i.Version}
+              />
+            </Grid.Col>
+          );
+        })
+      ) : (
+        <>
+          <Loader />
+        </>
+      )}
       </Grid>
     </>
   );
