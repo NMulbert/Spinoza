@@ -1,13 +1,23 @@
-import React from 'react';
-import { useState } from 'react';
-import { Search, Hash, X, ArrowRight } from 'tabler-icons-react';
-import { MultiSelect, TextInput, SimpleGrid, Group, Button, Text, ScrollArea, Badge, ActionIcon, Card, Space, Divider } from '@mantine/core';
+import { useState, useEffect } from 'react';
+import { Search, Hash, ArrowRight } from 'tabler-icons-react';
+import { MultiSelect, TextInput, SimpleGrid, Group, Button, Text, ScrollArea, ActionIcon, Divider, Loader, Center } from '@mantine/core';
 import ExistingQuestion from './ExistingQuestion';
 
 
 function ChooseQuestion() {
 
     const [dataHash, setHashData] = useState(['React', 'C#', 'JavaScript', 'Python']);
+    const [questions, setQuestions] = useState([]);
+
+    useEffect(() => {
+        let url = "./QuestionObject.json";
+        fetch(url)
+          .then((res) => res.json())
+          .then((result) => {
+            setQuestions(result);
+          });
+      }, []);
+
 
     return (
         <div>
@@ -48,11 +58,23 @@ function ChooseQuestion() {
                     <ScrollArea style={{ height: 450, width: "100%" }}>
                         {
                             <SimpleGrid style={{textAlign: "center" }} cols={3}>
-                                <ExistingQuestion/>
-                                <ExistingQuestion/>
-                                <ExistingQuestion/>
-                                <ExistingQuestion/>
-                                <ExistingQuestion/>
+                                {questions.length !== 0 ? (
+                                    questions.map((i: any) => {
+                                    return (
+                                        <ExistingQuestion key={i.Id}
+                                            Id={i.Id}
+                                            Title={i.Title}
+                                            Description={i.Description}
+                                            Author={i.Author}
+                                            Tags={i.Tags}
+                                            Status={i.Status}
+                                            Version={i.Version}
+                                        />
+                                    );
+                                    })
+                                ) : (
+                                    <Loader/>
+                                )}
                             </SimpleGrid>
                         }
                     </ScrollArea>

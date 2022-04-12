@@ -9,7 +9,25 @@ import {
   useMantineTheme,
 } from "@mantine/core";
 
-function QuestionCard() {
+type QuestionData = {
+  Id: string;
+  Title: string;
+  Description: string;
+  Author: any;
+  Tags: any;
+  Status: string;
+  Version: string;
+};
+
+function QuestionCard({
+  Id,
+  Title,
+  Description,
+  Author,
+  Tags,
+  Status,
+  Version,
+}: QuestionData) {
   const theme = useMantineTheme();
 
   const secondaryColor =
@@ -19,14 +37,14 @@ function QuestionCard() {
     <div style={{ width: 340, margin: "auto" }}>
       <Card shadow="sm" p="lg">
         <Card.Section>
-          <h3>Question </h3>
+          <h3>{Title}</h3>
         </Card.Section>
 
-        <Text weight={500}>this is question</Text>
+        <Text weight={500}>{Description}</Text>
 
         <Group style={{ marginBottom: 5, marginTop: theme.spacing.sm }}>
           <Badge color="pink" variant="light">
-            Author
+            {`${Author.FirstName} ${Author.LastName}`}
           </Badge>
           <Badge color="yellow" variant="light">
             Date
@@ -34,19 +52,20 @@ function QuestionCard() {
         </Group>
 
         <Text size="sm" style={{ color: secondaryColor, lineHeight: 1.5 }}>
-          Here would go a preview of the question. <br />
-          Here would go a preview of the question. <br />
-          Here would go a preview of the question. <br />
-          Here would go a preview of the question. <br />
+          Here would go a preview of the test. <br />
+          Here would go a preview of the test. <br />
+          Here would go a preview of the test. <br />
+          Here would go a preview of the test. <br />
         </Text>
 
         <Group style={{ marginBottom: 5, marginTop: theme.spacing.sm }}>
-          <Badge color="green" variant="light">
-            #React
-          </Badge>
-          <Badge color="green" variant="light">
-            #JAVASCRIPT
-          </Badge>
+          {Tags.map((i: any) => {
+            return (
+              <Badge key={i} color="green" variant="light">
+                {i}
+              </Badge>
+            );
+          })}
         </Group>
 
         <Button
@@ -55,7 +74,7 @@ function QuestionCard() {
           fullWidth
           style={{ marginTop: 14 }}
         >
-          open
+          Open
         </Button>
       </Card>
     </div>
