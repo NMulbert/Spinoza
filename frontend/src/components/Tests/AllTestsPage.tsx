@@ -1,11 +1,8 @@
 import React, { useEffect, useState } from "react";
-import {
-  Grid,
-  Card,
-  Text,
-} from "@mantine/core";
+import { Grid, Card, Text } from "@mantine/core";
 
 import TestCard from "./TestCard";
+import { Loader } from "tabler-icons-react";
 
 type AllTestsPageProps = {
   active: string;
@@ -52,16 +49,24 @@ function AllTestsPage({ active, setActive }: AllTestsPageProps) {
         </Card>
       </Grid.Col>
       {tests.length !== 0 ? (
-        tests.map((i: object) => {
+        tests.map((i: any) => {
           return (
-            <Grid.Col md={6} lg={3}>
-              <TestCard />
+            <Grid.Col md={6} lg={3} key={i.Id}>
+              <TestCard
+                Id={i.Id}
+                Title={i.Title}
+                Description={i.Description}
+                Author={i.Author}
+                Tags={i.Tags}
+                Status={i.Status}
+                Version={i.Version}
+              />
             </Grid.Col>
           );
         })
       ) : (
         <>
-          <h1>Hi</h1>
+          <Loader />
         </>
       )}
     </Grid>
