@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from "react";
-import { Grid, Card, Text } from "@mantine/core";
+import { Grid, Card, Text, Loader } from "@mantine/core";
 
 import TestCard from "./TestCard";
-import { Loader } from "tabler-icons-react";
 
 type AllTestsPageProps = {
   active: string;

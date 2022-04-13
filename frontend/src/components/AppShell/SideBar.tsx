@@ -1,4 +1,3 @@
-
 import { createStyles, Navbar, Avatar } from "@mantine/core";
 import {
   Notes,
@@ -97,7 +96,6 @@ const useStyles = createStyles((theme, _params, getRef) => {
 const data = [
   { link: "", label: "Tests", icon: Notes },
   { link: "", label: "Questions", icon: QuestionMark },
-  { link: "", label: "Settings", icon: Settings },
 ];
 
 export function Sidebar({ active, setActive }: SideBarProps) {
@@ -122,7 +120,7 @@ export function Sidebar({ active, setActive }: SideBarProps) {
 
   return (
     <Navbar width={{ base: 240 }} height={"90%"} p="md">
-{     /* <Navbar.Section className={classes.header}>
+      <Navbar.Section className={classes.header}>
         <a
           className={cx(classes.link, {
             [classes.linkActive]: "Username" === active,
@@ -137,8 +135,6 @@ export function Sidebar({ active, setActive }: SideBarProps) {
           <span>Username</span>
         </a>
       </Navbar.Section>
-    */
-    }
 
       <Navbar.Section grow>{links}</Navbar.Section>
 

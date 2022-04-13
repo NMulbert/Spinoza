@@ -5,9 +5,9 @@ import {
   Text,
   Badge,
   Card,
-  Space,
   useMantineTheme,
 } from "@mantine/core";
+import MDEditor from "@uiw/react-md-editor";
 
 type QuestionData = {
   Id: string;
@@ -40,7 +40,7 @@ function QuestionCard({
           <h3>{Title}</h3>
         </Card.Section>
 
-        <Text weight={500}>{Description}</Text>
+        <MDEditor.Markdown source={Description} />
 
         <Group style={{ marginBottom: 5, marginTop: theme.spacing.sm }}>
           <Badge color="pink" variant="light">
