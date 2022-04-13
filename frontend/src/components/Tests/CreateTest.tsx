@@ -20,12 +20,6 @@ function CreateTest() {
     "JavaScript",
     "Python",
   ]);
-  const [demoEmailsData, setDemoEmailsData] = useState([
-    "demo1@gmail.com",
-    "demo2@gmail.com",
-    "demo3@gmail.com",
-    "demo4@gmail.com",
-  ]);
   return (
     <>
       <Modal
@@ -94,21 +88,6 @@ function CreateTest() {
               CHOOSE FROM CATALOG
             </Button>
           </Group>
-        </div>
-        <div>
-          <MultiSelect
-            data={demoEmailsData}
-            label="Asigned to:"
-            style={{ width: "40%", textAlign: "left" }}
-            placeholder="Students emails"
-            radius="xs"
-            searchable
-            creatable
-            getCreateLabel={(query) => `+ Add ${query}`}
-            onCreate={(query) =>
-              setDemoEmailsData((current) => [...current, query])
-            }
-          />
         </div>
         <div>
           <Group spacing="sm">
