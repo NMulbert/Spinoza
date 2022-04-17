@@ -33,7 +33,6 @@ namespace CatalogManager.Controllers
             catch (Exception ex)
             {
                 _logger.LogError($"error then ending addtest post: {ex.Message}");
-
             }
             return Problem(statusCode: (int)StatusCodes.Status500InternalServerError);
         }
@@ -50,7 +49,6 @@ namespace CatalogManager.Controllers
             catch (Exception ex)
             {
                 _logger.LogError($"error whilte getting all tests: {ex.Message}");
-
             }
             return Problem(statusCode: (int)StatusCodes.Status500InternalServerError);
         }

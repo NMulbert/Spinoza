@@ -4,6 +4,7 @@ using Microsoft.Azure.Cosmos;
 using Microsoft.Azure.Cosmos.Linq;
 using Newtonsoft.Json;
 using System.Net;
+using System.Text.Json.Nodes;
 using TestCatalogAccessor.Models;
 
 namespace TestCatalogAccessor.Controllers
@@ -59,9 +60,9 @@ namespace TestCatalogAccessor.Controllers
         {
             try
             {
-                var command = await GetTestFromQueueRequestAsync();
-                _logger?.LogInformation($"here is a massege from queuetest: {command}");
-                return Ok(command);
+                var newTest = await GetTestFromQueueRequestAsync();
+                _logger?.LogInformation($"here is a massege from queuetest: {newTest}");
+                return Ok(newTest);
             }
             catch (Exception ex)
             {
@@ -75,17 +76,15 @@ namespace TestCatalogAccessor.Controllers
             var body = await streamReader.ReadToEndAsync();
             _logger?.LogInformation($"Here is the test that goona try to enter the database {body}");
             TestModel newTest = JsonConvert.DeserializeObject<TestModel>(body);
-            await AddNewTestToDataBase(newTest);
-            //string something = "hell";
-            //_logger?.LogInformation($"Here is the test after dsiarilization {responce.ToString()}");
-            //await _daprClient.PublishEventAsync("pubsub", "test-topic", responce.ToString());
-            //var bytes = Convert.FromBase64String(body);
-            //var decodedString = System.Text.Encoding.UTF8.GetString(bytes);
-            //var command = JsonConvert.DeserializeObject(decodedString);
+            var responce = await AddNewTestToDataBase(newTest);
+            //System.Diagnostics.Debugger.Launch();
+            //System.Diagnostics.Debugger.Break();
+            _logger?.LogInformation($"Here is the test after dsiarilization {responce}");
+            await _daprClient.PublishEventAsync("pubsub", "test-topic", responce);
             return newTest;
         }
 
-        private async Task<IActionResult> AddNewTestToDataBase(TestModel body)
+        private async Task<string> AddNewTestToDataBase(TestModel body)
         {
             CosmosClient cosmosClient = new CosmosClient(_configuration["ConnectionStrings:Tests"]);
             await cosmosClient.GetDatabase($"Catalog")
@@ -100,11 +99,11 @@ namespace TestCatalogAccessor.Controllers
             {
                 ItemResponse<TestModel> respons = await container.CreateItemAsync<TestModel>(body, new PartitionKey(body.Title));
 
-                return Ok("Test Created");
+                return $"Test Created {body.Title}";
             }
             catch (CosmosException ex) when (ex.StatusCode == HttpStatusCode.Conflict)
             {
-                return BadRequest(ex);
+                return $"the rest already exist! {ex}";
             }
         }
     }
