@@ -1,4 +1,5 @@
 ﻿using Dapr;
+using Dapr.Client;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CatalogManager.Controllers
@@ -8,18 +9,23 @@ namespace CatalogManager.Controllers
     public class IntegrationEventsController : ControllerBase
     {
         private readonly ILogger<IntegrationEventsController> _logger;
+        private readonly DaprClient _daprClient;
 
-        public IntegrationEventsController(ILogger<IntegrationEventsController> logger)
+        public IntegrationEventsController(ILogger<IntegrationEventsController> logger, DaprClient daprClient)
         {
             _logger = logger;
+            _daprClient = daprClient;
         }
 
         [Topic("pubsub", "test-topic")]
         public async Task<IActionResult> OnTestCreated([FromBody] string result)
         {
+            
             try
             {
                 _logger?.LogInformation($"Message received: {result}");
+                PublishMessageToSignalR(result);
+                
                 return Ok();
             }
             catch (Exception ex)
@@ -27,6 +33,12 @@ namespace CatalogManager.Controllers
                 _logger.LogError($"error Pubsub reciver: {ex.Message}");
             }
             return Problem(statusCode: (int)StatusCodes.Status500InternalServerError);
+        }
+
+        public async Task<IActionResult> PublishMessageToSignalR(string massege)
+        {
+            await _daprClient.InvokeBindingAsync("azuresignalroutput", "create", massege);
+            return Ok();
         }
     }
 }
