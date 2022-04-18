@@ -18,7 +18,8 @@ function AllTestsPage({ active, setActive }: AllTestsPageProps) {
   let tests = useSelector((s: TestsState) => s.tests.tests);
 
   useEffect(() => {
-    let url = "./TestObject.json";
+    let url =
+      "http://localhost:50000/v1.0/invoke/catalogmanager/method/alltests";
     fetch(url)
       .then((res) => res.json())
       .then((result) => {
@@ -58,13 +59,13 @@ function AllTestsPage({ active, setActive }: AllTestsPageProps) {
           return (
             <Grid.Col md={6} lg={3} key={i.Id}>
               <TestCard
-                Id={i.Id}
-                Title={i.Title}
-                Description={i.Description}
-                Author={i.Author}
-                Tags={i.Tags}
-                Status={i.Status}
-                Version={i.Version}
+                id={i.id}
+                title={i.title}
+                description={i.description}
+                author={i.author}
+                tags={i.tags}
+                status={i.status}
+                version={i.version}
               />
             </Grid.Col>
           );
