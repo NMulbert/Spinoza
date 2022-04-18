@@ -9,16 +9,16 @@ import {
 } from "@mantine/core";
 
 type TestCardProps = {
-  Id: string;
-  Title: string;
-  Description: string;
-  Author: any;
-  Tags: any;
-  Status: string;
-  Version: string;
+  id: any;
+  title: string;
+  description: string;
+  author: any;
+  tags: any;
+  status: string;
+  version: number;
 };
 
-const TestCard = ({ Title, Description, Author, Tags }: TestCardProps) => {
+const TestCard = ({ title, description, author, tags }: TestCardProps) => {
   const theme = useMantineTheme();
   const secondaryColor =
     theme.colorScheme === "dark" ? theme.colors.dark[1] : theme.colors.gray[7];
@@ -27,14 +27,14 @@ const TestCard = ({ Title, Description, Author, Tags }: TestCardProps) => {
     <div style={{ width: 340, margin: "auto" }}>
       <Card shadow="sm" p="lg">
         <Card.Section>
-          <h3>{Title} </h3>
+          <h3>{title} </h3>
         </Card.Section>
 
-        <Text weight={500}>{Description}</Text>
+        <Text weight={500}>{description}</Text>
 
         <Group style={{ marginBottom: 5, marginTop: theme.spacing.sm }}>
           <Badge color="pink" variant="light">
-            {`${Author.FirstName} ${Author.LastName}`}
+            {`${author.FirstName} ${author.LastName}`}
           </Badge>
           <Badge color="yellow" variant="light">
             Date
@@ -49,7 +49,7 @@ const TestCard = ({ Title, Description, Author, Tags }: TestCardProps) => {
         </Text>
 
         <Group style={{ marginBottom: 5, marginTop: theme.spacing.sm }}>
-          {Tags.map((i: any) => {
+          {tags.map((i: any) => {
             return (
               <Badge key={i} color="green" variant="light">
                 {i}
