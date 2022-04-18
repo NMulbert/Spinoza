@@ -1,4 +1,4 @@
-using CatalogManager;
+
 //System.Diagnostics.Debugger.Launch();
 //System.Diagnostics.Debugger.Break();
 var builder = WebApplication.CreateBuilder(args);
@@ -6,7 +6,6 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 
 builder.Services.AddControllers().AddDapr();
-//builder.Services.AddSignalR();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -28,7 +27,6 @@ app.UseEndpoints(endpoints =>
 {
     
     endpoints.MapSubscribeHandler();
-    //endpoints.MapHub<ChatHub>("/chat");
     endpoints.MapControllers();
 });
 app.Run();

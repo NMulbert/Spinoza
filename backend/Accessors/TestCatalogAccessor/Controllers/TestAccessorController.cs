@@ -103,7 +103,7 @@ namespace TestCatalogAccessor.Controllers
             }
             catch (CosmosException ex) when (ex.StatusCode == HttpStatusCode.Conflict)
             {
-                return $"the rest already exist!";
+                return $"The test already exists! {body.Title}";
             }
         }
     }

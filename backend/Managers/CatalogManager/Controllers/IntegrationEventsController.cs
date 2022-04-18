@@ -1,4 +1,5 @@
-﻿using Dapr;
+﻿using CatalogManager.Helpers;
+using Dapr;
 using Dapr.Client;
 using Microsoft.AspNetCore.Mvc;
 
@@ -14,20 +15,20 @@ namespace CatalogManager.Controllers
 
         public IntegrationEventsController(ILogger<IntegrationEventsController> logger, DaprClient daprClient)
         {
-            System.Diagnostics.Debugger.Launch();
-            System.Diagnostics.Debugger.Break();
-            _logger = logger;
-            _daprClient = daprClient;
+           // System.Diagnostics.Debugger.Launch();
+            //System.Diagnostics.Debugger.Break();
+           _logger = logger;
+           _daprClient = daprClient;
         }
 
         [Topic("pubsub", "test-topic")]
         public async Task<IActionResult> OnTestCreated([FromBody] string result)
         {
-            System.Diagnostics.Debugger.Launch();
+            
             try
             {
                 _logger?.LogInformation($"Message received: {result}");
-               //await PublishMessageToSignalRAsync(result);
+               await PublishMessageToSignalRAsync(result);
                 
                 return Ok();
             }
@@ -38,9 +39,16 @@ namespace CatalogManager.Controllers
             return Problem(statusCode: (int)StatusCodes.Status500InternalServerError);
         }
 
-        public async Task<IActionResult> PublishMessageToSignalRAsync(string massege)
+        private async Task<IActionResult> PublishMessageToSignalRAsync(string massege)
         {
-            await _daprClient.InvokeBindingAsync("azuresignalroutput", "create", massege);
+            Data data = new Data();
+            Argument argument = new Argument();
+            argument.Sender = "dapr";
+            argument.Text = massege;
+            data.Arguments = new Argument[] {argument};
+            //Dictionary<string, string> newmetadata = new Dictionary<string, string>() { { "hub", "spinozahub" } };
+            //var metadata = new Dictionary<string, string>() { { "spinozaHub", "Test" } };
+            await _daprClient.InvokeBindingAsync("azuresignalroutput", "create", data);
             return Ok();
         }
     }

@@ -21,7 +21,6 @@ namespace CatalogManager.Controllers
         [HttpPost("/addtest")]
         public async Task<IActionResult> PostNewTestToQueue()
         {
-
             try
             {
                 using var streamReader = new StreamReader(Request.Body);
