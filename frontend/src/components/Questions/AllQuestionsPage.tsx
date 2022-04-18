@@ -2,20 +2,27 @@ import React, { useState, useEffect } from "react";
 import { Modal, Grid, Card, Text, Loader } from "@mantine/core";
 import QuestionCard from "../Questions/QuestionCard";
 import NewQuestion from "./NewQuestion";
+import { useDispatch, useSelector } from "react-redux";
+import { loadQuestions } from "../../redux/Reducers/questions/questions-actions";
+interface QuestionsState {
+  questions: { questions: [] };
+}
 
 function AllQuestionsPage() {
+  useEffect(() => {
+    console.log("hi");
+    let url = "./QuestionObject.json";
+    fetch(url)
+      .then((res) => res.json())
+      .then((result) => {
+        dispatch(loadQuestions(result));
+      });
+  }, []);
+
   const [openedNQ, setOpenedNQ] = useState(false);
 
-  const [questions, setQuestions] = useState([]);
-
-  useEffect(() => {
-      let url = "./QuestionObject.json";
-      fetch(url)
-        .then((res) => res.json())
-        .then((result) => {
-          setQuestions(result);
-        });
-    }, []);
+  const dispatch = useDispatch();
+  let questions = useSelector((s: QuestionsState) => s.questions.questions);
 
   return (
     <>
@@ -52,27 +59,27 @@ function AllQuestionsPage() {
             </Text>
           </Card>
         </Grid.Col>
-        {questions.length !== 0 ? (
-        questions.map((i: any) => {
-          return (
-            <Grid.Col md={6} lg={3} key={i.Id}>
-              <QuestionCard
-                Id={i.Id}
-                Title={i.Title}
-                Description={i.Description}
-                Author={i.Author}
-                Tags={i.Tags}
-                Status={i.Status}
-                Version={i.Version}
-              />
-            </Grid.Col>
-          );
-        })
-      ) : (
-        <>
-          <Loader />
-        </>
-      )}
+        {questions ? (
+          questions.map((i: any) => {
+            return (
+              <Grid.Col md={6} lg={3} key={i.Id}>
+                <QuestionCard
+                  Id={i.Id}
+                  Title={i.Title}
+                  Description={i.Description}
+                  Author={i.Author}
+                  Tags={i.Tags}
+                  Status={i.Status}
+                  Version={i.Version}
+                />
+              </Grid.Col>
+            );
+          })
+        ) : (
+          <>
+            <Loader />
+          </>
+        )}
       </Grid>
     </>
   );
