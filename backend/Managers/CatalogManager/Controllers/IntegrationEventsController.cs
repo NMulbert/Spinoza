@@ -8,11 +8,14 @@ namespace CatalogManager.Controllers
     [Route("[controller]")]
     public class IntegrationEventsController : ControllerBase
     {
+
         private readonly ILogger<IntegrationEventsController> _logger;
         private readonly DaprClient _daprClient;
 
         public IntegrationEventsController(ILogger<IntegrationEventsController> logger, DaprClient daprClient)
         {
+            System.Diagnostics.Debugger.Launch();
+            System.Diagnostics.Debugger.Break();
             _logger = logger;
             _daprClient = daprClient;
         }
@@ -20,11 +23,11 @@ namespace CatalogManager.Controllers
         [Topic("pubsub", "test-topic")]
         public async Task<IActionResult> OnTestCreated([FromBody] string result)
         {
-            
+            System.Diagnostics.Debugger.Launch();
             try
             {
                 _logger?.LogInformation($"Message received: {result}");
-                PublishMessageToSignalR(result);
+               //await PublishMessageToSignalRAsync(result);
                 
                 return Ok();
             }
@@ -35,7 +38,7 @@ namespace CatalogManager.Controllers
             return Problem(statusCode: (int)StatusCodes.Status500InternalServerError);
         }
 
-        public async Task<IActionResult> PublishMessageToSignalR(string massege)
+        public async Task<IActionResult> PublishMessageToSignalRAsync(string massege)
         {
             await _daprClient.InvokeBindingAsync("azuresignalroutput", "create", massege);
             return Ok();

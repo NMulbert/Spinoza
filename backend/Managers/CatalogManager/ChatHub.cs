@@ -4,11 +4,43 @@ namespace CatalogManager
 {
     public class ChatHub :Hub
     {
-        public Task BroadcastMessage(string name, string message) =>
-            Clients.All.SendAsync("broadcastMessage", name, message);
+        private readonly ILogger<ChatHub> _logger;
 
-        public Task Echo(string name, string message) =>
-            Clients.Client(Context.ConnectionId)
-                   .SendAsync("echo", name, $"{message} (echo from server)");
+
+
+       
+
+
+        public ChatHub(ILogger<ChatHub> logger)
+        {
+           
+            _logger = logger;
+        }
+        public async Task BroadcastMessage(string name, string message)
+        {
+            try
+            {
+                await Clients.All.SendAsync("broadcastMessage", name, message);
+            }
+            catch(Exception ex)
+            {
+                _logger.LogError(ex.Message);
+            }
+        }
+            
+
+        public async Task Echo(string name, string message)
+        {
+            try
+            {
+                await Clients.Client(Context.ConnectionId)
+                        .SendAsync("echo", name, $"{message} (echo from server)");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message);
+            }
+        }
     }
+            
 }
