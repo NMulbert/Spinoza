@@ -1,22 +1,28 @@
 import React, { useEffect, useState } from "react";
 import { Grid, Card, Text, Loader } from "@mantine/core";
+import { useDispatch, useSelector } from "react-redux";
 
 import TestCard from "./TestCard";
+import { loadTests } from "../../redux/Reducers/tests/tests-actions";
 
 type AllTestsPageProps = {
   active: string;
   setActive: (string: string) => void;
 };
+interface TestsState {
+  tests: { tests: [] };
+}
 
 function AllTestsPage({ active, setActive }: AllTestsPageProps) {
-  const [tests, setTests] = useState([]);
+  const dispatch = useDispatch();
+  let tests = useSelector((s: TestsState) => s.tests.tests);
 
   useEffect(() => {
     let url = "./TestObject.json";
     fetch(url)
       .then((res) => res.json())
       .then((result) => {
-        setTests(result);
+        dispatch(loadTests(result));
       });
   }, []);
 
@@ -47,7 +53,7 @@ function AllTestsPage({ active, setActive }: AllTestsPageProps) {
           </Text>
         </Card>
       </Grid.Col>
-      {tests.length !== 0 ? (
+      {tests ? (
         tests.map((i: any) => {
           return (
             <Grid.Col md={6} lg={3} key={i.Id}>

@@ -1,6 +1,5 @@
 import { AppShell, Header, Image } from "@mantine/core";
-import { type } from "os";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { Sidebar } from "../AppShell/SideBar";
 import AllQuestionsPage from "../Questions/AllQuestionsPage";
 import AllTestsPage from "../Tests/AllTestsPage";
@@ -8,7 +7,7 @@ import CreateTest from "../Tests/CreateTest";
 
 function Dashboard() {
   const [active, setActive] = useState("Tests");
-  let Content = <AllTestsPage active={active} setActive={setActive} />;
+  let Content = null;
 
   switch (active) {
     case "Tests":
