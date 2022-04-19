@@ -1,7 +1,7 @@
 [
 {
     "Id":"1",
-    "Title":"exam 1",
+    "Title":"Exam 1",
     "Description":"this is exam 1",
     "Author":{
         "FirstName":"Alon",
@@ -14,7 +14,7 @@
 
 {
     "Id":"2",
-    "Title":"exam 2",
+    "Title":"Exam 2",
     "Description":"this is exam 2",
     "Author":{
         "FirstName":"Haim",
@@ -27,11 +27,24 @@
 ,
 {
     "Id":"3",
-    "Title":"exam 3",
+    "Title":"Exam 3",
     "Description":"this is exam 3",
     "Author":{
-        "FirstName":"Haim",
-        "LastName":"Gilboa"
+        "FirstName":"Elias",
+        "LastName":"Shajrawi"
+    },
+    "Tags":["#React" , "#JavaScript"],
+    "Status":"Draft",
+    "Version":"1.0.0"
+}
+,
+{
+    "Id":"3",
+    "Title":"Exam 3",
+    "Description":"this is exam 3",
+    "Author":{
+        "FirstName":"Elias",
+        "LastName":"Shajrawi"
     },
     "Tags":["#React" , "#JavaScript"],
     "Status":"Draft",
