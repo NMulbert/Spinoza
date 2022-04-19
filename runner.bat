@@ -10,6 +10,4 @@ Start /B dapr run --app-id catalogmanager --app-port 5000 --dapr-http-port 50000
 
 cd %spinoza_root%\frontend
 
-npm i 
-
 npm start
