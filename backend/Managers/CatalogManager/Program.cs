@@ -1,3 +1,6 @@
+
+//System.Diagnostics.Debugger.Launch();
+//System.Diagnostics.Debugger.Break();
 var builder = WebApplication.CreateBuilder(args);
 var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
 
@@ -31,6 +34,7 @@ app.UseAuthorization();
 app.UseCloudEvents();
 app.UseEndpoints(endpoints =>
 {
+    
     endpoints.MapSubscribeHandler();
     endpoints.MapControllers();
 });
