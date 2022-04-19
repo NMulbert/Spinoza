@@ -34,7 +34,7 @@ const TestCard = ({ title, description, author, tags }: TestCardProps) => {
 
         <Group style={{ marginBottom: 5, marginTop: theme.spacing.sm }}>
           <Badge color="pink" variant="light">
-            {`${author.FirstName} ${author.LastName}`}
+            {`${author.firstName} ${author.lastName}`}
           </Badge>
           <Badge color="yellow" variant="light">
             Date
