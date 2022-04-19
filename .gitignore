@@ -417,7 +417,6 @@ sketch
 # End of https://www.toptal.com/developers/gitignore/api/react,csharp
 # dependencies
 frontend/node_modules
-frontend/.env
 frontend/.pnp
 .pnp.js
 
