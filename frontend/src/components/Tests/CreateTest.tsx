@@ -10,6 +10,8 @@ import {
 } from "@mantine/core";
 import ChooseQuestion from "../Questions/ChooseQuestion";
 import NewQuestion from "../Questions/NewQuestion";
+import axios from "axios";
+import { Notify } from "./Notify";
 
 function CreateTest() {
   const [openedNQ, setOpenedNQ] = useState(false);
@@ -20,6 +22,18 @@ function CreateTest() {
     "JavaScript",
     "Python",
   ]);
+
+  const [testValues, setTestsValues] = useState({
+    title: "",
+    description: "",
+    author: {
+      firstName: "Haim",
+      lastName: "Gilboa",
+    },
+    tags: ["#React", "#JavaScript"],
+    status: "Draft",
+    version: 0.03,
+  });
   return (
     <>
       <Modal
@@ -47,6 +61,11 @@ function CreateTest() {
             style={{ width: "40%", textAlign: "left" }}
             placeholder="Test Name"
             radius="xs"
+            onChange={(e) => {
+              let temp = Object.assign(testValues);
+              temp.title = e.target.value;
+              setTestsValues(temp);
+            }}
           />
         </div>
         <div>
@@ -55,6 +74,11 @@ function CreateTest() {
             style={{ width: "40%", textAlign: "left" }}
             placeholder="Subject"
             radius="xs"
+            onChange={(e) => {
+              let temp = Object.assign(testValues);
+              temp.description = e.target.value;
+              setTestsValues(temp);
+            }}
           />
         </div>
         <div>
@@ -73,40 +97,25 @@ function CreateTest() {
         <div>
           <Group spacing="sm">
             <Button
-              variant="outline"
-              radius="lg"
-              onClick={() => setOpenedNQ(true)}
-            >
-              ADD NEW QUESTION
-            </Button>
-            <Button
-              variant="outline"
-              radius="lg"
-              onClick={() => setOpenedEQ(true)}
-              color="dark"
-            >
-              CHOOSE FROM CATALOG
-            </Button>
-          </Group>
-        </div>
-        <div>
-          <Group spacing="sm">
-            <Button
-              radius="lg"
-              variant="gradient"
-              gradient={{ from: "#838685", to: "#cfd0d0" }}
-            >
-              Save as Draft
-            </Button>
-            <Button
               radius="lg"
               variant="gradient"
               gradient={{ from: "#217ad2", to: "#4fbaee" }}
+              onClick={async () => {
+                try {
+                  const response = await axios.post(
+                    "http://localhost:50000/v1.0/invoke/catalogmanager/method/addtest",
+                    JSON.stringify({ ...testValues })
+                  );
+                } catch (err) {
+                  console.log(err);
+                }
+              }}
             >
-              Publish
+              Save
             </Button>
           </Group>
         </div>
+        <Notify />
       </SimpleGrid>
     </>
   );
