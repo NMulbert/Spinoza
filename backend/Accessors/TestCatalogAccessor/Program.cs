@@ -1,3 +1,5 @@
+using Spinoza.Backend.Accessor.TestCatalog.DataBases;
+
 var builder = WebApplication.CreateBuilder(args);
 var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
 // Add services to the container.
@@ -10,6 +12,7 @@ builder.Services.AddCors(options =>
                       });
 });
 builder.Services.AddControllers().AddDapr();
+builder.Services.AddSingleton<ICosmosDBWrapper, CosmosDBWrapper>();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();

@@ -3,11 +3,12 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Cosmos;
 using Microsoft.Azure.Cosmos.Linq;
 using Newtonsoft.Json;
+using Spinoza.Backend.Accessor.TestCatalog.DataBases;
+using Spinoza.Backend.Accessor.TestCatalog.Models;
 using System.Net;
-using System.Text.Json.Nodes;
-using TestCatalogAccessor.Models;
 
-namespace TestCatalogAccessor.Controllers
+
+namespace Spinoza.Backend.Accessor.TestCatalog.Controllers 
 {
     [ApiController]
     [Route("[controller]")]
@@ -17,11 +18,14 @@ namespace TestCatalogAccessor.Controllers
 
         private readonly DaprClient _daprClient;
         private IConfiguration _configuration;
-        public TestAccessorController(ILogger<TestAccessorController> logger, DaprClient daprClient, IConfiguration configuration)
+        private readonly ICosmosDBWrapper _cosmosDBWrapper;
+
+        public TestAccessorController(ILogger<TestAccessorController> logger, DaprClient daprClient, IConfiguration configuration, ICosmosDBWrapper cosmosDBWrapper)
         {
             _logger = logger;
             _daprClient = daprClient;
             _configuration = configuration;
+            _cosmosDBWrapper = cosmosDBWrapper;
         }
 
         [HttpGet("all")]
@@ -60,9 +64,10 @@ namespace TestCatalogAccessor.Controllers
         {
             try
             {
-                var newTest = await GetTestFromQueueRequestAsync();
-                _logger?.LogInformation($"here is a massege from queuetest: {newTest}");
-                return Ok(newTest);
+                var testInfo = await GetMessageFromBodyAsync();
+                var response = await AddNewTestToDataBase(testInfo);
+                await PublishTestResultAsync(testInfo);
+                return Ok();
             }
             catch (Exception ex)
             {
@@ -70,18 +75,25 @@ namespace TestCatalogAccessor.Controllers
             }
             return Problem(statusCode: (int)StatusCodes.Status500InternalServerError);
         }
-        private async Task<TestModel> GetTestFromQueueRequestAsync()
+        private async Task PublishTestResultAsync(TestModel testInfo)
         {
-            using var streamReader = new StreamReader(Request.Body);
+            try
+            {
+                await _daprClient.PublishEventAsync("pubsub", "test-topic", testInfo);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"GetTestFromQueueRequestAsync: error getting test from queue error while getting all tests: {ex.Message}");
+            }
+        }
+
+        private async Task<TestModel> GetMessageFromBodyAsync()
+        {
+            var streamReader = new StreamReader(Request.Body);
             var body = await streamReader.ReadToEndAsync();
             _logger?.LogInformation($"Here is the test that goona try to enter the database {body}");
-            TestModel newTest = JsonConvert.DeserializeObject<TestModel>(body);
-            var responce = await AddNewTestToDataBase(newTest);
-            //System.Diagnostics.Debugger.Launch();
-            //System.Diagnostics.Debugger.Break();
-            _logger?.LogInformation($"Here is the test after dsiarilization {responce}");
-            await _daprClient.PublishEventAsync("pubsub", "test-topic", responce);
-            return newTest;
+            var newTest = JsonConvert.DeserializeObject<TestModel>(body);
+            return newTest ?? throw new Exception("Error when deserialize message body");
         }
 
         private async Task<string> AddNewTestToDataBase(TestModel body)

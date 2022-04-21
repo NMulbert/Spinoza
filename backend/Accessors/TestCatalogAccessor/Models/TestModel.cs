@@ -1,6 +1,6 @@
 ﻿using Newtonsoft.Json;
 
-namespace TestCatalogAccessor.Models
+namespace Spinoza.Backend.Accessor.TestCatalog.Models
 {
     public class TestModel
     {
@@ -9,11 +9,11 @@ namespace TestCatalogAccessor.Models
         public string Title { get; set; } = string.Empty;
         public string Description { get; set; } = string.Empty;
 
-        public AuthorModel Author { get; set; }
+        public AuthorModel? Author { get; set; }
 
-        public List<string> Tags { get; set; }
+        public List<string> Tags { get; set; } = new List<string>();
 
-        public string Status { get; set; }
+        public string Status { get; set; } = string.Empty;
         public float Version { get; set; }
         public override string ToString()
         {
