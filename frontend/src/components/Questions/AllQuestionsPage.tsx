@@ -10,7 +10,6 @@ interface QuestionsState {
 
 function AllQuestionsPage() {
   useEffect(() => {
-    console.log("hi");
     let url = "./QuestionObject.json";
     fetch(url)
       .then((res) => res.json())
@@ -35,7 +34,12 @@ function AllQuestionsPage() {
         {<NewQuestion />}
       </Modal>
 
-      <Grid>
+      <Grid
+        style={{
+          paddingTop: "50px",
+          paddingLeft: "250px",
+        }}
+      >
         <Grid.Col md={6} lg={3}>
           <Card
             shadow="sm"

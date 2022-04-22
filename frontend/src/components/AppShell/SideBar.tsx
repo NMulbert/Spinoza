@@ -1,17 +1,13 @@
-import { createStyles, Navbar, Avatar } from "@mantine/core";
+import { createStyles, Navbar, Avatar, Image } from "@mantine/core";
+import { useState } from "react";
+import { Link, Outlet } from "react-router-dom";
 import {
   Notes,
   QuestionMark,
-  Settings,
   Logout,
   SwitchHorizontal,
   User,
 } from "tabler-icons-react";
-
-type SideBarProps = {
-  active: string;
-  setActive: (string: string) => void;
-};
 
 const useStyles = createStyles((theme, _params, getRef) => {
   const icon = getRef("icon");
@@ -94,68 +90,73 @@ const useStyles = createStyles((theme, _params, getRef) => {
 });
 
 const data = [
-  { link: "", label: "Tests", icon: Notes },
-  { link: "", label: "Questions", icon: QuestionMark },
+  { link: "/tests", label: "Tests", icon: Notes },
+  { link: "/questions", label: "Questions", icon: QuestionMark },
 ];
 
-export function Sidebar({ active, setActive }: SideBarProps) {
+export function Sidebar() {
   const { classes, cx } = useStyles();
-
+  const [active, setActive] = useState("Tests");
   const links = data.map((item) => (
-    <a
+    <Link
+      to={item.link}
       className={cx(classes.link, {
         [classes.linkActive]: item.label === active,
       })}
-      href={item.link}
       key={item.label}
       onClick={(event) => {
-        event.preventDefault();
         setActive(item.label);
       }}
     >
       <item.icon className={classes.linkIcon} />
       <span>{item.label}</span>
-    </a>
+    </Link>
   ));
 
   return (
-    <Navbar width={{ base: 240 }} height={"90%"} p="md">
-      <Navbar.Section className={classes.header}>
-        <a
-          className={cx(classes.link, {
-            [classes.linkActive]: "Username" === active,
-          })}
-          href="Profile"
-          onClick={(event) => {
-            event.preventDefault();
-            setActive("Username");
-          }}
-        >
-          <User className={classes.linkIcon} />
-          <span>Username</span>
-        </a>
-      </Navbar.Section>
+    <div>
+      <Navbar
+        width={{ base: 240 }}
+        height={"90vh"}
+        p="md"
+        style={{ position: "fixed" }}
+      >
+        <Navbar.Section className={classes.header}>
+          <a
+            className={cx(classes.link, {
+              [classes.linkActive]: "Username" === active,
+            })}
+            href="Profile"
+            onClick={(event) => {
+              event.preventDefault();
+              setActive("Username");
+            }}
+          >
+            <User className={classes.linkIcon} />
+            <span>Username</span>
+          </a>
+        </Navbar.Section>
 
-      <Navbar.Section grow>{links}</Navbar.Section>
+        <Navbar.Section grow>{links}</Navbar.Section>
 
-      <Navbar.Section className={classes.footer}>
-        <a
-          href="#"
-          className={classes.link}
-          onClick={(event) => event.preventDefault()}
-        >
-          <SwitchHorizontal className={classes.linkIcon} />
-          <span>Change account</span>
-        </a>
-        <a
-          href="#"
-          className={classes.link}
-          onClick={(event) => event.preventDefault()}
-        >
-          <Logout className={classes.linkIcon} />
-          <span>Logout</span>
-        </a>
-      </Navbar.Section>
-    </Navbar>
+        <Navbar.Section className={classes.footer}>
+          <Link to={"/tests"}>
+            <div className={classes.link}>
+              <SwitchHorizontal className={classes.linkIcon} />
+              <span>Change account</span>
+            </div>
+          </Link>
+          <a
+            href="#"
+            className={classes.link}
+            onClick={(event) => event.preventDefault()}
+          >
+            <Logout className={classes.linkIcon} />
+            <span>Logout</span>
+          </a>
+        </Navbar.Section>
+      </Navbar>
+      <Outlet />
+    </div>
   );
 }

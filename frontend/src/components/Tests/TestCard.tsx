@@ -1,12 +1,12 @@
 import {
   Card,
-  Image,
   Text,
   Badge,
   Button,
   Group,
   useMantineTheme,
 } from "@mantine/core";
+import { Link } from "react-router-dom";
 
 type TestCardProps = {
   id: any;
@@ -18,7 +18,7 @@ type TestCardProps = {
   version: number;
 };
 
-const TestCard = ({ title, description, author, tags }: TestCardProps) => {
+const TestCard = ({ title, description, author, tags, id }: TestCardProps) => {
   const theme = useMantineTheme();
   const secondaryColor =
     theme.colorScheme === "dark" ? theme.colors.dark[1] : theme.colors.gray[7];
@@ -57,15 +57,16 @@ const TestCard = ({ title, description, author, tags }: TestCardProps) => {
             );
           })}
         </Group>
-
-        <Button
-          variant="light"
-          color="blue"
-          fullWidth
-          style={{ marginTop: 14 }}
-        >
-          open
-        </Button>
+        <Link to={`/tests/${id}`} style={{ textDecoration: "none" }}>
+          <Button
+            variant="light"
+            color="blue"
+            fullWidth
+            style={{ marginTop: 14 }}
+          >
+            Open
+          </Button>
+        </Link>
       </Card>
     </div>
   );

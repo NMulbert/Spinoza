@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from "react";
-import { Badge, Text, Grid, Group, Button, Title, Loader, SimpleGrid } from "@mantine/core";
+import { Badge, Text, Grid, Group, Button, Title, Loader } from "@mantine/core";
 import { CalendarTime, Edit, UserCircle } from "tabler-icons-react";
-import ExistingQuestion from "../Questions/ExistingQuestion";
 import QuestionCard from "../Questions/QuestionCard";
+type ViewTestProps = {
+  test: any;
+};
 
-function ViewTest() {
+function ViewTest({ test }: ViewTestProps) {
   const [questions, setQuestions] = useState([]);
 
   useEffect(() => {
@@ -18,11 +20,11 @@ function ViewTest() {
 
   return (
     <div>
-      <Grid>
+      <Grid style={{ paddingLeft: "250px", paddingTop: "25px" }}>
         <Grid.Col span={12}>
-          <Edit size={60} strokeWidth={2} style={{ float:"right"}}/>
+          <Edit size={60} strokeWidth={2} style={{ float: "right" }} />
           <Title style={{ textDecoration: "underline" }} order={1}>
-            Test title
+            {test.title}
           </Title>
 
           <Group style={{ color: "#444848" }} spacing="xs">
@@ -32,52 +34,46 @@ function ViewTest() {
 
           <Group style={{ color: "#444848" }} spacing="xs">
             <UserCircle />
-            <Title order={5}>Author</Title>
+            <Title order={5}>
+              {" "}
+              {`${test.author.firstName} ${test.author.lastName}`}
+            </Title>
           </Group>
         </Grid.Col>
 
         {/* Tags grid */}
         <Grid.Col span={12}>
           <Group spacing="xs">
-            <Badge size="lg" variant="light">
-              #JavaScript
-            </Badge>
-            <Badge size="lg" variant="light">
-              #React
-            </Badge>
-            <Badge size="lg" variant="light">
-              #CSS
-            </Badge>
+            {test.tags.map((i: any) => {
+              return (
+                <Badge key={i} color="green" variant="light">
+                  {i}
+                </Badge>
+              );
+            })}
           </Group>
         </Grid.Col>
 
         <Grid.Col span={12}>
           <Title order={5}>Description:</Title>
-          <Text size="md">Text area for test description.</Text>
+          <Text size="md">{test.description}</Text>
         </Grid.Col>
 
         {/* Questions grid */}
         <Grid.Col span={12}>
           <Title order={5}>Questions:</Title>
-          {/* Will be visible only on edit mode
-            <Group spacing="sm">
-              <Button
-                variant="outline"
-                radius="lg"
-              >
-                ADD NEW QUESTION
-              </Button>
-              <Button
-                variant="outline"
-                radius="lg"
-                color="dark"
-              >
-                CHOOSE FROM CATALOG
-              </Button>
-            </Group> */}
+          <br />
+          <Group spacing="sm">
+            <Button variant="outline" radius="lg">
+              ADD NEW QUESTION
+            </Button>
+            <Button variant="outline" radius="lg" color="dark">
+              CHOOSE FROM CATALOG
+            </Button>
+          </Group>
         </Grid.Col>
 
-        {questions ? (
+        {questions &&
           questions.map((i: any) => {
             return (
               <Grid.Col md={6} lg={3} key={i.Id}>
@@ -92,29 +88,21 @@ function ViewTest() {
                 />
               </Grid.Col>
             );
-          })
-        ) : (
-          <>
-            <Loader />
-          </>
-        )}
-
+          })}
         {/* Buttons grid */}
         <Grid.Col span={12}>
-          <Group spacing="xs">
+          <Group spacing="sm">
             <Button
-              variant="gradient"
               radius="lg"
-              size="lg"
-              gradient={{ from: "gray", to: "dark" }}
+              variant="gradient"
+              gradient={{ from: "#838685", to: "#cfd0d0" }}
             >
               Save as Draft
             </Button>
             <Button
-              variant="gradient"
               radius="lg"
-              size="lg"
-              gradient={{ from: "blue", to: "#68b6d7" }}
+              variant="gradient"
+              gradient={{ from: "#217ad2", to: "#4fbaee" }}
             >
               Publish
             </Button>
