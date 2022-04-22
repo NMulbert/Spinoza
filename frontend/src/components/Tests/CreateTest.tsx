@@ -22,7 +22,6 @@ function CreateTest() {
     "JavaScript",
     "Python",
   ]);
-
   const [testValues, setTestsValues] = useState({
     title: "",
     description: "",
@@ -30,9 +29,9 @@ function CreateTest() {
       firstName: "Haim",
       lastName: "Gilboa",
     },
-    tags: ["#React", "#JavaScript"],
+    tags: [],
     status: "Draft",
-    version: 0.03,
+    version: 0.0,
   });
   return (
     <>
@@ -53,7 +52,11 @@ function CreateTest() {
         {<ChooseQuestion />}
       </Modal>
 
-      <SimpleGrid cols={1} spacing="xs">
+      <SimpleGrid
+        cols={1}
+        spacing="xs"
+        style={{ paddingLeft: "250px", paddingTop: "50px" }}
+      >
         <h1>New Test</h1>
         <div>
           <TextInput
@@ -92,6 +95,11 @@ function CreateTest() {
             creatable
             getCreateLabel={(query) => `+ Create ${query}`}
             onCreate={(query) => setHashData((current) => [...current, query])}
+            onChange={(e) => {
+              let temp = Object.assign(testValues);
+              temp.tags = e;
+              setTestsValues(temp);
+            }}
           />
         </div>
         <div>
