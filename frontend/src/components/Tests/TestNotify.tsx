@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import Snackbar from "@mui/material/Snackbar";
 import MuiAlert from "@mui/material/Alert";
 
-export const Notify = () => {
+export const TestNotify = () => {
   const hubConnection = new signalR.HubConnectionBuilder()
     .withUrl("https://signalr-management.azurewebsites.net/api")
     .configureLogging(signalR.LogLevel.Information)
