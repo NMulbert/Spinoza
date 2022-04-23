@@ -15,9 +15,9 @@ namespace CatalogManager.Controllers
 
         public IntegrationEventsController(ILogger<IntegrationEventsController> logger, DaprClient daprClient)
         {
-           // System.Diagnostics.Debugger.Launch();
-            //System.Diagnostics.Debugger.Break();
-           _logger = logger;
+            System.Diagnostics.Debugger.Launch();
+            System.Diagnostics.Debugger.Break();
+            _logger = logger;
            _daprClient = daprClient;
         }
 

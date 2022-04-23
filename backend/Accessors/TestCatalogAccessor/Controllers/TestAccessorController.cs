@@ -66,7 +66,7 @@ namespace Spinoza.Backend.Accessor.TestCatalog.Controllers
             {
                 var testInfo = await GetMessageFromBodyAsync();
                 var response = await AddNewTestToDataBase(testInfo);
-                await PublishTestResultAsync(testInfo);
+                await PublishTestResultAsync(response);
                 return Ok();
             }
             catch (Exception ex)
@@ -75,7 +75,7 @@ namespace Spinoza.Backend.Accessor.TestCatalog.Controllers
             }
             return Problem(statusCode: (int)StatusCodes.Status500InternalServerError);
         }
-        private async Task PublishTestResultAsync(TestModel testInfo)
+        private async Task PublishTestResultAsync(string testInfo)
         {
             try
             {
@@ -98,25 +98,28 @@ namespace Spinoza.Backend.Accessor.TestCatalog.Controllers
 
         private async Task<string> AddNewTestToDataBase(TestModel body)
         {
-            CosmosClient cosmosClient = new CosmosClient(_configuration["ConnectionStrings:Tests"]);
-            await cosmosClient.GetDatabase($"Catalog")
-           .DefineContainer(name: $"Tests", partitionKeyPath: "/Title")
-           .WithUniqueKey()
-           .Path("/Title")
-           .Attach()
-           .CreateIfNotExistsAsync();
-            Database database = cosmosClient.GetDatabase("Catalog");
-            Container container = database.GetContainer("Tests");
-            try
-            {
-                ItemResponse<TestModel> respons = await container.CreateItemAsync<TestModel>(body, new PartitionKey(body.Title));
+           // CosmosClient cosmosClient = new CosmosClient(_configuration["ConnectionStrings:Tests"]);
+           // await cosmosClient.GetDatabase($"Catalog")
+           //.DefineContainer(name: $"Tests", partitionKeyPath: "/Title")
+           //.WithUniqueKey()
+           //.Path("/Title")
+           //.Attach()
+           //.CreateIfNotExistsAsync();
+           // Database database = cosmosClient.GetDatabase("Catalog");
+           // Container container = database.GetContainer("Tests");
+           // try
+           // {
+           //     ItemResponse<TestModel> respons = await container.CreateItemAsync<TestModel>(body, new PartitionKey(body.Title));
 
-                return $"Test Created {body.Title}";
-            }
-            catch (CosmosException ex) when (ex.StatusCode == HttpStatusCode.Conflict)
-            {
-                return $"The test already exists! {body.Title}";
-            }
+           //     return $"Test Created {body.Title}";
+           // }
+           // catch (CosmosException ex) when (ex.StatusCode == HttpStatusCode.Conflict)
+           // {
+           //     return $"The test already exists! {body.Title}";
+           // }
+           var response = await _cosmosDBWrapper.CreateItemAsync(body);
+            return $"Test created {body.Title}";
+
         }
     }
 }
