@@ -74,6 +74,8 @@ function CreateTest() {
             creatable
             getCreateLabel={(query) => `+ Create ${query}`}
             onCreate={(query) => setHashData((current) => [...current, query])}
+            onChange={(e: any) => {
+              setTestsValues({ ...testValues, tags: e });
             }}
           />
         </div>
