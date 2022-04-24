@@ -17,14 +17,12 @@ namespace Spinoza.Backend.Accessor.TestCatalog.Controllers
         private readonly ILogger<TestAccessorController> _logger;
 
         private readonly DaprClient _daprClient;
-        private IConfiguration _configuration;
         private readonly ICosmosDBWrapper _cosmosDBWrapper;
 
-        public TestAccessorController(ILogger<TestAccessorController> logger, DaprClient daprClient, IConfiguration configuration, ICosmosDBWrapper cosmosDBWrapper)
+        public TestAccessorController(ILogger<TestAccessorController> logger, DaprClient daprClient, ICosmosDBWrapper cosmosDBWrapper)
         {
             _logger = logger;
             _daprClient = daprClient;
-            _configuration = configuration;
             _cosmosDBWrapper = cosmosDBWrapper;
         }
 
@@ -34,11 +32,8 @@ namespace Spinoza.Backend.Accessor.TestCatalog.Controllers
             try
             {
                 List<TestModel> tests = new List<TestModel>();
-                CosmosClient cosmosClient = new CosmosClient(_configuration["ConnectionStrings:Tests"]);
-                Database database = cosmosClient.GetDatabase("Catalog");
-                Container container = database.GetContainer("Tests");
-                using (FeedIterator<TestModel> setIterator = container.GetItemLinqQueryable<TestModel>()
-                          .ToFeedIterator<TestModel>())
+                using (FeedIterator<TestModel> setIterator = _cosmosDBWrapper.Container.GetItemLinqQueryable<TestModel>()
+                          .ToFeedIterator())
                 {
                     //Asynchronous query execution
                     while (setIterator.HasMoreResults)
@@ -65,8 +60,9 @@ namespace Spinoza.Backend.Accessor.TestCatalog.Controllers
             try
             {
                 var testInfo = await GetMessageFromBodyAsync();
-                var response = await AddNewTestToDataBase(testInfo);
-                await PublishTestResultAsync(response);
+                var response = await _cosmosDBWrapper.CreateItemAsync(testInfo);
+                //var response = await AddNewTestToDataBase(testInfo);
+                await PublishTestResultAsync(testInfo);
                 return Ok();
             }
             catch (Exception ex)
@@ -75,7 +71,7 @@ namespace Spinoza.Backend.Accessor.TestCatalog.Controllers
             }
             return Problem(statusCode: (int)StatusCodes.Status500InternalServerError);
         }
-        private async Task PublishTestResultAsync(string testInfo)
+        private async Task PublishTestResultAsync(TestModel testInfo)
         {
             try
             {
@@ -96,30 +92,21 @@ namespace Spinoza.Backend.Accessor.TestCatalog.Controllers
             return newTest ?? throw new Exception("Error when deserialize message body");
         }
 
-        private async Task<string> AddNewTestToDataBase(TestModel body)
-        {
-           // CosmosClient cosmosClient = new CosmosClient(_configuration["ConnectionStrings:Tests"]);
-           // await cosmosClient.GetDatabase($"Catalog")
-           //.DefineContainer(name: $"Tests", partitionKeyPath: "/Title")
-           //.WithUniqueKey()
-           //.Path("/Title")
-           //.Attach()
-           //.CreateIfNotExistsAsync();
-           // Database database = cosmosClient.GetDatabase("Catalog");
-           // Container container = database.GetContainer("Tests");
-           // try
-           // {
-           //     ItemResponse<TestModel> respons = await container.CreateItemAsync<TestModel>(body, new PartitionKey(body.Title));
+        //private async Task<string> AddNewTestToDataBase(TestModel body)
+        //{
+        //   // try
+        //   // {
+        //   //     ItemResponse<TestModel> respons = await container.CreateItemAsync<TestModel>(body, new PartitionKey(body.Title));
 
-           //     return $"Test Created {body.Title}";
-           // }
-           // catch (CosmosException ex) when (ex.StatusCode == HttpStatusCode.Conflict)
-           // {
-           //     return $"The test already exists! {body.Title}";
-           // }
-           var response = await _cosmosDBWrapper.CreateItemAsync(body);
-            return $"Test created {body.Title}";
+        //   //     return $"Test Created {body.Title}";
+        //   // }
+        //   // catch (CosmosException ex) when (ex.StatusCode == HttpStatusCode.Conflict)
+        //   // {
+        //   //     return $"The test already exists! {body.Title}";
+        //   // }
+           
+        //    return $"Test created {body.Title}";
 
-        }
+        //}
     }
 }

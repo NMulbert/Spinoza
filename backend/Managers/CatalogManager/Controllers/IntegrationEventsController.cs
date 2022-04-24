@@ -1,4 +1,5 @@
 ﻿using CatalogManager.Helpers;
+using CatalogManager.Models;
 using Dapr;
 using Dapr.Client;
 using Microsoft.AspNetCore.Mvc;
@@ -15,20 +16,20 @@ namespace CatalogManager.Controllers
 
         public IntegrationEventsController(ILogger<IntegrationEventsController> logger, DaprClient daprClient)
         {
-            System.Diagnostics.Debugger.Launch();
-            System.Diagnostics.Debugger.Break();
+            //System.Diagnostics.Debugger.Launch();
+            //System.Diagnostics.Debugger.Break();
             _logger = logger;
            _daprClient = daprClient;
         }
 
         [Topic("pubsub", "test-topic")]
-        public async Task<IActionResult> OnTestCreated([FromBody] string result)
+        public async Task<IActionResult> OnTestCreated([FromBody] TestModel result)
         {
             
             try
             {
-                _logger?.LogInformation($"Message received: {result}");
-               await PublishMessageToSignalRAsync(result);
+                _logger?.LogInformation($"Message received: {result.Title}");
+               await PublishMessageToSignalRAsync(result.Title);
                 
                 return Ok();
             }

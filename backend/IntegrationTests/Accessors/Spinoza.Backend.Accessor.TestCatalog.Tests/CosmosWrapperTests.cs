@@ -26,12 +26,12 @@ namespace Spinoza.Backend.Accessor.TestCatalog.Tests
     {
         private readonly ICosmosDBWrapper _cosmosDBWrapper; 
 
-        public CosmosWrapperTests(ICosmosDBWrapper cosmosDBWrapper )
+        public CosmosWrapperTests(ICosmosDBWrapper cosmosDBWrapper, ICosmosDbInformationProvider cosmosDbInformationProvider )
         {
-            Database database = cosmosDBWrapper.CosmosClient.GetDatabase("Catalog");
+            Database database = cosmosDBWrapper.CosmosClient.GetDatabase(cosmosDbInformationProvider.DataBaseName);
             try
             {
-                Task.Run(() => database.DeleteAsync()).Wait();
+                database.DeleteAsync().Wait();
             }
             catch(Exception)
             {
@@ -44,32 +44,34 @@ namespace Spinoza.Backend.Accessor.TestCatalog.Tests
         [Fact]
         public void DBCreationTest()
         {
-            var database = _cosmosDBWrapper.TestDatabase;
+            var database = _cosmosDBWrapper.Database;
             Assert.NotNull(database);
            
         }
         [Fact]
         public void ContainerCreationTest()
         {
-            var testContainer = _cosmosDBWrapper.TestContainer;
+            var testContainer = _cosmosDBWrapper.Container;
             Assert.NotNull(testContainer);
 
         }
         [Fact]
         public void AlreadyExistDBCreationTest()
         {
-            var database = _cosmosDBWrapper.TestDatabase;
+            var database = _cosmosDBWrapper.Database;
             Assert.NotNull(database);
-            database = _cosmosDBWrapper.TestDatabase;
-            Assert.NotNull(database);
+            var database2 = _cosmosDBWrapper.Database;
+            Assert.NotNull(database2);
+            Assert.Equal(database, database2);
         }
         [Fact]
         public void AlreadyExistContainerCreationTest()
         {
-            var testContainer = _cosmosDBWrapper.TestContainer;
+            var testContainer = _cosmosDBWrapper.Container;
             Assert.NotNull(testContainer);
-            testContainer = _cosmosDBWrapper.TestContainer;
-            Assert.NotNull(testContainer);
+            var testContainer2 = _cosmosDBWrapper.Container;
+            Assert.NotNull(testContainer2);
+            Assert.Equal(testContainer, testContainer2);
         }
 
         [Fact]
@@ -86,5 +88,70 @@ namespace Spinoza.Backend.Accessor.TestCatalog.Tests
             Assert.Equal("Created",result.StatusCode.ToString());
             
         }
+        [Fact]
+        public async void DBGetAllTests()
+        {
+           // await Task.Delay(2000);
+            for (int i = 0; i < 100; i++)
+            {
+                
+                TestItem item = new TestItem()
+                {
+                    Id = i.ToString(),
+                    Title = $"New Test:{i}"
+
+                };
+                var result = await _cosmosDBWrapper.CreateItemAsync(item);
+            }
+            var allItems = await _cosmosDBWrapper.GetAllCosmosElementsAsync<TestItem>(0, 100);
+            Assert.NotNull(allItems);
+            Assert.Equal("50", allItems[50].Id);
+            Assert.Equal(100, allItems.Count);
+
+        }
+
+        [Fact]
+        public async void DBGetOffsetWithLimitTests()
+        {
+            //await Task.Delay(2000);
+            for (int i = 0; i < 100; i++)
+            {
+                
+                TestItem item = new TestItem()
+                {
+                    Id = i.ToString(),
+                    Title = $"New Test:{i}"
+
+                };
+                var result = await _cosmosDBWrapper.CreateItemAsync(item);
+            }
+            var allItems = await _cosmosDBWrapper.GetAllCosmosElementsAsync<TestItem>(30, 10);
+            Assert.NotNull(allItems);
+            Assert.Equal("35", allItems[5].Id);
+            Assert.Equal(10, allItems.Count);
+
+        }
+        [Fact]
+        public async void DBGetSpecificTest()
+        {
+            //await Task.Delay(2000);
+            for (int i = 0; i < 10; i++)
+            {
+
+                TestItem item = new TestItem()
+                {
+                    Id = i.ToString(),
+                    Title = $"New Test:{i}"
+
+                };
+                var result = await _cosmosDBWrapper.CreateItemAsync(item);
+            }
+            var allItems = await _cosmosDBWrapper.GetAllCosmosElementsAsync<TestItem>();
+            Assert.NotNull(allItems);
+            Assert.Equal("35", allItems[5].Id);
+            Assert.Equal(10, allItems.Count);
+
+        }
+
     }
 }
