@@ -134,6 +134,68 @@ namespace Spinoza.Backend.Accessor.TestCatalog.DataBases
                 .WithParameter("@count", count);
             return await GetCosmosElementsAsync<TOut>(query); 
         }
+
+        public async Task<ItemResponse<T>?> UpdateItemAsync<T>(T newItem, Func<T,string?> eTagSelector, Func<T,Guid> idSelector, Func<T,T,T> merger, bool createIfNotExist=true, PartitionKey? partitionKey = null, CancellationToken cancellationToken = default(CancellationToken))
+        {
+            var polly = Policy
+            .Handle<CosmosException>()
+            //Todo: move 3 to configuration
+            .RetryAsync(3, (exception, retryCount, context) => _logger.LogError($"try: {retryCount}, Exception: {exception.Message}"));
+
+            var result = await polly.ExecuteAsync(async () =>
+            {
+                try
+                {
+                    var query = new QueryDefinition("SELECT * FROM ITEMS item WHERE item.id = @id").WithParameter("@id", idSelector(newItem));
+                    var dbItem = (await GetCosmosElementsAsync<T>(query)).FirstOrDefault();
+                    if (dbItem == null)
+                    {
+                        _logger.LogInformation($"UpdateItemAsync doesn't exist:");
+                        return await CreateIfItemIsNeededAsync();
+                    }
+                    var mergedItem = merger(dbItem,newItem);
+                    var requestOption = new ItemRequestOptions()
+                    {
+                        IfMatchEtag = eTagSelector(mergedItem)
+                    };
+                    var result = await Container.ReplaceItemAsync(mergedItem, idSelector(mergedItem).ToString(), partitionKey, requestOption);
+                    _logger.LogInformation($"create cosmosDB element returns: {result?.StatusCode}, cost: {result?.RequestCharge} RU/S");
+                    return result;
+                }
+                catch (CosmosException cosmosException)
+                {
+                    if (cosmosException.StatusCode == System.Net.HttpStatusCode.TooManyRequests)
+                    {
+                        _logger.LogWarning($"Too many requests when accessing cosmosDB, waiting: {cosmosException.RetryAfter}");
+                        await Task.Delay(cosmosException.RetryAfter ?? TimeSpan.FromSeconds(1));
+                        //Todo: move 1 to configuration
+                        throw;
+                    }
+                    if (cosmosException.StatusCode == System.Net.HttpStatusCode.PreconditionFailed)
+                    {
+                        _logger.LogWarning("eTag was changed");
+                        throw;
+                    }
+
+                    //else
+                    _logger.LogError($"UpdateItemAsync: Error accessing cosmosDB, Error : {cosmosException.Message}");
+                    throw;// new Exception("Error accessing cosmosDB", cosmosException);
+                }
+                
+                async Task<ItemResponse<T>?> CreateIfItemIsNeededAsync()
+                {
+                    if (!createIfNotExist)
+                    {
+                        _logger.LogInformation("CreateIfItemIsNeededAsync: nothing to do");
+                        return null;
+                    }
+                    return await CreateItemAsync(newItem, partitionKey, null, cancellationToken);
+                }
+            }
+            );
+            return result;
+            
+        }
     }
 }
 

@@ -82,6 +82,21 @@ namespace Spinoza.Backend.Accessor.TestCatalog.Controllers
                 _logger.LogError($"GetTestFromQueueRequestAsync: error getting test from queue error while getting all tests: {ex.Message}");
             }
         }
+        public async Task<IActionResult> UpdateTest(TestModel testModel)
+        {
+            var result = await _cosmosDBWrapper.UpdateItemAsync(testModel, item => item.ETag, item => item.Id, TestMerger);
+            return Ok();
+        }
+
+        private TestModel TestMerger(TestModel newItem, TestModel dbItem)
+        {
+            dbItem.Author = newItem.Author;
+            dbItem.Description = newItem.Description;
+            dbItem.Status = newItem.Status;
+            dbItem.Questions = dbItem.Questions.Union(newItem.Questions).ToList();
+            dbItem.Title = newItem.Title;
+            return dbItem;
+        }
 
         private async Task<TestModel> GetMessageFromBodyAsync()
         {

@@ -134,6 +134,8 @@ namespace Spinoza.Backend.Accessor.TestCatalog.Tests
         [Fact]
         public async void DBGetSpecificTest()
         {
+            var id = "1";
+            var query = new QueryDefinition($"SELECT * FROM ITEMS item  WHERE item.id = @id").WithParameter("@id", id);
             //await Task.Delay(2000);
             for (int i = 0; i < 10; i++)
             {
@@ -146,11 +148,10 @@ namespace Spinoza.Backend.Accessor.TestCatalog.Tests
                 };
                 var result = await _cosmosDBWrapper.CreateItemAsync(item);
             }
-            var allItems = await _cosmosDBWrapper.GetAllCosmosElementsAsync<TestItem>();
+            var allItems = await _cosmosDBWrapper.GetCosmosElementsAsync<TestItem>(query);
             Assert.NotNull(allItems);
-            Assert.Equal("35", allItems[5].Id);
-            Assert.Equal(10, allItems.Count);
-
+            Assert.Equal("1", allItems[0].Id);
+            Assert.Equal(1, allItems.Count);
         }
 
     }
