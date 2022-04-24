@@ -4,9 +4,12 @@ import {
   Badge,
   Button,
   Group,
-  useMantineTheme,
+  Title,
+  Divider,
 } from "@mantine/core";
+import MDEditor from "@uiw/react-md-editor";
 import { Link } from "react-router-dom";
+import { CalendarTime, UserCircle, Link as LinkIcon } from "tabler-icons-react";
 
 type TestCardProps = {
   id: any;
@@ -19,56 +22,80 @@ type TestCardProps = {
 };
 
 const TestCard = ({ title, description, author, tags, id }: TestCardProps) => {
-  const theme = useMantineTheme();
-  const secondaryColor =
-    theme.colorScheme === "dark" ? theme.colors.dark[1] : theme.colors.gray[7];
-
   return (
-    <div style={{ width: 340, margin: "auto" }}>
-      <Card shadow="sm" p="lg">
-        <Card.Section>
-          <h3>{title} </h3>
-        </Card.Section>
+    <Card
+      withBorder
+      shadow="xl"
+      p="lg"
+      radius="xl"
+      style={{
+        height: 309,
+        minHeight: 300,
+        width: "90%",
+        minWidth: "90%",
+        margin: "auto",
+        display: "inline-block",
+      }}
+    >
+      <Title order={4} style={{ textAlign: "center" }}>
+        {title}
+      </Title>
+      <Divider my="sm" color="blue" />
 
-        <Text weight={500}>{description}</Text>
-
-        <Group style={{ marginBottom: 5, marginTop: theme.spacing.sm }}>
-          <Badge color="pink" variant="light">
-            {`${author.firstName} ${author.lastName}`}
-          </Badge>
-          <Badge color="yellow" variant="light">
-            Date
-          </Badge>
-        </Group>
-
-        <Text size="sm" style={{ color: secondaryColor, lineHeight: 1.5 }}>
-          Here would go a preview of the test. <br />
-          Here would go a preview of the test. <br />
-          Here would go a preview of the test. <br />
-          Here would go a preview of the test. <br />
+      <Card.Section style={{ margin: 5, height: 80 }}>
+        <Text lineClamp={3} size="md" weight={500}>
+          <MDEditor.Markdown
+            style={{ backgroundColor: "white", color: "black" }}
+            source={description}
+          />
         </Text>
+      </Card.Section>
 
-        <Group style={{ marginBottom: 5, marginTop: theme.spacing.sm }}>
-          {tags.map((i: any) => {
-            return (
-              <Badge key={i} color="green" variant="light">
-                {i}
-              </Badge>
-            );
-          })}
-        </Group>
+      <Group spacing="xs" style={{ marginTop: 10, marginBottom: 20 }}>
+        {tags.map((i: any) => {
+          return (
+            <Badge key={i} color="green" variant="light">
+              {i}
+            </Badge>
+          );
+        })}
+      </Group>
+
+      <Group style={{ color: "#444848" }} spacing="xs">
+        <CalendarTime size={18} />
+        <Text size="xs" weight={700}>
+          Creation Date
+        </Text>
+      </Group>
+
+      <Group style={{ color: "#444848" }} spacing="xs">
+        <UserCircle size={18} />
+        <Text size="xs" weight={700}>
+          {`${author.firstName} ${author.lastName}`}
+        </Text>
+      </Group>
+
+      <Group position="apart" spacing="xs">
         <Link to={`/tests/${id}`} style={{ textDecoration: "none" }}>
           <Button
+            radius="lg"
             variant="light"
             color="blue"
-            fullWidth
-            style={{ marginTop: 14 }}
+            style={{ marginTop: 14, width: 120 }}
           >
             Open
           </Button>
         </Link>
-      </Card>
-    </div>
+        <Button
+          radius="lg"
+          variant="light"
+          color="gray"
+          style={{ marginTop: 14 }}
+        >
+          <LinkIcon />
+        </Button>
+      </Group>
+    </Card>
   );
 };
 

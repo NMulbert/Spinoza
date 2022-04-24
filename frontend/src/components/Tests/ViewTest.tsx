@@ -106,7 +106,10 @@ function ViewTest({ test }: ViewTestProps) {
               }}
             />
           ) : (
-            <MDEditor.Markdown source={testValus.description} />
+            <MDEditor.Markdown
+              style={{ backgroundColor: "white", color: "black" }}
+              source={testValus.description}
+            />
           )}
         </Grid.Col>
 
@@ -177,13 +180,13 @@ function ViewTest({ test }: ViewTestProps) {
             return (
               <Grid.Col md={6} lg={3} key={i.id}>
                 <QuestionCard
-                  Id={i.id}
-                  Title={i.Title}
-                  Description={i.Description}
-                  Author={i.Author}
-                  Tags={i.Tags}
-                  Status={i.Status}
-                  Version={i.Version}
+                  id={i.id}
+                  title={i.Title}
+                  description={i.Description}
+                  author={i.Author}
+                  tags={i.Tags}
+                  status={i.Status}
+                  version={i.Version}
                 />
               </Grid.Col>
             );
