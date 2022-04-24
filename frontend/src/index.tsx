@@ -11,10 +11,10 @@ import { signInAuthProvider } from "./authProvider";
 const root = createRoot(document.getElementById("root") as HTMLDivElement);
 root.render(
   <Provider store={store}>
-    <AzureAD provider={signInAuthProvider} forceLogin={true}>
-      <BrowserRouter>
-        <App />
-      </BrowserRouter>
-    </AzureAD>
+    {/* <AzureAD provider={signInAuthProvider} forceLogin={true}> */}
+    <BrowserRouter>
+      <App />
+    </BrowserRouter>
+    {/* </AzureAD> */}
   </Provider>
 );
