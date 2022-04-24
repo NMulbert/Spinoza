@@ -2,17 +2,15 @@ import React, { useState } from "react";
 import {
   RadioGroup,
   Radio,
-  Textarea,
   MultiSelect,
   TextInput,
   SimpleGrid,
   Group,
   Button,
   Text,
-  Badge,
-  ActionIcon,
   Space,
   Divider,
+  SegmentedControl,
 } from "@mantine/core";
 import { Hash } from "tabler-icons-react";
 import MDEditor from "@uiw/react-md-editor";
@@ -64,14 +62,15 @@ function NewQuestion() {
             Answer Type:
           </Text>
           <Space h="xs" />
-          <Group spacing="xs">
-            <Button radius="md" size="xl" variant="outline" color="pink">
-              Text
-            </Button>
-            <Button radius="md" size="xl" variant="outline" color="violet">
-              Multiple Choice
-            </Button>
-          </Group>
+          <SegmentedControl
+            size="xl"
+            radius="sm"
+            color="green"
+            data={[
+              { value: "TextA", label: "Text" },
+              { value: "MultipleChoiceA", label: "Multiple Choice" },
+            ]}
+          />
           <Space h="xs" />
           <RadioGroup label="Select level:" required>
             <Radio value="level1" label="1" />

@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from "react";
-import { Modal, Grid, Card, Text, Loader } from "@mantine/core";
+import { Modal, Grid, Card, Text, Loader, Button } from "@mantine/core";
 import QuestionCard from "../Questions/QuestionCard";
 import NewQuestion from "./NewQuestion";
 import { useDispatch, useSelector } from "react-redux";
 import { loadQuestions } from "../../redux/Reducers/questions/questions-actions";
+import { Writing } from "tabler-icons-react";
 interface QuestionsState {
   questions: { questions: [] };
 }
@@ -24,7 +25,15 @@ function AllQuestionsPage() {
   let questions = useSelector((s: QuestionsState) => s.questions.questions);
 
   return (
-    <>
+    <div
+      style={{
+        height: "100%",
+        paddingLeft: "270px",
+        paddingTop: "30px",
+        paddingBottom: "30px",
+        backgroundColor: "#f0f0f0",
+      }}
+    >
       <Modal
         opened={openedNQ}
         onClose={() => setOpenedNQ(false)}
@@ -33,48 +42,52 @@ function AllQuestionsPage() {
       >
         {<NewQuestion />}
       </Modal>
-
-      <Grid
-        style={{
-          paddingTop: "50px",
-          paddingLeft: "250px",
-        }}
-      >
-        <Grid.Col md={6} lg={3}>
-          <Card
-            shadow="sm"
-            p="lg"
-            style={{ width: 340, margin: "auto", height: 307.23 }}
+<Grid>
+      <Grid.Col md={6} lg={4} xl={3}>
+        <Card
+          withBorder
+          shadow="xl"
+          p="lg"
+          radius="xl"
+          style={{
+            height: 309,
+            width: "90%",
+            minWidth: "90%",
+            margin: "auto",
+            padding: 0,
+            display: "inline-block",
+          }}
+        >
+          <Button
+            radius="xl"
+            variant="light"
+            color="blue"
+            onClick={() => setOpenedNQ(true)}
+            style={{
+              fontSize: 30,
+              width: "100%",
+              height: "100%",
+            }}
           >
-            <Text
-              align="center"
-              text-align="center"
-              variant="gradient"
-              gradient={{ from: "indigo", to: "cyan", deg: 45 }}
-              size="xl"
-              weight={700}
-              style={{
-                fontFamily: "Greycliff CF, sans-serif",
-                padding: "90px",
-              }}
-              onClick={() => setOpenedNQ(true)}
-            >
-              New Question <br /> +
-            </Text>
-          </Card>
-        </Grid.Col>
+            NEW QUESTION
+            <Writing size={50} />
+          </Button>
+        </Card>
+      </Grid.Col>
+
         {questions ? (
           questions.map((i: any) => {
             return (
-              <Grid.Col md={6} lg={3} key={i.Id}>
+              <Grid.Col md={6} lg={4} xl={3}>
                 <QuestionCard
-                  Id={i.Id}
-                  Title={i.Title}
-                  Description={i.Description}
-                  Author={i.Author}
-                  Tags={i.Tags}
-                  Status={i.Status}
-                  Version={i.Version}
+                  key={i.id}
+                  id={i.id}
+                  title={i.title}
+                  description={i.description}
+                  author={i.author}
+                  tags={i.tags}
+                  status={i.status}
+                  version={i.version}
                 />
               </Grid.Col>
             );
@@ -85,7 +98,7 @@ function AllQuestionsPage() {
           </>
         )}
       </Grid>
-    </>
+    </div>
   );
 }
 
