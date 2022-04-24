@@ -24,7 +24,7 @@ function CreateTest() {
   ]);
   const [testValues, setTestsValues] = useState({
     title: "",
-    description: "**Write question here...**",
+    description: "**Write description here...**",
     author: {
       firstName: "Haim",
       lastName: "Gilboa",

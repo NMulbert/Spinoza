@@ -53,7 +53,7 @@ function AllTestsPage() {
       {tests ? (
         tests.map((i: any) => {
           return (
-            <Grid.Col md={6} lg={3} key={i.Id}>
+            <Grid.Col md={6} lg={3} key={i.id}>
               <TestCard
                 id={i.id}
                 title={i.title}
