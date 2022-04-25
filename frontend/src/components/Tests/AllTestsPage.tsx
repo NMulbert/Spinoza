@@ -22,7 +22,7 @@ function AllTestsPage() {
       .then((result) => {
         dispatch(loadTests(result));
       });
-  }, []);
+  }, [tests]);
 
   return (
     <div
