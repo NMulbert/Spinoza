@@ -78,9 +78,8 @@ function AllQuestionsPage() {
         {questions ? (
           questions.map((i: any) => {
             return (
-              <Grid.Col md={6} lg={4} xl={3}>
+              <Grid.Col md={6} lg={4} xl={3} key={i.id}>
                 <QuestionCard
-                  key={i.id}
                   id={i.id}
                   title={i.title}
                   description={i.description}
