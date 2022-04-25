@@ -2,10 +2,10 @@ import { Button, Group, Radio, Textarea, Card, Checkbox } from "@mantine/core";
 import { useState } from "react";
 import { X } from "tabler-icons-react";
 
-function MultiChoice() {
+function Checkboxes() {
   const [inputList, setInputList] = useState([{ answerOption: "" }]);
   const [chooseMode, setChooseMode] = useState(false);
-  const [correctAnswer, setCorrectAnswer] = useState("");
+  const [correctAnswers, setCorrectAnswers]: any = useState([]);
 
   const handleInputChange = (e: any, index: number) => {
     const { name, value } = e.target;
@@ -32,16 +32,26 @@ function MultiChoice() {
             <div key={i}>
               <Group>
                 {chooseMode ? (
-                  <Radio
+                  <Checkbox
                     name="answerOption"
                     value={x.answerOption}
                     onChange={(e) => {
                       handleInputChange(e, i);
-                      setCorrectAnswer(e.target.value);
+                      let temp = [...correctAnswers];
+                      e.target.checked ? (
+                        temp.push(e.target.value)
+                      ) : correctAnswers.length !== 0 ? (
+                        (temp = correctAnswers.filter(
+                          (answer: string) => answer !== e.target.value
+                        ))
+                      ) : (
+                        <> </>
+                      );
+                      setCorrectAnswers(temp);
                     }}
                   />
                 ) : (
-                  <Radio
+                  <Checkbox
                     disabled
                     name="answerOption"
                     value={x.answerOption}
@@ -102,4 +112,4 @@ function MultiChoice() {
   );
 }
 
-export default MultiChoice;
+export default Checkboxes;
