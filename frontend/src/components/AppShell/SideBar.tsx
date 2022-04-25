@@ -140,12 +140,10 @@ export function Sidebar() {
         <Navbar.Section grow>{links}</Navbar.Section>
 
         <Navbar.Section className={classes.footer}>
-          <Link to={"/tests"}>
-            <div className={classes.link}>
-              <SwitchHorizontal className={classes.linkIcon} />
-              <span>Change account</span>
-            </div>
-          </Link>
+          <div className={classes.link}>
+            <SwitchHorizontal className={classes.linkIcon} />
+            <span>Change account</span>
+          </div>
           <a
             href="#"
             className={classes.link}
