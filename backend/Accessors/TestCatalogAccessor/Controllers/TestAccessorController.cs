@@ -88,7 +88,7 @@ namespace Spinoza.Backend.Accessor.TestCatalog.Controllers
             return Ok();
         }
 
-        private TestModel TestMerger(TestModel newItem, TestModel dbItem)
+        private TestModel TestMerger(TestModel dbItem, TestModel newItem )
         {
             dbItem.Author = newItem.Author;
             dbItem.Description = newItem.Description;

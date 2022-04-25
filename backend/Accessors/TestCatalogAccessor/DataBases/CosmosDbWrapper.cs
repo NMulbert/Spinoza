@@ -1,5 +1,4 @@
-﻿using AsyncLazy;
-using Microsoft.Azure.Cosmos;
+﻿using Microsoft.Azure.Cosmos;
 using Polly;
 using Microsoft.Azure.Cosmos.Linq;
 using System.Web;
@@ -9,8 +8,8 @@ namespace Spinoza.Backend.Accessor.TestCatalog.DataBases
     public class CosmosDBWrapper : ICosmosDBWrapper
     {
         private readonly ILogger<CosmosDBWrapper> _logger;
-        private readonly AsyncLazy<Database> _lazyDatabase;
-        private readonly AsyncLazy<Container> _lazyContainer;
+        private readonly Lazy<Database> _lazyDatabase;
+        private readonly Lazy<Container> _lazyContainer;
         public Database Database => _lazyDatabase.Value;
         public Container Container => _lazyContainer.Value;
 
@@ -20,27 +19,27 @@ namespace Spinoza.Backend.Accessor.TestCatalog.DataBases
         {
             _logger = logger;
             CosmosClient = new CosmosClient(configuration["ConnectionStrings:CosmosDB"]);
-            _lazyDatabase = new AsyncLazy<Database>(() => CreateDataBaseAsync(CosmosClient, logger, cosmosDbInformationProvider));
-            _lazyContainer = new AsyncLazy<Container>(() => CreateDataBaseContainerAsync(CosmosClient, logger, Database, cosmosDbInformationProvider));
+            _lazyDatabase = new Lazy<Database>(() => CreateDataBase(CosmosClient, logger, cosmosDbInformationProvider),true);
+            _lazyContainer = new Lazy<Container>(() => CreateDataBaseContainer(CosmosClient, logger, Database, cosmosDbInformationProvider),true);
         }
 
-        public static async Task<Database> CreateDataBaseAsync(CosmosClient cosmosClient, ILogger<CosmosDBWrapper> logger , ICosmosDbInformationProvider cosmosDbInformationProvider)
+        public static  Database CreateDataBase(CosmosClient cosmosClient, ILogger<CosmosDBWrapper> logger , ICosmosDbInformationProvider cosmosDbInformationProvider)
         {
-            return await CreateCosmosElementAsync<Database, DatabaseProperties>(cosmosClient, logger,
+            return  (CreateCosmosElementAsync<Database, DatabaseProperties>(cosmosClient, logger,
                     async () => await cosmosClient.CreateDatabaseIfNotExistsAsync(cosmosDbInformationProvider.DataBaseName),
-                    () => cosmosClient.GetDatabase(cosmosDbInformationProvider.DataBaseName));
+                    () => cosmosClient.GetDatabase(cosmosDbInformationProvider.DataBaseName))).Result;
         }
 
-        public static async Task<Container> CreateDataBaseContainerAsync(CosmosClient cosmosClient, ILogger<CosmosDBWrapper> logger, Database database , ICosmosDbInformationProvider cosmosDbInformationProvider)
+        public static Container CreateDataBaseContainer(CosmosClient cosmosClient, ILogger<CosmosDBWrapper> logger, Database database , ICosmosDbInformationProvider cosmosDbInformationProvider)
         {
-            return await CreateCosmosElementAsync<Container, ContainerProperties>(cosmosClient, logger,
+            return  (CreateCosmosElementAsync<Container, ContainerProperties>(cosmosClient, logger,
                 async () => await database
                 .DefineContainer(name: cosmosDbInformationProvider.ContainerName, partitionKeyPath: $"/{cosmosDbInformationProvider.PartitionKey}")
                 .WithUniqueKey()
-                .Path($"/{cosmosDbInformationProvider.PartitionKey}")
+                .Path($"/{cosmosDbInformationProvider.UniqueKey}")
                 .Attach()
                 .CreateIfNotExistsAsync(),
-                () => database.GetContainer(cosmosDbInformationProvider.ContainerName));
+                () => database.GetContainer(cosmosDbInformationProvider.ContainerName))).Result;
         }
         public static async Task<TOut> CreateCosmosElementAsync<TOut, TProperties>(CosmosClient cosmosClient, ILogger<CosmosDBWrapper> logger, Func<Task<Response<TProperties>?>> createFuncAsync, Func<TOut> returnFunc)
         {
@@ -137,6 +136,7 @@ namespace Spinoza.Backend.Accessor.TestCatalog.DataBases
 
         public async Task<ItemResponse<T>?> UpdateItemAsync<T>(T newItem, Func<T,string?> eTagSelector, Func<T,Guid> idSelector, Func<T,T,T> merger, bool createIfNotExist=true, PartitionKey? partitionKey = null, CancellationToken cancellationToken = default(CancellationToken))
         {
+            
             var polly = Policy
             .Handle<CosmosException>()
             //Todo: move 3 to configuration
@@ -144,6 +144,7 @@ namespace Spinoza.Backend.Accessor.TestCatalog.DataBases
 
             var result = await polly.ExecuteAsync(async () =>
             {
+                
                 try
                 {
                     var query = new QueryDefinition("SELECT * FROM ITEMS item WHERE item.id = @id").WithParameter("@id", idSelector(newItem));

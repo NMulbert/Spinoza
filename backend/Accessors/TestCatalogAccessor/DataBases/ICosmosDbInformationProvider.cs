@@ -6,5 +6,7 @@
         string DataBaseName { get; }
 
         string PartitionKey { get; }
+
+        string UniqueKey { get; }
     }
 }
