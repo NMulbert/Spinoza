@@ -17,7 +17,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Accessors", "Accessors", "{
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Managers", "Managers", "{5EC0155C-6AD5-416E-95CB-959EC5EB4633}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Spinoza.Backend.Accessor.TestCatalog.Tests", "IntegrationTests\Accessors\Spinoza.Backend.Accessor.TestCatalog.Tests\Spinoza.Backend.Accessor.TestCatalog.Tests.csproj", "{3B9C9A6F-D27E-4FD3-80B2-3DF8C00A74F2}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Spinoza.Backend.Accessor.TestCatalog.Tests", "IntegrationTests\Accessors\Spinoza.Backend.Accessor.TestCatalog.Tests\Spinoza.Backend.Accessor.TestCatalog.Tests.csproj", "{3B9C9A6F-D27E-4FD3-80B2-3DF8C00A74F2}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

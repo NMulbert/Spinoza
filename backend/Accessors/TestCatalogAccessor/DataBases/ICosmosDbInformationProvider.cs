@@ -7,6 +7,7 @@
 
         string PartitionKey { get; }
 
-        string UniqueKey { get; }
+        string[] UniqueKeys { get; }
+
     }
 }

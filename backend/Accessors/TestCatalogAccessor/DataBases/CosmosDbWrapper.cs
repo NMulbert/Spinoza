@@ -2,6 +2,8 @@
 using Polly;
 using Microsoft.Azure.Cosmos.Linq;
 using System.Web;
+using System.Linq;
+using System.Text;
 
 namespace Spinoza.Backend.Accessor.TestCatalog.DataBases
 {
@@ -32,14 +34,23 @@ namespace Spinoza.Backend.Accessor.TestCatalog.DataBases
 
         public static Container CreateDataBaseContainer(CosmosClient cosmosClient, ILogger<CosmosDBWrapper> logger, Database database , ICosmosDbInformationProvider cosmosDbInformationProvider)
         {
-            return  (CreateCosmosElementAsync<Container, ContainerProperties>(cosmosClient, logger,
-                async () => await database
-                .DefineContainer(name: cosmosDbInformationProvider.ContainerName, partitionKeyPath: $"/{cosmosDbInformationProvider.PartitionKey}")
-                .WithUniqueKey()
-                .Path($"/{cosmosDbInformationProvider.UniqueKey}")
-                .Attach()
-                .CreateIfNotExistsAsync(),
-                () => database.GetContainer(cosmosDbInformationProvider.ContainerName))).Result;
+            if (cosmosDbInformationProvider.UniqueKeys.Any())
+            {
+                return (CreateCosmosElementAsync<Container, ContainerProperties>(cosmosClient, logger,
+                    async () => await database
+                    .DefineContainer(name: cosmosDbInformationProvider.ContainerName, partitionKeyPath: $"/{cosmosDbInformationProvider.PartitionKey}")
+                    .WithUniqueKey()
+                    .Path(cosmosDbInformationProvider.UniqueKeys.Aggregate(new StringBuilder(), (sb, p) => sb.Append($"/{p},"), sb => { sb.Length -= 1; return sb.ToString(); }))
+                    .Attach()
+                    .CreateIfNotExistsAsync(),
+                    () => database.GetContainer(cosmosDbInformationProvider.ContainerName))).Result;
+            }
+            //else
+            return (CreateCosmosElementAsync<Container, ContainerProperties>(cosmosClient, logger,
+                    async () => await database
+                    .DefineContainer(name: cosmosDbInformationProvider.ContainerName, partitionKeyPath: $"/{cosmosDbInformationProvider.PartitionKey}")
+                    .CreateIfNotExistsAsync(),
+                    () => database.GetContainer(cosmosDbInformationProvider.ContainerName))).Result;
         }
         public static async Task<TOut> CreateCosmosElementAsync<TOut, TProperties>(CosmosClient cosmosClient, ILogger<CosmosDBWrapper> logger, Func<Task<Response<TProperties>?>> createFuncAsync, Func<TOut> returnFunc)
         {
