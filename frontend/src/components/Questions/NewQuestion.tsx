@@ -11,9 +11,12 @@ import {
   Space,
   Divider,
   SegmentedControl,
+  CheckboxGroup,
+  Checkbox,
 } from "@mantine/core";
 import { Hash } from "tabler-icons-react";
 import MDEditor from "@uiw/react-md-editor";
+import MultiChoice from "./MultiChoice";
 
 function NewQuestion() {
   const [dataHash, setHashData] = useState([
@@ -25,6 +28,8 @@ function NewQuestion() {
   const [questionValue, setQuestionValue] = useState(
     "**Write question here...**"
   );
+
+    const [answerType, setAnswerType] = useState("Text");
 
   return (
     <div>
@@ -67,10 +72,22 @@ function NewQuestion() {
             radius="sm"
             color="green"
             data={[
-              { value: "TextA", label: "Text" },
-              { value: "MultipleChoiceA", label: "Multiple Choice" },
+              { value: "Text", label: "Text" },
+              { value: "MultipleChoice", label: "Multiple Choice" },
+              { value: "Checkboxes", label: "Checkboxes" },
             ]}
+            onChange={(value) => {
+              setAnswerType(value);
+            }}
           />
+          <Space h="xs" />
+          {answerType === "MultipleChoice" ? (
+            <MultiChoice />
+          ) : answerType === "Checkboxes" ? (
+            <></>
+          ) : (
+            <></>
+          )}
           <Space h="xs" />
           <RadioGroup label="Select level:" required>
             <Radio value="level1" label="1" />
