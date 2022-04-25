@@ -1,7 +1,10 @@
-﻿using CatalogManager.Helpers;
+﻿using AutoMapper;
+using CatalogManager.Helpers;
+using CatalogManager.Models;
 using Dapr;
 using Dapr.Client;
 using Microsoft.AspNetCore.Mvc;
+using System.Text.Json;
 
 namespace CatalogManager.Controllers
 {
@@ -12,23 +15,25 @@ namespace CatalogManager.Controllers
 
         private readonly ILogger<IntegrationEventsController> _logger;
         private readonly DaprClient _daprClient;
+        private readonly IMapper _mapper;
 
-        public IntegrationEventsController(ILogger<IntegrationEventsController> logger, DaprClient daprClient)
+        public IntegrationEventsController(ILogger<IntegrationEventsController> logger, DaprClient daprClient, IMapper mapper)
         {
-           // System.Diagnostics.Debugger.Launch();
-            //System.Diagnostics.Debugger.Break();
-           _logger = logger;
+            
+            _logger = logger;
            _daprClient = daprClient;
+            _mapper = mapper;
         }
 
         [Topic("pubsub", "test-topic")]
-        public async Task<IActionResult> OnTestCreated([FromBody] string result)
+        public async Task<IActionResult> OnTestCreated([FromBody] Models.AccessorResults.TestChangeResult accessorTestChangeResult)
         {
             
             try
             {
-                _logger?.LogInformation($"Message received: {result}");
-               await PublishMessageToSignalRAsync(result);
+                var frontendTestChangeResult = _mapper.Map<Models.FrontendResponses.TestChangeResult>(accessorTestChangeResult);
+                _logger?.LogInformation($"Message received: {frontendTestChangeResult.Id}");
+               await PublishMessageToSignalRAsync(frontendTestChangeResult);
                 
                 return Ok();
             }
@@ -39,12 +44,12 @@ namespace CatalogManager.Controllers
             return Problem(statusCode: (int)StatusCodes.Status500InternalServerError);
         }
 
-        private async Task<IActionResult> PublishMessageToSignalRAsync(string massege)
+        private async Task<IActionResult> PublishMessageToSignalRAsync(Models.FrontendResponses.TestChangeResult frontendTestChangeResult)
         {
             Data data = new Data();
             Argument argument = new Argument();
             argument.Sender = "dapr";
-            argument.Text = massege;
+            argument.Text = JsonSerializer.Serialize(frontendTestChangeResult);
             data.Arguments = new Argument[] {argument};
             //Dictionary<string, string> newmetadata = new Dictionary<string, string>() { { "hub", "spinozahub" } };
             //var metadata = new Dictionary<string, string>() { { "spinozaHub", "Test" } };

@@ -1,4 +1,5 @@
-﻿using CatalogManager.Models;
+﻿using AutoMapper;
+using CatalogManager.Models;
 using Dapr.Client;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
@@ -12,43 +13,89 @@ namespace CatalogManager.Controllers
         private readonly ILogger<TestController> _logger;
 
         private readonly DaprClient _daprClient;
-        public TestController(ILogger<TestController> logger, DaprClient daprClient)
+        private readonly IMapper _mapper;
+        public TestController(ILogger<TestController> logger, DaprClient daprClient, IMapper mapper)
         {
             _logger = logger;
             _daprClient = daprClient;
+            _mapper = mapper;  
         }
 
-        [HttpPost("/addtest")]
+        [HttpPost("/test")]
         public async Task<IActionResult> PostNewTestToQueue()
+        {
+            
+            return await PostNewOrUpdateTestToQueue(false);
+        }
+
+        [HttpPut("/test")]
+        public async Task<IActionResult> PutNewTestToQueue()
+        {
+            return await PostNewOrUpdateTestToQueue(true);
+        }
+
+
+        [HttpGet("/tests")]
+        public async Task<IActionResult> GetAll(int? offset, int? limit)
+        {
+            
+            try
+            {
+                var allAccessorTests = await _daprClient.InvokeMethodAsync<List<Models.AccessorResults.Test>>(HttpMethod.Get, "testaccessor", $"testaccessor/all?offset={offset ?? 0 }&limit={limit ?? 100}");
+                var frontendAllTestModelResult = _mapper.Map<List<Models.FrontendResponses.Test>>(allAccessorTests);
+                _logger?.LogInformation($"returned {frontendAllTestModelResult.Count} tests");
+                return new OkObjectResult(frontendAllTestModelResult);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Error while getting all tests: {ex.Message}");
+            }
+            return Problem(statusCode: (int)StatusCodes.Status500InternalServerError);
+        }
+
+        [HttpGet("/test/{id:Guid}")]
+
+        public async Task<IActionResult> GetTest(Guid id)
+        {
+            //System.Diagnostics.Debugger.Launch();
+            //System.Diagnostics.Debugger.Break();
+            try
+            {
+                var accessorTest = await _daprClient.InvokeMethodAsync<Models.AccessorResults.Test>(HttpMethod.Get, "testaccessor", $"testaccessor?id={id}");
+                if (accessorTest == null)
+                {
+                    _logger.LogWarning($"GetTest: accessor returnes null for test: {id}");
+                    return new NotFoundObjectResult(id);
+                }
+                var frontendTestModelResult = _mapper.Map<Models.FrontendResponses.Test>(accessorTest);
+                _logger?.LogInformation($"returned test id: {id}");
+                return new OkObjectResult(frontendTestModelResult);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Error while getting a test: {id} Error: {ex.Message}");
+            }
+            return Problem(statusCode: (int)StatusCodes.Status500InternalServerError);
+        }
+
+        private async Task<IActionResult> PostNewOrUpdateTestToQueue(bool isUpdate)
         {
             try
             {
                 using var streamReader = new StreamReader(Request.Body);
                 var body = await streamReader.ReadToEndAsync();
-                var newTestModel = JsonConvert.DeserializeObject<TestModel>(body);
+                var requestTestModel = JsonConvert.DeserializeObject<Models.FrontendRequests.Test>(body);
+
                 _logger.LogInformation("the message is going to queue");
-                await _daprClient.InvokeBindingAsync("azurequeueoutput", "create", newTestModel);
-                return Ok(newTestModel);
+                var submitTestModel = _mapper.Map<Models.AccessorSubmits.Test>(requestTestModel);
+                submitTestModel.TestVersion = "1.0";
+                submitTestModel.MessageType = isUpdate ? "UpdateTest" : "CreateTest";
+                await _daprClient.InvokeBindingAsync("azurequeueoutput", "create", submitTestModel);
+                return Ok("Accepted");
             }
             catch (Exception ex)
             {
-                _logger.LogError($"error then ending addtest post: {ex.Message}");
-            }
-            return Problem(statusCode: (int)StatusCodes.Status500InternalServerError);
-        }
-        [HttpGet("/alltests")]
-        public async Task<IActionResult> GetAll()
-        {
-            try
-            {
-                List<TestModel> allTests = new List<TestModel>();
-                allTests = await _daprClient.InvokeMethodAsync<List<TestModel>>(HttpMethod.Get, "testaccessor", "testaccessor/all");
-                _logger?.LogInformation($"All the test in the test database {allTests}");
-                return new OkObjectResult(allTests);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError($"error whilte getting all tests: {ex.Message}");
+                _logger.LogError("Error when {0} ending addtest post: {1}", isUpdate ? "updating" : "creating", ex.Message);
             }
             return Problem(statusCode: (int)StatusCodes.Status500InternalServerError);
         }

@@ -1,6 +1,8 @@
 
 //System.Diagnostics.Debugger.Launch();
 //System.Diagnostics.Debugger.Break();
+using AutoMapper;
+
 var builder = WebApplication.CreateBuilder(args);
 var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
 
@@ -19,6 +21,20 @@ builder.Services.AddControllers().AddDapr();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+try
+{
+    var mapperConfig = new MapperConfiguration(mc => { mc.AddProfile(new AutoMapperProfile()); });
+    IMapper mapper = mapperConfig.CreateMapper();
+    mapperConfig.AssertConfigurationIsValid();
+    builder.Services.AddSingleton(mapper);
+}
+catch (Exception ex)
+{
+    Console.WriteLine(ex.ToString());
+    throw;
+}
+
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -34,7 +50,7 @@ app.UseAuthorization();
 app.UseCloudEvents();
 app.UseEndpoints(endpoints =>
 {
-    
+
     endpoints.MapSubscribeHandler();
     endpoints.MapControllers();
 });
