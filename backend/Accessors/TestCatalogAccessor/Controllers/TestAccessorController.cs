@@ -1,13 +1,15 @@
-﻿using Dapr.Client;
+﻿using AutoMapper;
+using Dapr.Client;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Cosmos;
 using Microsoft.Azure.Cosmos.Linq;
 using Newtonsoft.Json;
+using Spinoza.Backend.Accessor.TestCatalog.Models;
+using Spinoza.Backend.Crosscutting.CosmosDBWrapper;
 using System.Net;
-using System.Text.Json.Nodes;
-using TestCatalogAccessor.Models;
 
-namespace TestCatalogAccessor.Controllers
+
+namespace Spinoza.Backend.Accessor.TestCatalog.Controllers 
 {
     [ApiController]
     [Route("[controller]")]
@@ -16,12 +18,15 @@ namespace TestCatalogAccessor.Controllers
         private readonly ILogger<TestAccessorController> _logger;
 
         private readonly DaprClient _daprClient;
-        private IConfiguration _configuration;
-        public TestAccessorController(ILogger<TestAccessorController> logger, DaprClient daprClient, IConfiguration configuration)
+        private readonly ICosmosDBWrapper _cosmosDBWrapper;
+        private readonly IMapper _mapper;
+
+        public TestAccessorController(ILogger<TestAccessorController> logger, DaprClient daprClient, ICosmosDBWrapper cosmosDBWrapper, IMapper mapper)
         {
             _logger = logger;
             _daprClient = daprClient;
-            _configuration = configuration;
+            _cosmosDBWrapper = cosmosDBWrapper;
+            _mapper = mapper;
         }
 
         [HttpGet("all")]
@@ -30,11 +35,8 @@ namespace TestCatalogAccessor.Controllers
             try
             {
                 List<TestModel> tests = new List<TestModel>();
-                CosmosClient cosmosClient = new CosmosClient(_configuration["ConnectionStrings:Tests"]);
-                Database database = cosmosClient.GetDatabase("Catalog");
-                Container container = database.GetContainer("Tests");
-                using (FeedIterator<TestModel> setIterator = container.GetItemLinqQueryable<TestModel>()
-                          .ToFeedIterator<TestModel>())
+                using (FeedIterator<TestModel> setIterator = _cosmosDBWrapper.Container.GetItemLinqQueryable<TestModel>()
+                          .ToFeedIterator())
                 {
                     //Asynchronous query execution
                     while (setIterator.HasMoreResults)
@@ -60,9 +62,11 @@ namespace TestCatalogAccessor.Controllers
         {
             try
             {
-                var newTest = await GetTestFromQueueRequestAsync();
-                _logger?.LogInformation($"here is a massege from queuetest: {newTest}");
-                return Ok(newTest);
+                var testInfo = await GetMessageFromBodyAsync();
+                var response = await _cosmosDBWrapper.CreateItemAsync(testInfo);
+                //var response = await AddNewTestToDataBase(testInfo);
+                await PublishTestResultAsync(testInfo);
+                return Ok();
             }
             catch (Exception ex)
             {
@@ -70,41 +74,57 @@ namespace TestCatalogAccessor.Controllers
             }
             return Problem(statusCode: (int)StatusCodes.Status500InternalServerError);
         }
-        private async Task<TestModel> GetTestFromQueueRequestAsync()
+        private async Task PublishTestResultAsync(TestModel testInfo)
         {
-            using var streamReader = new StreamReader(Request.Body);
-            var body = await streamReader.ReadToEndAsync();
-            _logger?.LogInformation($"Here is the test that goona try to enter the database {body}");
-            TestModel newTest = JsonConvert.DeserializeObject<TestModel>(body);
-            var responce = await AddNewTestToDataBase(newTest);
-            //System.Diagnostics.Debugger.Launch();
-            //System.Diagnostics.Debugger.Break();
-            _logger?.LogInformation($"Here is the test after dsiarilization {responce}");
-            await _daprClient.PublishEventAsync("pubsub", "test-topic", responce);
-            return newTest;
-        }
-
-        private async Task<string> AddNewTestToDataBase(TestModel body)
-        {
-            CosmosClient cosmosClient = new CosmosClient(_configuration["ConnectionStrings:Tests"]);
-            await cosmosClient.GetDatabase($"Catalog")
-           .DefineContainer(name: $"Tests", partitionKeyPath: "/Title")
-           .WithUniqueKey()
-           .Path("/Title")
-           .Attach()
-           .CreateIfNotExistsAsync();
-            Database database = cosmosClient.GetDatabase("Catalog");
-            Container container = database.GetContainer("Tests");
             try
             {
-                ItemResponse<TestModel> respons = await container.CreateItemAsync<TestModel>(body, new PartitionKey(body.Title));
-
-                return $"Test Created {body.Title}";
+                await _daprClient.PublishEventAsync("pubsub", "test-topic", testInfo);
             }
-            catch (CosmosException ex) when (ex.StatusCode == HttpStatusCode.Conflict)
+            catch (Exception ex)
             {
-                return $"The test already exists! {body.Title}";
+                _logger.LogError($"GetTestFromQueueRequestAsync: error getting test from queue error while getting all tests: {ex.Message}");
             }
         }
+        public async Task<IActionResult> UpdateTest(TestModel testModel)
+        {
+            var result = await _cosmosDBWrapper.UpdateItemAsync(testModel, item => item.ETag, item => item.Id, TestMerger);
+            return Ok();
+        }
+
+        private TestModel TestMerger(TestModel dbItem, TestModel newItem )
+        {
+            dbItem.Author = newItem.Author;
+            dbItem.Description = newItem.Description;
+            dbItem.Status = newItem.Status;
+            dbItem.Questions = dbItem.Questions.Union(newItem.Questions).ToList();
+            dbItem.Title = newItem.Title;
+            return dbItem;
+        }
+
+        private async Task<TestModel> GetMessageFromBodyAsync()
+        {
+            var streamReader = new StreamReader(Request.Body);
+            var body = await streamReader.ReadToEndAsync();
+            _logger?.LogInformation($"Here is the test that goona try to enter the database {body}");
+            var newTest = JsonConvert.DeserializeObject<TestModel>(body);
+            return newTest ?? throw new Exception("Error when deserialize message body");
+        }
+
+        //private async Task<string> AddNewTestToDataBase(TestModel body)
+        //{
+        //   // try
+        //   // {
+        //   //     ItemResponse<TestModel> respons = await container.CreateItemAsync<TestModel>(body, new PartitionKey(body.Title));
+
+        //   //     return $"Test Created {body.Title}";
+        //   // }
+        //   // catch (CosmosException ex) when (ex.StatusCode == HttpStatusCode.Conflict)
+        //   // {
+        //   //     return $"The test already exists! {body.Title}";
+        //   // }
+           
+        //    return $"Test created {body.Title}";
+
+        //}
     }
 }

@@ -1,6 +1,6 @@
 ﻿using Newtonsoft.Json;
 
-namespace TestCatalogAccessor.Models
+namespace Spinoza.Backend.Accessor.TestCatalog.Models
 {
     public class AuthorModel
     {
