@@ -1,6 +1,6 @@
 ﻿using Newtonsoft.Json;
 
-namespace CatalogManager.Models.AccessorSubmits
+namespace Spinoza.Backend.Accessor.TestCatalog.Models.Requests
 {
 
     public class Test
@@ -14,7 +14,9 @@ namespace CatalogManager.Models.AccessorSubmits
         public string AuthorId { get; set; }
         public string Description { get; set; }
         public Tag[] Tags { get; set; }
-        public QuestionRef[] Questions { get; set; }
+        public Question[] Questions { get; set; }
+
+        public string Status { get; set; }
     }
 
     public class Tag
@@ -23,7 +25,7 @@ namespace CatalogManager.Models.AccessorSubmits
         public string Status { get; set; }
     }
 
-    public class QuestionRef
+    public class Question
     {
         public string QuestionId { get; set; }
         public string Status { get; set; }
