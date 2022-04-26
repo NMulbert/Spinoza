@@ -14,6 +14,8 @@ import axios from "axios";
 import { TestNotify } from "./TestNotify";
 import { InputLabel } from "@mui/material";
 import MDEditor from "@uiw/react-md-editor";
+import { v4 as uuidv4 } from "uuid";
+
 
 function CreateTest() {
   const [dataHash, setHashData] = useState([
@@ -23,15 +25,14 @@ function CreateTest() {
     "Python",
   ]);
   const [testValues, setTestsValues] = useState({
+    messageType: "CreateTest",
+    id: uuidv4(),
     title: "",
-    description: "**Write description here...**",
-    author: {
-      firstName: "Haim",
-      lastName: "Gilboa",
-    },
-    tags: [],
+    description: "",
     status: "Draft",
-    version: 0.0,
+    authorId: "alonf@zion-net.co.il",
+    tags: [{ name: "", status: ""}],
+    questions: [{}],
   });
 
   return (
@@ -74,8 +75,13 @@ function CreateTest() {
             creatable
             getCreateLabel={(query) => `+ Create ${query}`}
             onCreate={(query) => setHashData((current) => [...current, query])}
-            onChange={(e: any) => {
-              setTestsValues({ ...testValues, tags: e });
+            onChange={(e: any) => 
+              {
+                let tagsObjects = e.map( (e: any) => {return ( {name: e, status: "added"})})
+              setTestsValues({
+                ...testValues,
+                tags: tagsObjects
+              });
             }}
           />
         </div>
@@ -88,7 +94,7 @@ function CreateTest() {
               onClick={async () => {
                 try {
                   const response = await axios.post(
-                    "http://localhost:50000/v1.0/invoke/catalogmanager/method/addtest",
+                    "http://localhost:50000/v1.0/invoke/catalogmanager/method/test",
                     JSON.stringify({ ...testValues })
                   );
                 } catch (err) {
