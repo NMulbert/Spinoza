@@ -41,7 +41,7 @@ namespace CatalogManager.Controllers
             
             try
             {
-                var allAccessorTests = await _daprClient.InvokeMethodAsync<List<Models.AccessorResults.Test>>(HttpMethod.Get, "testaccessor", $"testaccessor/all?offset={offset ?? 0 }&limit={limit ?? 100}");
+                var allAccessorTests = await _daprClient.InvokeMethodAsync<List<Models.AccessorResults.Test>>(HttpMethod.Get, "testaccessor", $"testaccessor/tests?offset={offset ?? 0 }&limit={limit ?? 100}");
                 var frontendAllTestModelResult = _mapper.Map<List<Models.FrontendResponses.Test>>(allAccessorTests);
                 _logger?.LogInformation($"returned {frontendAllTestModelResult.Count} tests");
                 return new OkObjectResult(frontendAllTestModelResult);
@@ -61,7 +61,9 @@ namespace CatalogManager.Controllers
             //System.Diagnostics.Debugger.Break();
             try
             {
-                var accessorTest = await _daprClient.InvokeMethodAsync<Models.AccessorResults.Test>(HttpMethod.Get, "testaccessor", $"testaccessor?id={id}");
+                
+                
+                var accessorTest = await _daprClient.InvokeMethodAsync<Models.AccessorResults.Test>(HttpMethod.Get, "testaccessor", $"test/{id}");
                 if (accessorTest == null)
                 {
                     _logger.LogWarning($"GetTest: accessor returnes null for test: {id}");

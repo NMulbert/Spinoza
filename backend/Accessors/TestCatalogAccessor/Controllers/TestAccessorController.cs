@@ -29,29 +29,45 @@ namespace Spinoza.Backend.Accessor.TestCatalog.Controllers
             _mapper = mapper;
         }
 
-        [HttpGet("all")]
-        public async Task<IActionResult> GetAllTests()
+        [HttpGet("tests")]
+        public async Task<IActionResult> GetTests(int? offset, int? limit)
         {
             try
             {
-                List<TestModel> tests = new List<TestModel>();
-                using (FeedIterator<TestModel> setIterator = _cosmosDBWrapper.Container.GetItemLinqQueryable<TestModel>()
-                          .ToFeedIterator())
-                {
-                    //Asynchronous query execution
-                    while (setIterator.HasMoreResults)
-                    {
-                        foreach (var item in await setIterator.ReadNextAsync())
-                        {
-                            tests.Add(item);
-                        }
-                    }
-                }
-                return new OkObjectResult(tests);
+                var dbTests = await _cosmosDBWrapper.GetAllCosmosElementsAsync<Models.DB.Test>(offset ?? 0, limit ?? 100);
+                var resultTests = _mapper.Map<Models.Results.Test>(dbTests);
+
+                return new OkObjectResult(resultTests);
             }
             catch (Exception ex)
             {
-                _logger.LogError($"error whilte getting all tests: {ex.Message}");
+                _logger.LogError($"Error while getting tests: {ex.Message}");
+
+            }
+            return Problem(statusCode: (int)StatusCodes.Status500InternalServerError);
+        }
+        
+        [HttpGet("/test/{id:Guid}")]
+
+        public async Task<IActionResult> GetTest(Guid id)
+        {
+            
+            var query = new QueryDefinition($"SELECT * FROM ITEMS item  WHERE item.id = @id").WithParameter("@id", id.ToString().ToUpper());
+            try
+            {
+                var dbTest = (await _cosmosDBWrapper.GetCosmosElementsAsync<Models.DB.Test>(query)).FirstOrDefault();
+                if (dbTest == null)
+                {
+                    return new NotFoundObjectResult(id.ToString());
+                }
+                //else
+                var resultTest = _mapper.Map<Models.Results.Test>(dbTest);
+
+                return new OkObjectResult(resultTest);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Error while getting tests: {ex.Message}");
 
             }
             return Problem(statusCode: (int)StatusCodes.Status500InternalServerError);
@@ -60,53 +76,96 @@ namespace Spinoza.Backend.Accessor.TestCatalog.Controllers
         [HttpPost("/azurequeueinput")]
         public async Task<IActionResult> GetTestDataInputFromQueueBinding()
         {
+            Models.Requests.Test? testRequest = null;
             try
             {
-                var testInfo = await GetMessageFromBodyAsync();
-                var response = await _cosmosDBWrapper.CreateItemAsync(testInfo);
-                //var response = await AddNewTestToDataBase(testInfo);
-                await PublishTestResultAsync(testInfo);
+                testRequest = await GetMessageFromBodyAsync();
+                Models.Responses.TestChangeResult? result = null;
+                if (testRequest.MessageType == "CreateTest")
+                {
+                    result = await CreateTestAsync(testRequest);                    
+                }
+                else if(testRequest.MessageType == "UpdateTest")
+                {
+                    result = await UpdateTestAsync(testRequest);
+                }
+                else
+                {
+                    result = new Models.Responses.TestChangeResult() { Id = testRequest.Id, MessageType="UnknownRequest", TestVersion= string.Empty };
+                }
+                
+                await PublishTestResultAsync(result);
                 return Ok();
             }
             catch (Exception ex)
             {
                 _logger.LogError($"error while getting all tests: {ex.Message}");
+                var result = new Models.Responses.TestChangeResult() { Id = testRequest?.Id ?? Guid.Empty.ToString(), MessageType = $"InternalServerError: {ex.Message}", TestVersion = string.Empty };
+                await PublishTestResultAsync(result);
             }
             return Problem(statusCode: (int)StatusCodes.Status500InternalServerError);
         }
-        private async Task PublishTestResultAsync(TestModel testInfo)
+
+        private async Task<Models.Responses.TestChangeResult> CreateTestAsync(Models.Requests.Test testRequest)
+        {
+            var dbTest = _mapper.Map<Models.DB.Test>(testRequest);
+            var result = await _cosmosDBWrapper.CreateItemAsync(dbTest);
+            if(result.StatusCode == HttpStatusCode.OK)
+            {
+                return new Models.Responses.TestChangeResult() { Id=dbTest.Id, MessageType="TestCreated", TestVersion = dbTest.TestVersion };
+            }
+            //else
+            return new Models.Responses.TestChangeResult() { Id = dbTest.Id, MessageType = "TestCreateFailed", TestVersion = string.Empty };
+        }
+
+        private async Task PublishTestResultAsync(Models.Responses.TestChangeResult testChangeResult)
         {
             try
             {
-                await _daprClient.PublishEventAsync("pubsub", "test-topic", testInfo);
+                await _daprClient.PublishEventAsync("pubsub", "test-topic", testChangeResult);
             }
             catch (Exception ex)
             {
                 _logger.LogError($"GetTestFromQueueRequestAsync: error getting test from queue error while getting all tests: {ex.Message}");
             }
         }
-        public async Task<IActionResult> UpdateTest(TestModel testModel)
+        public async Task<Models.Responses.TestChangeResult> UpdateTestAsync(Models.Requests.Test testRequest)
         {
-            var result = await _cosmosDBWrapper.UpdateItemAsync(testModel, item => item.ETag, item => item.Id, TestMerger);
-            return Ok();
+            var newDbTest = _mapper.Map<Models.DB.Test>(testRequest);
+            var result = await _cosmosDBWrapper.UpdateItemAsync(newDbTest, item => item._etag, item =>  Guid.Parse(item.Id), TestMerger);
+            if (result?.StatusCode == HttpStatusCode.OK)
+            {
+                return new Models.Responses.TestChangeResult() { Id = newDbTest.Id, MessageType = "TestUpdated", TestVersion = newDbTest.TestVersion  };
+            }
+            //else
+            return new Models.Responses.TestChangeResult() { Id = newDbTest.Id, MessageType = "TestUpdateFailed", TestVersion = string.Empty };
+
+
+            Models.DB.Test TestMerger(Models.DB.Test dbItem, Models.DB.Test newItem)
+            {
+                dbItem.AuthorId = newItem.AuthorId;
+                dbItem.Description = newItem.Description;
+                dbItem.Status = newItem.Status;
+                dbItem.LastUpdateCreationTimeUTC = newItem.LastUpdateCreationTimeUTC;
+                dbItem.Title = newItem.Title;
+                dbItem.Questions = dbItem.Questions.Union(newItem.Questions)
+                    .Where(q=>testRequest.Questions
+                    .Any(x=>x.Status.ToLower()=="deleted"&&x.QuestionId==q)).ToArray();
+
+                dbItem.Tags = dbItem.Tags.Union(newItem.Tags)
+                    .Where(t => testRequest.Tags
+                    .Any(x => x.Status.ToLower() == "deleted" && x.Name == t)).ToArray();
+                dbItem.Title = newItem.Title;
+                return dbItem;
+            }
         }
 
-        private TestModel TestMerger(TestModel dbItem, TestModel newItem )
-        {
-            dbItem.Author = newItem.Author;
-            dbItem.Description = newItem.Description;
-            dbItem.Status = newItem.Status;
-            dbItem.Questions = dbItem.Questions.Union(newItem.Questions).ToList();
-            dbItem.Title = newItem.Title;
-            return dbItem;
-        }
-
-        private async Task<TestModel> GetMessageFromBodyAsync()
+        private async Task<Models.Requests.Test> GetMessageFromBodyAsync()
         {
             var streamReader = new StreamReader(Request.Body);
             var body = await streamReader.ReadToEndAsync();
             _logger?.LogInformation($"Here is the test that goona try to enter the database {body}");
-            var newTest = JsonConvert.DeserializeObject<TestModel>(body);
+            var newTest = JsonConvert.DeserializeObject<Models.Requests.Test>(body);
             return newTest ?? throw new Exception("Error when deserialize message body");
         }
 

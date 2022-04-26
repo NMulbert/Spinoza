@@ -1,7 +1,7 @@
-﻿using Newtonsoft.Json;
-
-namespace CatalogManager.Models.FrontendRequests
+﻿
+namespace Spinoza.Backend.Accessor.TestCatalog.Models.Results
 {
+    
 
     public class Test
     {
@@ -13,21 +13,17 @@ namespace CatalogManager.Models.FrontendRequests
         public string PreviousVersionId { get; set; }
         public string AuthorId { get; set; }
         public string Description { get; set; }
-        public Tag[] Tags { get; set; }
-        public QuestionRef[] Questions { get; set; }
-    }
-
-    public class Tag
-    {
-        public string Name { get; set; }
+        public string[] Tags { get; set; }
+        public string[] Questions { get; set; }
+        public DateTimeOffset  CreationTimeUTC { get; set; }
+        public DateTimeOffset LastUpdateCreationTimeUTC { get; set; }
         public string Status { get; set; }
+
+        
+
     }
 
-    public class QuestionRef
-    {
-        public string QuestionId { get; set; }
-        public string Status { get; set; }
-    }
 
-   
+
+
 }
