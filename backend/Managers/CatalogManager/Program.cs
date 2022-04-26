@@ -1,6 +1,5 @@
 
-//System.Diagnostics.Debugger.Launch();
-//System.Diagnostics.Debugger.Break();
+
 using AutoMapper;
 
 var builder = WebApplication.CreateBuilder(args);
