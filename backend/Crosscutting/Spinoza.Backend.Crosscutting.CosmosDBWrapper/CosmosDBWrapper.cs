@@ -12,23 +12,33 @@ namespace Spinoza.Backend.Crosscutting.CosmosDBWrapper;
 public class CosmosDBWrapper : ICosmosDBWrapper
 {
     private readonly ILogger<CosmosDBWrapper> _logger;
-    private readonly Lazy<Database> _lazyDatabase;
-    private readonly Lazy<Container> _lazyContainer;
-    public Database Database => _lazyDatabase.Value;
-    public Container Container => _lazyContainer.Value;
+    
+    public Database Database { get; init; }
+    public Container Container { get; init; }
 
-    public CosmosClient CosmosClient { get; init; }
+public CosmosClient CosmosClient { get; init; }
 
     public CosmosDBWrapper(IConfiguration configuration, ILogger<CosmosDBWrapper> logger, ICosmosDbInformationProvider cosmosDbInformationProvider)
     {
+
         _logger = logger;
-        CosmosClient = new CosmosClient(configuration["ConnectionStrings:CosmosDB"]);
-        _lazyDatabase = new Lazy<Database>(() => CreateDataBase(CosmosClient, logger, cosmosDbInformationProvider), true);
-        _lazyContainer = new Lazy<Container>(() => CreateDataBaseContainer(CosmosClient, logger, Database, cosmosDbInformationProvider), true);
+        try
+        {
+            CosmosClient = new CosmosClient(configuration["ConnectionStrings:CosmosDB"]);
+            Database = CreateDataBase(CosmosClient, logger, cosmosDbInformationProvider);
+            Container = CreateDataBaseContainer(CosmosClient, logger, Database, cosmosDbInformationProvider);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError($"CosmosDBWrapper threw an exception: {ex.Message}");
+            throw;
+        }
     }
+
 
     public static Database CreateDataBase(CosmosClient cosmosClient, ILogger<CosmosDBWrapper> logger, ICosmosDbInformationProvider cosmosDbInformationProvider)
     {
+       
         return (CreateCosmosElementAsync<Database, DatabaseProperties>(cosmosClient, logger,
                 async () => await cosmosClient.CreateDatabaseIfNotExistsAsync(cosmosDbInformationProvider.DataBaseName),
                 () => cosmosClient.GetDatabase(cosmosDbInformationProvider.DataBaseName))).Result;
@@ -36,6 +46,7 @@ public class CosmosDBWrapper : ICosmosDBWrapper
 
     public static Container CreateDataBaseContainer(CosmosClient cosmosClient, ILogger<CosmosDBWrapper> logger, Database database, ICosmosDbInformationProvider cosmosDbInformationProvider)
     {
+        
         if (cosmosDbInformationProvider.UniqueKeys.Any())
         {
             return (CreateCosmosElementAsync<Container, ContainerProperties>(cosmosClient, logger,
@@ -160,7 +171,8 @@ public class CosmosDBWrapper : ICosmosDBWrapper
 
             try
             {
-                var query = new QueryDefinition("SELECT * FROM ITEMS item WHERE item.id = @id").WithParameter("@id", idSelector(newItem));
+               
+                var query = new QueryDefinition("SELECT * FROM ITEMS item WHERE item.id = @id").WithParameter("@id", idSelector(newItem).ToString().ToUpper());
                 var dbItem = (await GetCosmosElementsAsync<T>(query)).FirstOrDefault();
                 if (dbItem == null)
                 {
@@ -172,7 +184,7 @@ public class CosmosDBWrapper : ICosmosDBWrapper
                 {
                     IfMatchEtag = eTagSelector(mergedItem)
                 };
-                var result = await Container.ReplaceItemAsync(mergedItem, idSelector(mergedItem).ToString(), partitionKey, requestOption);
+                var result = await Container.ReplaceItemAsync(mergedItem, idSelector(mergedItem).ToString().ToUpper(), partitionKey, requestOption);
                 _logger.LogInformation($"create cosmosDB element returns: {result?.StatusCode}, cost: {result?.RequestCharge} RU/S");
                 return result;
             }

@@ -41,8 +41,7 @@ namespace CatalogManager.Controllers
             
             try
             {
-                //System.Diagnostics.Debugger.Break();
-                //System.Diagnostics.Debugger.Launch();
+             
                 var allAccessorTests = await _daprClient.InvokeMethodAsync<List<Models.AccessorResults.Test>>(HttpMethod.Get, "testaccessor", $"testaccessor/tests?offset={offset ?? 0 }&limit={limit ?? 100}");
                 var frontendAllTestModelResult = _mapper.Map<List<Models.FrontendResponses.Test>>(allAccessorTests);
                 _logger?.LogInformation($"returned {frontendAllTestModelResult.Count} tests");
@@ -59,8 +58,7 @@ namespace CatalogManager.Controllers
 
         public async Task<IActionResult> GetTest(Guid id)
         {
-            //System.Diagnostics.Debugger.Launch();
-            //System.Diagnostics.Debugger.Break();
+          
             try
             {
                 
