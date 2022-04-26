@@ -34,8 +34,10 @@ namespace Spinoza.Backend.Accessor.TestCatalog.Controllers
         {
             try
             {
+                //System.Diagnostics.Debugger.Break();
+                //System.Diagnostics.Debugger.Launch();
                 var dbTests = await _cosmosDBWrapper.GetAllCosmosElementsAsync<Models.DB.Test>(offset ?? 0, limit ?? 100);
-                var resultTests = _mapper.Map<Models.Results.Test>(dbTests);
+                var resultTests = _mapper.Map<List<Models.Results.Test>>(dbTests);
 
                 return new OkObjectResult(resultTests);
             }
