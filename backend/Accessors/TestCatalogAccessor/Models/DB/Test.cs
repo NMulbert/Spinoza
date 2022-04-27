@@ -7,6 +7,8 @@ namespace Spinoza.Backend.Accessor.TestCatalog.Models.DB
 
     public class Test
     {
+#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
+
         [JsonProperty("id")]
         public string Id { get; set; }
 
@@ -23,7 +25,7 @@ namespace Spinoza.Backend.Accessor.TestCatalog.Models.DB
         public string Status { get; set; }
 
         public string _etag { get; set; }
-
+#pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
 
     }
 

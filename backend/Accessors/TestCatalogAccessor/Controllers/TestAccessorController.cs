@@ -6,11 +6,11 @@ using Microsoft.Azure.Cosmos.Linq;
 using Newtonsoft.Json;
 using Spinoza.Backend.Accessor.TestCatalog.Models;
 using Spinoza.Backend.Crosscutting.CosmosDBWrapper;
-using System.Net;
 
 
-namespace Spinoza.Backend.Accessor.TestCatalog.Controllers 
+namespace Spinoza.Backend.Accessor.TestCatalog.Controllers
 {
+
     [ApiController]
     [Route("[controller]")]
     public class TestAccessorController : ControllerBase
@@ -76,6 +76,8 @@ namespace Spinoza.Backend.Accessor.TestCatalog.Controllers
         [HttpPost("/azurequeueinput")]
         public async Task<IActionResult> GetTestDataInputFromQueueBinding()
         {
+           
+
             Models.Requests.Test? testRequest = null;
             try
             {
@@ -94,7 +96,8 @@ namespace Spinoza.Backend.Accessor.TestCatalog.Controllers
                 }
                 else
                 {
-                    result = new Models.Responses.TestChangeResult() { Id = testRequest.Id, MessageType="UnknownRequest", TestVersion= string.Empty };
+                    result = CreateTestResult(testRequest.Id, "UnknownRequest", "Understand only CreateTest or UpdateTest", 1, false);
+                    
                 }
                 
                 await PublishTestResultAsync(result);
@@ -103,22 +106,40 @@ namespace Spinoza.Backend.Accessor.TestCatalog.Controllers
             catch (Exception ex)
             {
                 _logger.LogError($"Error while creatring or updating a test: {ex.Message}");
-                var result = new Models.Responses.TestChangeResult() { Id = testRequest?.Id ?? Guid.Empty.ToString(), MessageType = $"InternalServerError: {ex.Message}", TestVersion = string.Empty };
+                var result = CreateTestResult( testRequest?.Id ?? Guid.Empty.ToString(), "Unknown" ,$"InternalServerError: {ex.Message}", 666, false);
                 await PublishTestResultAsync(result);
             }
             return Problem(statusCode: (int)StatusCodes.Status500InternalServerError);
-        }
 
+        }
+        private Models.Responses.TestChangeResult CreateTestResult(string testId, string messageType, string reason, int reasonId, bool isSuccess=true )
+        {
+            return new Models.Responses.TestChangeResult()
+            {
+                Id = testId,
+                MessageType = messageType,
+                ActionResult = isSuccess? "Success" : "Error",
+                Reason = reason,
+                Sender = "Catalog",
+                ReasonId = reasonId,
+                ResourceType = "Test"
+            };
+        }
+        
+        
         private async Task<Models.Responses.TestChangeResult> CreateTestAsync(Models.Requests.Test testRequest)
         {
+
             var dbTest = _mapper.Map<Models.DB.Test>(testRequest);
             var result = await _cosmosDBWrapper.CreateItemAsync(dbTest);
-            if(result.StatusCode == HttpStatusCode.OK)
+            if(result.StatusCode.IsOk())
             {
-                return new Models.Responses.TestChangeResult() { Id=dbTest.Id, MessageType="TestCreated", TestVersion = dbTest.TestVersion };
+                return CreateTestResult(dbTest.Id, "Create", $"Test {dbTest.Title} has been created", 2);
+
             }
             //else
-            return new Models.Responses.TestChangeResult() { Id = dbTest.Id, MessageType = "TestCreateFailed", TestVersion = string.Empty };
+            return CreateTestResult(dbTest.Id, "Create", $"Test {dbTest.Title} creation has been failed", 3, false);
+
         }
 
         private async Task PublishTestResultAsync(Models.Responses.TestChangeResult testChangeResult)
@@ -137,12 +158,12 @@ namespace Spinoza.Backend.Accessor.TestCatalog.Controllers
            
             var newDbTest = _mapper.Map<Models.DB.Test>(testRequest);
             var result = await _cosmosDBWrapper.UpdateItemAsync(newDbTest, item => item._etag, item =>  Guid.Parse(item.Id), TestMerger);
-            if (result?.StatusCode == HttpStatusCode.OK)
+            if(result != null && result.StatusCode.IsOk())
             {
-                return new Models.Responses.TestChangeResult() { Id = newDbTest.Id, MessageType = "TestUpdated", TestVersion = newDbTest.TestVersion  };
+                return CreateTestResult(newDbTest.Id, "Update", $"Test {newDbTest.Title} has been updated", 4);
             }
             //else
-            return new Models.Responses.TestChangeResult() { Id = newDbTest.Id, MessageType = "TestUpdateFailed", TestVersion = string.Empty };
+            return CreateTestResult(newDbTest.Id, "Update", $"Test {newDbTest.Title} update has been failed", 5, false);
 
 
             Models.DB.Test TestMerger(Models.DB.Test dbItem, Models.DB.Test newItem)
@@ -152,14 +173,8 @@ namespace Spinoza.Backend.Accessor.TestCatalog.Controllers
                 dbItem.Status = newItem.Status;
                 dbItem.LastUpdateCreationTimeUTC = newItem.LastUpdateCreationTimeUTC;
                 dbItem.Title = newItem.Title;
-                dbItem.Questions = dbItem.Questions.Union(newItem.Questions)
-                    .Where(q=>testRequest.Questions
-                    .Any(x=>x.Status.ToLower()=="deleted"&&x.QuestionId==q)).ToArray();
-
-                dbItem.Tags = dbItem.Tags.Union(newItem.Tags)
-                    .Where(t => testRequest.Tags
-                    .Any(x => x.Status.ToLower() == "deleted" && x.Name == t)).ToArray();
-                dbItem.Title = newItem.Title;
+                dbItem.Questions = newItem.Questions;
+                dbItem.Tags = newItem.Tags;
                 return dbItem;
             }
         }
@@ -172,22 +187,5 @@ namespace Spinoza.Backend.Accessor.TestCatalog.Controllers
             var newTest = JsonConvert.DeserializeObject<Models.Requests.Test>(body);
             return newTest ?? throw new Exception("Error when deserialize message body");
         }
-
-        //private async Task<string> AddNewTestToDataBase(TestModel body)
-        //{
-        //   // try
-        //   // {
-        //   //     ItemResponse<TestModel> respons = await container.CreateItemAsync<TestModel>(body, new PartitionKey(body.Title));
-
-        //   //     return $"Test Created {body.Title}";
-        //   // }
-        //   // catch (CosmosException ex) when (ex.StatusCode == HttpStatusCode.Conflict)
-        //   // {
-        //   //     return $"The test already exists! {body.Title}";
-        //   // }
-           
-        //    return $"Test created {body.Title}";
-
-        //}
     }
 }
