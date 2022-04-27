@@ -19,9 +19,17 @@ type TestCardProps = {
   tags: any;
   status: string;
   version: number;
+  creationTimeUTC: string;
 };
 
-const TestCard = ({ title, description, author, tags, id }: TestCardProps) => {
+const TestCard = ({
+  title,
+  description,
+  author,
+  tags,
+  id,
+  creationTimeUTC,
+}: TestCardProps) => {
   return (
     <Card
       withBorder
@@ -64,14 +72,14 @@ const TestCard = ({ title, description, author, tags, id }: TestCardProps) => {
       <Group style={{ color: "#444848" }} spacing="xs">
         <CalendarTime size={18} />
         <Text size="xs" weight={700}>
-          Creation Date
+          {creationTimeUTC.replace(/T/g, " | ").split(".")[0]}
         </Text>
       </Group>
 
       <Group style={{ color: "#444848" }} spacing="xs">
         <UserCircle size={18} />
         <Text size="xs" weight={700}>
-          {`${author.firstName} ${author.lastName}`}
+          {author}
         </Text>
       </Group>
 

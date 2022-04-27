@@ -26,7 +26,7 @@ function App() {
           <Route path="/create-test" element={<CreateTest />} />
           {tests?.map((e: any) => {
             return (
-              <Route path={`/tests/${e?.id}`} element={<ViewTest test={e} />} />
+              <Route key={e?.id} path={`/tests/:id`} element={<ViewTest />} />
             );
           })}
           <Route path="/questions" element={<AllQuestionsPage />} />

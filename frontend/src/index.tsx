@@ -7,6 +7,7 @@ import { Provider } from "react-redux";
 import store from "./redux/store";
 import AzureAD from "react-aad-msal";
 import { signInAuthProvider } from "./authProvider";
+import { Notify } from "./components/Notify";
 
 const root = createRoot(document.getElementById("root") as HTMLDivElement);
 root.render(
@@ -15,6 +16,7 @@ root.render(
       <BrowserRouter>
         <App />
       </BrowserRouter>
+      <Notify />
     </AzureAD>
   </Provider>
 );
