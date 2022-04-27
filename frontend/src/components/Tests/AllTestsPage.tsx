@@ -15,14 +15,13 @@ function AllTestsPage() {
   let tests = useSelector((s: TestsState) => s.tests.tests);
 
   useEffect(() => {
-    let url =
-      "http://localhost:50000/v1.0/invoke/catalogmanager/method/alltests";
+    let url = "http://localhost:50000/v1.0/invoke/catalogmanager/method/tests";
     fetch(url)
       .then((res) => res.json())
       .then((result) => {
         dispatch(loadTests(result));
       });
-  }, [tests]);
+  }, []);
 
   return (
     <div
@@ -76,10 +75,11 @@ function AllTestsPage() {
                   id={i.id}
                   title={i.title}
                   description={i.description}
-                  author={i.author}
+                  author={i.authorId}
                   tags={i.tags}
                   status={i.status}
                   version={i.version}
+                  creationTimeUTC={i.creationTimeUTC}
                 />
               </Grid.Col>
             );

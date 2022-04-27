@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import Snackbar from "@mui/material/Snackbar";
 import MuiAlert from "@mui/material/Alert";
 
-export const TestNotify = () => {
+export const Notify = () => {
   const hubConnection = new signalR.HubConnectionBuilder()
     .withUrl("https://signalr-management.azurewebsites.net/api")
     .configureLogging(signalR.LogLevel.Information)
@@ -27,22 +27,17 @@ export const TestNotify = () => {
       setMessage("");
     };
 
-    const notify = (message: any, severity: string) => {
+    const notify = (message: string, severity: string) => {
       setOpen(true);
       setIsPublish(true);
       setIsSeverity(severity);
-      setMessage(message.text);
+      setMessage(message);
     };
 
     useEffect(() => {
       hubConnection.on("SendMessage", (message) => {
-        if (message.text?.includes("exists!")) {
-          notify(message, "error");
-        } else if (message.text?.includes("Created")) {
-          notify(message, "success");
-        } else {
-          console.log("Unkown message: ", message);
-        }
+        console.log(message);
+        notify(message.text.reason, message.text.actionResult.toLowerCase());
       });
     }, []);
 

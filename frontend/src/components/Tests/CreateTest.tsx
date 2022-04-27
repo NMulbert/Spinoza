@@ -11,11 +11,9 @@ import {
 import ChooseQuestion from "../Questions/ChooseQuestion";
 import NewQuestion from "../Questions/NewQuestion";
 import axios from "axios";
-import { TestNotify } from "./TestNotify";
 import { InputLabel } from "@mui/material";
 import MDEditor from "@uiw/react-md-editor";
 import { v4 as uuidv4 } from "uuid";
-
 
 function CreateTest() {
   const [dataHash, setHashData] = useState([
@@ -24,15 +22,19 @@ function CreateTest() {
     "JavaScript",
     "Python",
   ]);
+
   const [testValues, setTestsValues] = useState({
-    messageType: "CreateTest",
-    id: uuidv4(),
+    MessageType: "CreateTest",
+    id: uuidv4().toUpperCase(),
     title: "",
     description: "",
     status: "Draft",
     authorId: "alonf@zion-net.co.il",
-    tags: [{ name: "", status: ""}],
-    questions: [{}],
+    tags: [{ name: "", status: "" }],
+    questions: [],
+    schemaVersion: "1.0",
+    testVersion: "1.0",
+    previousVersionId: "none",
   });
 
   return (
@@ -75,12 +77,10 @@ function CreateTest() {
             creatable
             getCreateLabel={(query) => `+ Create ${query}`}
             onCreate={(query) => setHashData((current) => [...current, query])}
-            onChange={(e: any) => 
-              {
-                let tagsObjects = e.map( (e: any) => {return ( {name: e, status: "added"})})
+            onChange={(e: any) => {
               setTestsValues({
                 ...testValues,
-                tags: tagsObjects
+                tags: e,
               });
             }}
           />
@@ -106,7 +106,6 @@ function CreateTest() {
             </Button>
           </Group>
         </div>
-        <TestNotify />
       </SimpleGrid>
     </>
   );
