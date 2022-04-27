@@ -8,49 +8,52 @@ using Xunit;
 
 namespace Spinoza.Backend.Accessor.TestCatalog.Tests
 {
+#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
     class TestItem 
     {
         [JsonProperty("_etag")]
         public string ETag { get; set; }
 
-        [JsonProperty(PropertyName = "Version")]
-        public string Version { get; set; } = "1.0.0";
+       
 
-        [JsonProperty("Title")]
+        [JsonProperty("title")]
         public string Title { get; set; }
 
         [JsonProperty(PropertyName = "ttl", NullValueHandling = NullValueHandling.Ignore)]
         public int? TTL { get; set; }
 
-        [JsonProperty("Questions")]
+        [JsonProperty("questions")]
         public List<Guid> Questions { get; set; } = new List<Guid>();
 
         [JsonProperty("id")]
         public string Id { get; set; }
 
-        [JsonProperty(PropertyName = "Descrition")]
-        public string Descrition { get; set; } 
-        
+        [JsonProperty("description")]
+        public string Descrition { get; set; }
+        [JsonProperty("testVersion")]
+        public string TestVersion { get; set; } = "1.0";
+
 
     }
+#pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
 
     public class CosmosWrapperTests
     {
-        private readonly ICosmosDBWrapper _cosmosDBWrapper; 
-        
+        private readonly ICosmosDBWrapper _cosmosDBWrapper;
 
-        public CosmosWrapperTests(ICosmosDBWrapper cosmosDBWrapper, ICosmosDbInformationProvider cosmosDbInformationProvider )
+        public CosmosWrapperTests(ICosmosDbWrapperFactory cosmosDbWrapperFactory)
         {
-            Database database = cosmosDBWrapper.CosmosClient.GetDatabase(cosmosDbInformationProvider.DataBaseName);
+            
             try
             {
-                database.DeleteAsync().Wait();
+                cosmosDbWrapperFactory.CreateCosmosDBWrapper().Database.DeleteAsync().Wait();
             }
             catch(Exception)
             {
 
             }
-            _cosmosDBWrapper = cosmosDBWrapper;
+            _cosmosDBWrapper = cosmosDbWrapperFactory.CreateCosmosDBWrapper();
+           
         }
 
 
@@ -94,6 +97,7 @@ namespace Spinoza.Backend.Accessor.TestCatalog.Tests
             {
                 Id = "1234",
                 Title = "New Test",
+                TestVersion = "1.0"
 
             };
             var result = await _cosmosDBWrapper.CreateItemAsync(item);
@@ -178,7 +182,7 @@ namespace Spinoza.Backend.Accessor.TestCatalog.Tests
 
                 TestItem item = new TestItem()
                 {
-                    Id =  Guid.NewGuid().ToString(),
+                    Id =  Guid.NewGuid().ToString().ToUpper(),
                     Title = $"New Test: {i}"
 
                 };
@@ -197,7 +201,7 @@ namespace Spinoza.Backend.Accessor.TestCatalog.Tests
             
             Assert.Equal(newItem.Id, updatedItem.Id);
             Assert.Equal("updatedItem", updatedItem.Title);
-            Assert.Equal(1, updatedItem.Questions.Count);
+            Assert.Single(updatedItem.Questions);
             Assert.Equal("Hello its a test", updatedItem.Descrition);
         }
         private TestItem TestMerger(TestItem dbItem, TestItem newItem)
@@ -218,7 +222,7 @@ namespace Spinoza.Backend.Accessor.TestCatalog.Tests
 
                 TestItem item = new TestItem()
                 {
-                    Id = Guid.NewGuid().ToString(),
+                    Id = Guid.NewGuid().ToString().ToUpper(),
                     Title = $"New Test: {i}"
 
                 };

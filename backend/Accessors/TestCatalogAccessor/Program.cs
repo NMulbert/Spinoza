@@ -1,5 +1,6 @@
 using AutoMapper;
 using Spinoza.Backend.Crosscutting.CosmosDBWrapper;
+using System.Text.Json;
 
 var builder = WebApplication.CreateBuilder(args);
 var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
@@ -12,7 +13,11 @@ builder.Services.AddCors(options =>
                           policy.AllowAnyOrigin().WithMethods("PUT", "POST", "DELETE", "GET");                          
                       });
 });
-builder.Services.AddControllers().AddDapr();
+builder.Services.AddControllers().AddDapr()
+    .AddJsonOptions(options =>
+{
+    options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+});
 builder.Services.AddSingleton<ICosmosDBWrapper, CosmosDBWrapper>();
 builder.Services.AddSingleton<ICosmosDbInformationProvider>(new CosmosDbInformationProvider("Catalog", "Tests", "TestVersion", "Title"));
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle

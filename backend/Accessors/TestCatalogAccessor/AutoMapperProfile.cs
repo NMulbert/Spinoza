@@ -11,9 +11,6 @@ internal class AutoMapperProfile : Profile
             .ForMember(dest => dest.PreviousVersionId, opt => opt.MapFrom(src => "none"))
             .ForMember(dest => dest.CreationTimeUTC, opt => opt.MapFrom(src => DateTimeOffset.UtcNow))
             .ForMember(dest => dest.LastUpdateCreationTimeUTC, opt => opt.MapFrom(src => DateTimeOffset.UtcNow));
-        CreateMap<Spinoza.Backend.Accessor.TestCatalog.Models.Requests.Tag, string>()
-            .ConvertUsing(t => t.Name);
-        CreateMap<Spinoza.Backend.Accessor.TestCatalog.Models.Requests.Question, string>()
-            .ConvertUsing(q => q.QuestionId);
+       
     }
 }

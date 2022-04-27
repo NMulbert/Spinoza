@@ -46,11 +46,11 @@ namespace CatalogManager.Controllers
 
         private async Task<IActionResult> PublishMessageToSignalRAsync(Models.FrontendResponses.TestChangeResult frontendTestChangeResult)
         {
-            Data data = new Data();
-            Argument argument = new Argument();
+            Data data = new ();
+            Argument  argument = new Argument();
             argument.Sender = "dapr";
-            argument.Text = JsonSerializer.Serialize(frontendTestChangeResult);
-            data.Arguments = new Argument[] {argument};
+            argument.Text = frontendTestChangeResult;
+            data.Arguments = new Argument [] {argument};
             //Dictionary<string, string> newmetadata = new Dictionary<string, string>() { { "hub", "spinozahub" } };
             //var metadata = new Dictionary<string, string>() { { "spinozaHub", "Test" } };
             await _daprClient.InvokeBindingAsync("azuresignalroutput", "create", data);

@@ -2,6 +2,7 @@
 
 namespace CatalogManager.Models.AccessorSubmits
 {
+#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
 
     public class Test
     {
@@ -13,21 +14,11 @@ namespace CatalogManager.Models.AccessorSubmits
         public string PreviousVersionId { get; set; }
         public string AuthorId { get; set; }
         public string Description { get; set; }
-        public Tag[] Tags { get; set; }
-        public QuestionRef[] Questions { get; set; }
-    }
-
-    public class Tag
-    {
-        public string Name { get; set; }
-        public string Status { get; set; }
-    }
-
-    public class QuestionRef
-    {
-        public string QuestionId { get; set; }
-        public string Status { get; set; }
+        public string[] Tags { get; set; }
+        public string[] Questions { get; set; }
     }
 
    
+#pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
+
 }
