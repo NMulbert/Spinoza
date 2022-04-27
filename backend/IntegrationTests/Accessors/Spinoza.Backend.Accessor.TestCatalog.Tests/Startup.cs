@@ -12,7 +12,7 @@ namespace Spinoza.Backend.Accessor.TestCatalog.Tests
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddSingleton<ICosmosDBWrapper, CosmosDBWrapper>();
-            services.AddSingleton<ICosmosDbInformationProvider>(new CosmosDbInformationProvider("Catalog", "Tests", "Version","Title"));
+            services.AddSingleton<ICosmosDbInformationProvider>(new CosmosDbInformationProvider("Catalog", "Tests", "TestVersion","Title"));
             var builder = new ConfigurationBuilder()
            .SetBasePath(Directory.GetCurrentDirectory())
            .AddJsonFile("appsettings.json", false, false);

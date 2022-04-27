@@ -10,7 +10,7 @@ builder.Services.AddCors(options =>
     options.AddPolicy(name: MyAllowSpecificOrigins,
                       policy =>
                       {
-                          policy.AllowAnyOrigin();
+                          policy.AllowAnyOrigin().WithMethods("PUT","POST", "DELETE", "GET");
                       });
 });
 // Add services to the container.
