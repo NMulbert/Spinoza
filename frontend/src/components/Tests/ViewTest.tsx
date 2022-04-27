@@ -46,6 +46,16 @@ function ViewTest() {
   const [openedNQ, setOpenedNQ] = useState(false);
   const [openedEQ, setOpenedEQ] = useState(false);
 
+  let date = new Date(
+    `${test?.creationTimeUTC
+      .toString()
+      .replace(/T/g, " ")
+      .replace(/-/g, "/")} UTC`
+  )
+    .toString()
+    .split(" ");
+  let creationTimeUTC = `${date[2]}/ ${date[1]}/ ${date[3]} | ${date[4]}`;
+
   return (
     <div>
       <Modal
@@ -94,9 +104,7 @@ function ViewTest() {
           <br />
           <Group spacing="xs">
             <CalendarTime />
-            <Title order={5}>
-              {test.creationTimeUTC.replace(/T/g, " | ").split(".")[0]}
-            </Title>
+            <Title order={5}>{creationTimeUTC}</Title>
           </Group>
 
           <Group spacing="xs">

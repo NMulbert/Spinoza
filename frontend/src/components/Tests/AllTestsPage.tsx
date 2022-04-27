@@ -69,6 +69,15 @@ function AllTestsPage() {
 
         {tests ? (
           tests.map((i: any) => {
+            let date = new Date(
+              `${i.creationTimeUTC
+                .toString()
+                .replace(/T/g, " ")
+                .replace(/-/g, "/")} UTC`
+            )
+              .toString()
+              .split(" ");
+            let creationTimeUTC = `${date[2]}/ ${date[1]}/ ${date[3]} | ${date[4]}`;
             return (
               <Grid.Col key={i.id} md={6} lg={4} xl={3}>
                 <TestCard
@@ -79,7 +88,7 @@ function AllTestsPage() {
                   tags={i.tags}
                   status={i.status}
                   version={i.version}
-                  creationTimeUTC={i.creationTimeUTC}
+                  creationTimeUTC={creationTimeUTC}
                 />
               </Grid.Col>
             );

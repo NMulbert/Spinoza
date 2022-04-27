@@ -72,7 +72,7 @@ const TestCard = ({
       <Group style={{ color: "#444848" }} spacing="xs">
         <CalendarTime size={18} />
         <Text size="xs" weight={700}>
-          {creationTimeUTC.replace(/T/g, " | ").split(".")[0]}
+          {creationTimeUTC}
         </Text>
       </Group>
 
