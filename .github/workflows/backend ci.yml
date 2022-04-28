@@ -6,6 +6,7 @@ on:
       - main
     paths:
       -backend/**
+      -.github/**
   pull_request:
     types: [opened, synchronize, reopened, closed]
     branches:
