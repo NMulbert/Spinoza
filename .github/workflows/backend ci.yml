@@ -1,0 +1,64 @@
+name: .NET Windows
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      -backend/**
+  pull_request:
+    types: [opened, synchronize, reopened, closed]
+    branches:
+      - main
+    paths:
+      - backend/**
+
+
+jobs:
+  build_and_test:
+    name: Build and test
+    runs-on: windows-latest
+      
+    steps:
+    - uses: dapr/setup-dapr@v1
+      name: install dapr
+      with:
+      version: '1.7'
+      id: install
+
+    - uses: actions/checkout@v2
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 6.0.x
+    - name: Setup .NET SDK 6.0 LTS
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 6.0.x
+    - name: Restore dependencies
+      run: dotnet restore
+
+    - name: 'Install Cosmos Emulator'
+      uses: southpolesteve/cosmos-emulator-github-action@v1
+      
+    - name: start Azurite
+      shell: bash
+      run: |
+           cd DevOps
+           npm install -g azurite
+           mkdir azurite
+           azurite  --silent --location azurite &
+      
+    - name: Build
+      run: dotnet build --configuration Release --no-restore
+    
+    - name: Test
+      run: dotnet test --no-restore --verbosity normal
+    
+    # - name: Start dapr apps
+    #   shell: pwsh
+    #   run: |
+    #         $spinoza_root = $pwd.Path
+    #         runner.bat
+    #         cd backend/CatalogManager
+    #         dotnet test . 
