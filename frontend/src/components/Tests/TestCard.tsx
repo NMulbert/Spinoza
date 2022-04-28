@@ -37,8 +37,7 @@ const TestCard = ({
       p="lg"
       radius="xl"
       style={{
-        height: 309,
-        minHeight: 300,
+        height: "100%",
         width: "90%",
         minWidth: "90%",
         margin: "auto",
@@ -59,12 +58,15 @@ const TestCard = ({
         </Text>
       </Card.Section>
 
-      <Group spacing="xs" style={{ marginTop: 10, marginBottom: 20 }}>
+      <Group
+        spacing="xs"
+        style={{ marginTop: 10, marginBottom: 20, height: 40 }}
+      >
         {tags.map((i: any) => {
           return (
-            <Badge key={i} color="green" variant="light">
-              {i}
-            </Badge>
+              <Badge key={i} color="green" variant="light">
+                {i}
+              </Badge>
           );
         })}
       </Group>

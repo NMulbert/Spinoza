@@ -90,7 +90,7 @@ function MultiChoice() {
                       setChooseMode(!chooseMode);
                     }}
                   >
-                    Correct answer
+                    {chooseMode ? "Done" : "Correct answer"}
                   </Button>
                 )}
               </div>
