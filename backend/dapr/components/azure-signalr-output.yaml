@@ -1,0 +1,13 @@
+apiVersion: dapr.io/v1alpha1
+kind: Component
+metadata:
+  name: azuresignalroutput
+spec:
+  type: bindings.azure.signalr
+  version: v1
+  metadata:
+  - name: connectionString
+    value: Endpoint=https://spinozasignalr.service.signalr.net;AccessKey=PX2Iu99frJJAapzcp/qQSco3gF6rjdWrhqMisv4mTei=;Version=1.0;
+  - name: hub 
+    value: spinozahub
+    

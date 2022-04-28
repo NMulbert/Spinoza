@@ -1,0 +1,19 @@
+{
+  "profiles": {
+    "Docker Compose": {
+      "commandName": "DockerCompose",
+      "commandVersion": "1.0",
+      "serviceActions": {
+        "azurite": "StartWithoutDebugging",
+        "cosmosdb": "StartWithoutDebugging",
+        "placement": "StartWithoutDebugging",
+        "redis": "StartWithoutDebugging",
+        "testcatalog-dapr": "StartWithoutDebugging",
+        "testaccessor": "StartDebugging",
+        "catalogmanager": "StartDebugging",
+        "catalogmanager-dapr": "StartWithoutDebugging",
+        "zipkin": "StartWithoutDebugging"
+      }
+    }
+  }
+}

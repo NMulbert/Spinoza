@@ -23,6 +23,22 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Crosscutting", "Crosscuttin
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Spinoza.Backend.Crosscutting.CosmosDBWrapper", "Crosscutting\Spinoza.Backend.Crosscutting.CosmosDBWrapper\Spinoza.Backend.Crosscutting.CosmosDBWrapper.csproj", "{BEAD37B0-F08B-43F7-91C7-FF0A3B623C40}"
 EndProject
+Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-compose.dcproj", "{997B01FE-176B-4AC5-A5ED-61634F594E52}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Components", "Components", "{71A76FCD-A828-4148-9F4A-5E417425ADC4}"
+	ProjectSection(SolutionItems) = preProject
+		dapr\components\azure-queue-input-binding.yaml = dapr\components\azure-queue-input-binding.yaml
+		dapr\components\azure-queue-output-binding.yaml = dapr\components\azure-queue-output-binding.yaml
+		dapr\components\azure-signalr-output.yaml = dapr\components\azure-signalr-output.yaml
+		dapr\components\pubsub.yaml = dapr\components\pubsub.yaml
+		dapr\components\statestore.yaml = dapr\components\statestore.yaml
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Dapr", "Dapr", "{04F806E2-49AB-47E5-9421-74B7E7B8D9C8}"
+	ProjectSection(SolutionItems) = preProject
+		dapr\config.yaml = dapr\config.yaml
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -45,6 +61,10 @@ Global
 		{BEAD37B0-F08B-43F7-91C7-FF0A3B623C40}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BEAD37B0-F08B-43F7-91C7-FF0A3B623C40}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BEAD37B0-F08B-43F7-91C7-FF0A3B623C40}.Release|Any CPU.Build.0 = Release|Any CPU
+		{997B01FE-176B-4AC5-A5ED-61634F594E52}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{997B01FE-176B-4AC5-A5ED-61634F594E52}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{997B01FE-176B-4AC5-A5ED-61634F594E52}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{997B01FE-176B-4AC5-A5ED-61634F594E52}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -56,6 +76,7 @@ Global
 		{5EC0155C-6AD5-416E-95CB-959EC5EB4633} = {5A04E073-61AE-47FC-B1FB-99F2F880D300}
 		{3B9C9A6F-D27E-4FD3-80B2-3DF8C00A74F2} = {15CC4AAF-1505-49B2-9F0D-05EB7599DD55}
 		{BEAD37B0-F08B-43F7-91C7-FF0A3B623C40} = {87C325CE-8236-4620-88D2-2707B5A7D432}
+		{71A76FCD-A828-4148-9F4A-5E417425ADC4} = {04F806E2-49AB-47E5-9421-74B7E7B8D9C8}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {6F3D72FB-A183-46A8-B6AA-794EC676AF58}

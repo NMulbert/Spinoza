@@ -1,0 +1,177 @@
+version: '3.4'
+
+services:
+  ###########################################
+  # Test Catalog Microservice + Dapr sidecar
+  ###########################################
+  testaccessor:
+    image: ${DOCKER_REGISTRY-}testcatalogaccessor
+    build:
+      context: .
+      dockerfile: ./Accessors/TestCatalogAccessor/Dockerfile
+    ports:
+      - 5008:5008
+    depends_on:
+      - redis
+      - placement
+    #networks:
+    #  - spinoza-dapr
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://127.0.0.1:5008
+  testcatalog-dapr:
+    image: "daprio/daprd:edge"
+    command: ["./daprd",
+     "-app-id", "testaccessor",
+     "-app-port", "5008",
+     "-dapr-http-port", "50001",
+     "-placement-host-address", "placement:50006",
+     "-dapr-grpc-port", "50002",
+     "-components-path", "/dapr/components",
+     "-config", "/dapr/config.yaml"]
+    volumes:
+        - "./dapr/:/dapr"
+    depends_on:
+#      - signalR
+      - azurite
+      - cosmosdb
+    #networks:
+    #  - spinoza-dapr
+
+  #############################################
+  # Catalog Manager Microservice + Dapr sidecar
+  #############################################
+  catalogmanager:
+    image: ${DOCKER_REGISTRY-}testcatalogaccessor
+    build:
+      context: .
+      dockerfile: ./Managers/CatalogManager/Dockerfile
+    ports:
+      - 8080:8080
+    depends_on:
+      - redis
+      - placement
+    #networks:
+    #  - spinoza-dapr
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://127.0.0.1:8080
+  catalogmanager-dapr:
+    image: "daprio/daprd:edge"
+    command: ["./daprd",
+     "-app-id", "catalogmanager",
+     "-app-port", "8080",
+     "-placement-host-address", "placement:50006",
+     "-dapr-http-port", "50005",
+     "-dapr-grpc-port", "50000",
+     "-components-path", "/dapr/components",
+     "-config", "/dapr/config.yaml"]
+    volumes:
+        - "./dapr/:/dapr"
+    depends_on:
+#      - signalR
+      - azurite
+      - cosmosdb
+    ports:
+      - "50005:50005"
+    #networks:
+    #  - spinoza-dapr   
+
+  ############################
+  # Azurite
+  ############################
+  azurite:
+    image: mcr.microsoft.com/azure-storage/azurite
+    hostname: azurite
+    command: "azurite-queue --queueHost 0.0.0.0 --loose --skipApiVersionCheck -d /tmp/azurite_debug.log"
+    ports:
+     - "10000:10000"
+     - "10001:10001"
+    #networks:
+    #  - spinoza-dapr
+    volumes:
+     - ./data/azurite:/data
+
+  ############################
+  # CosmosDB
+  ############################
+  cosmosdb:
+    container_name: cosmosdb
+    image: "mcr.microsoft.com/cosmosdb/linux/azure-cosmos-emulator"
+    tty: true
+    restart: always
+    mem_limit: 2G
+    cpu_count: 2
+    environment:
+      - AZURE_COSMOS_EMULATOR_PARTITION_COUNT=10
+      - AZURE_COSMOS_EMULATOR_ENABLE_DATA_PERSISTENCE=true
+#      - AZURE_COSMOS_EMULATOR_IP_ADDRESS_OVERRIDE=
+    ports:
+       - "8081:8081"
+       - "8900:8900"
+       - "8901:8901"
+       - "8979:8979"
+       - "10250:10250"
+       - "10251:10251"
+       - "10252:10252"
+       - "10253:10253"
+       - "10254:10254"
+       - "10255:10255"
+       - "10256:10256"
+       - "10350:10350"
+    #networks:
+    #  - spinoza-dapr
+    volumes:
+       - vol_cosmos:/data/db
+
+  ############################
+  # Redis state store
+  ############################
+  #rabbitmq:
+  #  image: "rabbitmq:3-management-alpine"
+  #  ports:
+  #    - "5672:5672"
+  #  networks:
+  #    - spinoza-dapr
+
+  ############################
+  # Redis state store
+  ############################
+  redis:
+    image: "redis:alpine"
+    hostname: redisserver
+    ports:
+      - "6379:6379"
+    #networks:
+    #  - spinoza-dapr
+
+  ############################
+  # Dapr placement service
+  ############################
+  placement:
+    image: "daprio/dapr"
+    command: ["./placement", "-port", "50006"]
+    ports:
+      - "50006:50006"
+    #networks:
+    #  - spinoza-dapr
+
+  ############################
+  # Dapr zipkin service
+  ############################
+  zipkin:
+    image: "openzipkin/zipkin"
+    ports:
+      - "9411:9411"
+    #networks:
+    #  - spinoza-dapr
+
+############################
+# Global settings
+############################
+#networks:
+#  spinoza-dapr:
+
+volumes: 
+  vol_cosmos:
+ 

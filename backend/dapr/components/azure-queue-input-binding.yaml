@@ -1,0 +1,21 @@
+apiVersion: dapr.io/v1alpha1
+kind: Component
+metadata:
+  name: azurequeueinput
+spec:
+  type: bindings.azure.storagequeues
+  version: v1
+  metadata:
+ # waiting for: https://github.com/dapr/components-contrib/pull/1692
+ # - name: storageAccount
+ #   value: "devstoreaccount1"
+ # - name: storageAccessKey
+ #   value: "Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw=="
+  - name: storageAccount
+    value: "sagithubactionsupport"
+  - name: storageAccessKey
+    value: "RJjlOYRrQV7HWVvXoMJEQ5vHaQCWbVUXvUkWzIB73Hb7eTE8XzkLWFIGbc7q63WnmqQ82Z13fGZ0+AStNrl7fa=="
+  - name: queue
+    value: "testaccessor"
+  - name: ttlInSeconds
+    value: "60"
