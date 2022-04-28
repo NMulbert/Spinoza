@@ -10,6 +10,9 @@ import {
 import MDEditor from "@uiw/react-md-editor";
 import { Link } from "react-router-dom";
 import { CalendarTime, UserCircle, Link as LinkIcon } from "tabler-icons-react";
+import { Copy } from "tabler-icons-react";
+import { CopyToClipboard } from "react-copy-to-clipboard";
+import { useState } from "react";
 
 type TestCardProps = {
   id: any;
@@ -30,6 +33,7 @@ const TestCard = ({
   id,
   creationTimeUTC,
 }: TestCardProps) => {
+  const [copied, setCopied] = useState(false);
   return (
     <Card
       withBorder
@@ -64,9 +68,9 @@ const TestCard = ({
       >
         {tags.map((i: any) => {
           return (
-              <Badge key={i} color="green" variant="light">
-                {i}
-              </Badge>
+            <Badge key={i} color="green" variant="light">
+              {i}
+            </Badge>
           );
         })}
       </Group>
@@ -96,14 +100,22 @@ const TestCard = ({
             Open
           </Button>
         </Link>
-        <Button
-          radius="lg"
-          variant="light"
-          color="gray"
-          style={{ marginTop: 14 }}
+        <CopyToClipboard
+          text={`http://localhost:3000/tests/${id}`}
+          onCopy={() => {
+            setCopied(true);
+            setTimeout(() => setCopied(false), 1000);
+          }}
         >
-          <LinkIcon />
-        </Button>
+          <Button
+            radius="lg"
+            variant="light"
+            color="gray"
+            style={{ marginTop: 14 }}
+          >
+            {copied ? <Copy color="#40c057" /> : <LinkIcon />}
+          </Button>
+        </CopyToClipboard>
       </Group>
     </Card>
   );

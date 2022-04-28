@@ -13,7 +13,7 @@ interface TestsState {
 
 function AllTestsPage() {
   // Pagination
-  const [limit] = useState(7);
+  const [limit] = useState(11);
   const [offset, setOffset] = useState(0);
   const [pageCount, setPageCount] = useState(0);
 
