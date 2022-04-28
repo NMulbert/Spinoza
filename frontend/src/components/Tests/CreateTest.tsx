@@ -97,6 +97,7 @@ function CreateTest() {
                     "http://localhost:50000/v1.0/invoke/catalogmanager/method/test",
                     JSON.stringify({ ...testValues })
                   );
+                  setTestsValues({ ...testValues, id: uuidv4().toUpperCase() });
                 } catch (err) {
                   console.log(err);
                 }
