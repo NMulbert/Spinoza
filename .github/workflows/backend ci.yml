@@ -1,19 +1,15 @@
-name: .NET Backend
+name: Backend
 
 on:
   push:
-    branches:
-      - main
-    paths:
-      -backend/**
-      -.github/**
-  pull_request:
-    types: [opened, synchronize, reopened, closed]
-    branches:
-      - main
+    branches: [ main ]
     paths:
       - backend/**
 
+  pull_request:
+    branches: [ main ]
+    paths:
+      - backend/**
 
 jobs:
   build_and_test:
@@ -23,8 +19,6 @@ jobs:
     steps:
     - uses: dapr/setup-dapr@v1
       name: install dapr
-      with:
-      version: '1.7'
       id: install
 
     - uses: actions/checkout@v2
@@ -38,6 +32,7 @@ jobs:
         dotnet-version: 6.0.x
     - name: Restore dependencies
       run: dotnet restore
+      working-directory: backend
 
     - name: 'Install Cosmos Emulator'
       uses: southpolesteve/cosmos-emulator-github-action@v1
@@ -45,16 +40,15 @@ jobs:
     - name: start Azurite
       shell: bash
       run: |
-           cd DevOps
            npm install -g azurite
            mkdir azurite
            azurite  --silent --location azurite &
       
-    - name: Build
-      run: dotnet build --configuration Release --no-restore
+    - name: Build 
+      run: dotnet build backend/SpinozaBackEnd.sln --configuration Release --no-restore
     
     - name: Test
-      run: dotnet test --no-restore --verbosity normal
+      run: dotnet test backend/SpinozaBackEnd.sln --no-restore --verbosity normal
     
     # - name: Start dapr apps
     #   shell: pwsh
