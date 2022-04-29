@@ -1,5 +1,3 @@
-
-
 using AutoMapper;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -47,6 +45,7 @@ app.UseHttpsRedirection();
 app.UseRouting();
 app.UseAuthorization();
 app.UseCloudEvents();
+app.Urls.Add("http://*:80");
 app.UseEndpoints(endpoints =>
 {
 

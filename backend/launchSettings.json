@@ -8,7 +8,7 @@
         "cosmosdb": "StartWithoutDebugging",
         "placement": "StartWithoutDebugging",
         "redis": "StartWithoutDebugging",
-        "testcatalog-dapr": "StartWithoutDebugging",
+        "testaccessor-dapr": "StartWithoutDebugging",
         "testaccessor": "StartDebugging",
         "catalogmanager": "StartDebugging",
         "catalogmanager-dapr": "StartWithoutDebugging",

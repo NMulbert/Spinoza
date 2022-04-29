@@ -14,7 +14,7 @@ spec:
   - name: storageAccount
     value: "sagithubactionsupport"
   - name: storageAccessKey
-    value: "RJjlOYRrQV7HWVvXoMJEQ5vHaQCWbVUXvUkWzIB73Hb7eTE8XzkLWFIGbc7q63WnmqQ82Z13fGZ0+AStNrl7fa=="
+    value: "RJjlOYRrQV7HWVvXoMJEQ5vHaQCWbVUXvUkWzIB73Hb7eTE8XzkLWFIGbc7q63WnmqQ82Z13fGZ0+AStNrl7fA=="
   - name: queue
     value: "testaccessor"
   - name: ttlInSeconds

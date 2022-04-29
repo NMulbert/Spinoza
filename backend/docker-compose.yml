@@ -2,7 +2,7 @@ version: '3.4'
 
 services:
   ###########################################
-  # Test Catalog Microservice + Dapr sidecar
+  # Test Accessor Microservice + Dapr sidecar
   ###########################################
   testaccessor:
     image: ${DOCKER_REGISTRY-}testcatalogaccessor
@@ -10,20 +10,20 @@ services:
       context: .
       dockerfile: ./Accessors/TestCatalogAccessor/Dockerfile
     ports:
-      - 5008:5008
+      - 5008:80
     depends_on:
       - redis
       - placement
-    #networks:
-    #  - spinoza-dapr
+    networks:
+      - spinoza-dapr
     environment:
+      - ASPNETCORE_URLS=http://testaccessor:80
       - ASPNETCORE_ENVIRONMENT=Development
-      - ASPNETCORE_URLS=http://127.0.0.1:5008
-  testcatalog-dapr:
+  testaccessor-dapr:
     image: "daprio/daprd:edge"
     command: ["./daprd",
      "-app-id", "testaccessor",
-     "-app-port", "5008",
+     "-app-port", "80",
      "-dapr-http-port", "50001",
      "-placement-host-address", "placement:50006",
      "-dapr-grpc-port", "50002",
@@ -32,9 +32,11 @@ services:
     volumes:
         - "./dapr/:/dapr"
     depends_on:
-#      - signalR
+      - testaccessor
+#     - signalR
       - azurite
       - cosmosdb
+    network_mode: "service:testaccessor"
     #networks:
     #  - spinoza-dapr
 
@@ -42,25 +44,26 @@ services:
   # Catalog Manager Microservice + Dapr sidecar
   #############################################
   catalogmanager:
-    image: ${DOCKER_REGISTRY-}testcatalogaccessor
+    image: ${DOCKER_REGISTRY-}catalogmanager
     build:
       context: .
       dockerfile: ./Managers/CatalogManager/Dockerfile
     ports:
-      - 8080:8080
+      - 5007:80
+      - 50005:50005
     depends_on:
       - redis
       - placement
-    #networks:
-    #  - spinoza-dapr
+    networks:
+      - spinoza-dapr
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
-      - ASPNETCORE_URLS=http://127.0.0.1:8080
+      - ASPNETCORE_URLS=http://catalogmanager:80
   catalogmanager-dapr:
     image: "daprio/daprd:edge"
     command: ["./daprd",
      "-app-id", "catalogmanager",
-     "-app-port", "8080",
+     "-app-port", "80",
      "-placement-host-address", "placement:50006",
      "-dapr-http-port", "50005",
      "-dapr-grpc-port", "50000",
@@ -69,11 +72,13 @@ services:
     volumes:
         - "./dapr/:/dapr"
     depends_on:
-#      - signalR
+      - catalogmanager
+#     - signalR
       - azurite
       - cosmosdb
-    ports:
-      - "50005:50005"
+    #ports:
+    #  - "50005:50005"
+    network_mode: "service:catalogmanager"
     #networks:
     #  - spinoza-dapr   
 
@@ -87,8 +92,8 @@ services:
     ports:
      - "10000:10000"
      - "10001:10001"
-    #networks:
-    #  - spinoza-dapr
+    networks:
+      - spinoza-dapr
     volumes:
      - ./data/azurite:/data
 
@@ -119,8 +124,8 @@ services:
        - "10255:10255"
        - "10256:10256"
        - "10350:10350"
-    #networks:
-    #  - spinoza-dapr
+    networks:
+      - spinoza-dapr
     volumes:
        - vol_cosmos:/data/db
 
@@ -142,8 +147,8 @@ services:
     hostname: redisserver
     ports:
       - "6379:6379"
-    #networks:
-    #  - spinoza-dapr
+    networks:
+      - spinoza-dapr
 
   ############################
   # Dapr placement service
@@ -163,14 +168,14 @@ services:
     image: "openzipkin/zipkin"
     ports:
       - "9411:9411"
-    #networks:
-    #  - spinoza-dapr
+    networks:
+      - spinoza-dapr
 
 ############################
 # Global settings
 ############################
-#networks:
-#  spinoza-dapr:
+networks:
+  spinoza-dapr:
 
 volumes: 
   vol_cosmos:
