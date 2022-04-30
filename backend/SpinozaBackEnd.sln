@@ -27,11 +27,10 @@ Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-co
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Components", "Components", "{71A76FCD-A828-4148-9F4A-5E417425ADC4}"
 	ProjectSection(SolutionItems) = preProject
-		dapr\components\azure-queue-input-binding.yaml = dapr\components\azure-queue-input-binding.yaml
-		dapr\components\azure-queue-output-binding.yaml = dapr\components\azure-queue-output-binding.yaml
 		dapr\components\azure-signalr-output.yaml = dapr\components\azure-signalr-output.yaml
 		dapr\components\pubsub.yaml = dapr\components\pubsub.yaml
 		dapr\components\statestore.yaml = dapr\components\statestore.yaml
+		dapr\components\test-accessor-requests-queue.yaml = dapr\components\test-accessor-requests-queue.yaml
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Dapr", "Dapr", "{04F806E2-49AB-47E5-9421-74B7E7B8D9C8}"

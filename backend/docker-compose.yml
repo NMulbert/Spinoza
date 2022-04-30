@@ -11,9 +11,12 @@ services:
       dockerfile: ./Accessors/TestCatalogAccessor/Dockerfile
     ports:
       - 5008:80
+      - 50002:3500
+      - 50010:50001
     depends_on:
       - redis
       - placement
+      - rabbitmq
     networks:
       - spinoza-dapr
     environment:
@@ -24,21 +27,19 @@ services:
     command: ["./daprd",
      "-app-id", "testaccessor",
      "-app-port", "80",
-     "-dapr-http-port", "50001",
+     "-dapr-http-port", "3500",
      "-placement-host-address", "placement:50006",
-     "-dapr-grpc-port", "50002",
      "-components-path", "/dapr/components",
      "-config", "/dapr/config.yaml"]
     volumes:
         - "./dapr/:/dapr"
     depends_on:
+      - rabbitmq
       - testaccessor
 #     - signalR
       - azurite
       - cosmosdb
     network_mode: "service:testaccessor"
-    #networks:
-    #  - spinoza-dapr
 
   #############################################
   # Catalog Manager Microservice + Dapr sidecar
@@ -50,8 +51,10 @@ services:
       dockerfile: ./Managers/CatalogManager/Dockerfile
     ports:
       - 5007:80
-      - 50005:50005
+      - 50005:3500
+      - 50001:50001
     depends_on:
+      - rabbitmq
       - redis
       - placement
     networks:
@@ -65,23 +68,20 @@ services:
      "-app-id", "catalogmanager",
      "-app-port", "80",
      "-placement-host-address", "placement:50006",
-     "-dapr-http-port", "50005",
-     "-dapr-grpc-port", "50000",
+     "-dapr-http-port", "3500",
      "-components-path", "/dapr/components",
      "-config", "/dapr/config.yaml"]
     volumes:
         - "./dapr/:/dapr"
     depends_on:
       - catalogmanager
+      - rabbitmq
 #     - signalR
       - azurite
       - cosmosdb
-    #ports:
-    #  - "50005:50005"
+    
     network_mode: "service:catalogmanager"
-    #networks:
-    #  - spinoza-dapr   
-
+    
   ############################
   # Azurite
   ############################
@@ -130,14 +130,14 @@ services:
        - vol_cosmos:/data/db
 
   ############################
-  # Redis state store
+  # RabitMQ
   ############################
-  #rabbitmq:
-  #  image: "rabbitmq:3-management-alpine"
-  #  ports:
-  #    - "5672:5672"
-  #  networks:
-  #    - spinoza-dapr
+  rabbitmq:
+    image: "rabbitmq:3-management-alpine"
+    ports:
+      - "5672:5672"
+    networks:
+      - spinoza-dapr
 
   ############################
   # Redis state store
@@ -158,8 +158,8 @@ services:
     command: ["./placement", "-port", "50006"]
     ports:
       - "50006:50006"
-    #networks:
-    #  - spinoza-dapr
+    networks:
+      - spinoza-dapr
 
   ############################
   # Dapr zipkin service

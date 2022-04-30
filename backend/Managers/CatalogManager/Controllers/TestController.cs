@@ -92,7 +92,7 @@ namespace CatalogManager.Controllers
                 var submitTestModel = _mapper.Map<Models.AccessorSubmits.Test>(requestTestModel);
                 submitTestModel.TestVersion = "1.0";
                 submitTestModel.MessageType = isUpdate ? "UpdateTest" : "CreateTest";
-                await _daprClient.InvokeBindingAsync("azurequeueoutput", "create", submitTestModel);
+                await _daprClient.InvokeBindingAsync("testaccessorrequestqueue", "create", submitTestModel);
                 return Ok("Accepted");
             }
             catch (Exception ex)

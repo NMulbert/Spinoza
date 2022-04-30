@@ -24,7 +24,23 @@ public CosmosClient CosmosClient { get; init; }
         _logger = logger;
         try
         {
-            CosmosClient = new CosmosClient(configuration["ConnectionStrings:CosmosDB"]);
+            //todo: inject the correct cosmosDB client
+            CosmosClientOptions cosmosClientOptions = new CosmosClientOptions()
+            {
+                HttpClientFactory = () =>
+                {
+                    HttpMessageHandler httpMessageHandler = new HttpClientHandler()
+                    {
+                        ServerCertificateCustomValidationCallback = (req, cert, chain, errors) => true
+                    };
+                    return new HttpClient(httpMessageHandler);
+                },
+                ConnectionMode = ConnectionMode.Gateway
+            };
+
+            //CosmosClient = new CosmosClient(configuration["ConnectionStrings:CosmosDB"], cosmosClientOptions);
+            //todo: move this to compose environment variable
+            CosmosClient = new CosmosClient(configuration["ConnectionStringsCompose:CosmosDB"], cosmosClientOptions);
             Database = CreateDataBase(CosmosClient, logger, cosmosDbInformationProvider);
             Container = CreateDataBaseContainer(CosmosClient, logger, Database, cosmosDbInformationProvider);
         }
