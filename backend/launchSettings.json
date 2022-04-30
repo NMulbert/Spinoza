@@ -12,7 +12,10 @@
         "testaccessor": "StartDebugging",
         "catalogmanager": "StartDebugging",
         "catalogmanager-dapr": "StartWithoutDebugging",
-        "zipkin": "StartWithoutDebugging"
+        "zipkin": "StartWithoutDebugging",
+        "rabbitmq": "StartWithoutDebugging",
+        "signalr": "StartWithoutDebugging",
+        "signalr-negotiate": "StartWithoutDebugging"
       }
     }
   }

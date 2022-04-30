@@ -36,7 +36,7 @@ services:
     depends_on:
       - rabbitmq
       - testaccessor
-#     - signalR
+      - signalr
       - azurite
       - cosmosdb
     network_mode: "service:testaccessor"
@@ -76,11 +76,29 @@ services:
     depends_on:
       - catalogmanager
       - rabbitmq
-#     - signalR
+      - signalr
       - azurite
       - cosmosdb
     
     network_mode: "service:catalogmanager"
+
+  #############################################
+  # SignalR Negotiate function support
+  #############################################
+  signalr-negotiate:
+    image: ${DOCKER_REGISTRY-}signalr-negotiate
+    build:
+      context: .
+      dockerfile: ./Managers/SignalRConnectionSupport/Docker/Dockerfile
+    ports:
+      - 80:80
+      - 443:443
+    depends_on:
+      - azurite
+    networks:
+      - spinoza-dapr
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
     
   ############################
   # Azurite
@@ -171,6 +189,21 @@ services:
     networks:
       - spinoza-dapr
 
+############################
+# Dapr zipkin service
+############################
+  signalr:
+    image: ${DOCKER_REGISTRY-}signalremulator
+    build:
+      context: .
+      dockerfile: ./LocalEnvironmentSupport/Dockerfile
+    ports:
+      - 8999:8999
+    networks:
+      - spinoza-dapr
+    environment:
+      - ASRS_EMULATOR_PORT=8999
+      
 ############################
 # Global settings
 ############################
