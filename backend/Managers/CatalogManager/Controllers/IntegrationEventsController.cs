@@ -31,6 +31,7 @@ namespace CatalogManager.Controllers
             
             try
             {
+                
                 var frontendTestChangeResult = _mapper.Map<Models.FrontendResponses.TestChangeResult>(accessorTestChangeResult);
                 _logger?.LogInformation($"Message received: {frontendTestChangeResult.Id}");
                await PublishMessageToSignalRAsync(frontendTestChangeResult);
