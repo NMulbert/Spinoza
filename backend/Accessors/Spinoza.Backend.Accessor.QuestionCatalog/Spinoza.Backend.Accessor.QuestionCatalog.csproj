@@ -17,9 +17,4 @@
     <ProjectReference Include="..\..\Crosscutting\Spinoza.Backend.Crosscutting.CosmosDBWrapper\Spinoza.Backend.Crosscutting.CosmosDBWrapper.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Models\Responses\" />
-    <Folder Include="Models\DB\" />
-  </ItemGroup>
-
 </Project>

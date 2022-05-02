@@ -1,13 +1,16 @@
 ﻿namespace Spinoza.Backend.Accessor.QuestionCatalog.Models.Results
 {
 #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
-
-    public class CommonQuestion
+    interface IQuestion
+    {
+        string Type { get; set; }
+    }
+    public class CommonQuestion : IQuestion
     {
         public string Type { get; set; }
     }
 
-    public class MultipleChoiceQuestion
+    public class MultipleChoiceQuestion : IQuestion
     {
         public string Id { get; set; }
         public string SchemaVersion { get; set; }
@@ -35,7 +38,7 @@
         public bool IsCorrect { get; set; }
     }
 
-    public class OpenTextQuestion
+    public class OpenTextQuestion  : IQuestion
     {
         public string Id { get; set; }
         public string SchemaVersion { get; set; }
