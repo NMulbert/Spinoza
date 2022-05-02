@@ -62,7 +62,7 @@ function ViewTest() {
         opened={openedNQ}
         onClose={() => setOpenedNQ(false)}
         title="New Question"
-        size="75%"
+        size="100%"
       >
         {<NewQuestion />}
       </Modal>
@@ -70,7 +70,7 @@ function ViewTest() {
         opened={openedEQ}
         onClose={() => setOpenedEQ(false)}
         title="Questions Catalog"
-        size="75%"
+        size="100%"
       >
         {<ChooseQuestion />}
       </Modal>
