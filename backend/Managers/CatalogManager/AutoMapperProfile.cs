@@ -7,10 +7,23 @@ internal class AutoMapperProfile : Profile
     {
         CreateMap<CatalogManager.Models.FrontendRequests.Test, CatalogManager.Models.AccessorSubmits.Test>()
             .ForMember(dest => dest.MessageType, opt => opt.Ignore());
+
         CreateMap<CatalogManager.Models.AccessorResults.TestChangeResult, CatalogManager.Models.FrontendResponses.TestChangeResult>();
         
         CreateMap<CatalogManager.Models.AccessorResults.Test, CatalogManager.Models.FrontendResponses.Test>();
 
-        
+        CreateMap<CatalogManager.Models.FrontendRequests.MultipleChoiceQuestion, CatalogManager.Models.AccessorSubmits.MultipleChoiceQuestion>()
+            .ForMember(dest => dest.MessageType, opt => opt.Ignore());
+
+        CreateMap<CatalogManager.Models.FrontendRequests.OpenTextQuestion, CatalogManager.Models.AccessorSubmits.OpenTextQuestion>()
+            .ForMember(dest => dest.MessageType, opt => opt.Ignore());
+
+        CreateMap<CatalogManager.Models.AccessorResults.MultipleChoiceQuestion, CatalogManager.Models.FrontendResponses.MultipleChoiceQuestion>();
+
+        CreateMap<CatalogManager.Models.AccessorResults.OpenTextQuestion, CatalogManager.Models.FrontendResponses.OpenTextQuestion>();
+
+        CreateMap<CatalogManager.Models.FrontendRequests.Content, CatalogManager.Models.AccessorSubmits.Content>();
+
+        CreateMap<CatalogManager.Models.FrontendRequests.AnswerOption, CatalogManager.Models.AccessorSubmits.AnswerOption>();
     }
 }
