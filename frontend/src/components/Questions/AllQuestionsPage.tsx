@@ -38,42 +38,42 @@ function AllQuestionsPage() {
         opened={openedNQ}
         onClose={() => setOpenedNQ(false)}
         title="New Question"
-        size="75%"
+        size="100%"
       >
         {<NewQuestion />}
       </Modal>
-<Grid>
-      <Grid.Col md={6} lg={4} xl={3}>
-        <Card
-          withBorder
-          shadow="xl"
-          p="lg"
-          radius="xl"
-          style={{
-            height: 309,
-            width: "90%",
-            minWidth: "90%",
-            margin: "auto",
-            padding: 0,
-            display: "inline-block",
-          }}
-        >
-          <Button
+      <Grid>
+        <Grid.Col md={6} lg={4} xl={3}>
+          <Card
+            withBorder
+            shadow="xl"
+            p="lg"
             radius="xl"
-            variant="light"
-            color="blue"
-            onClick={() => setOpenedNQ(true)}
             style={{
-              fontSize: 30,
-              width: "100%",
-              height: "100%",
+              height: 309,
+              width: "90%",
+              minWidth: "90%",
+              margin: "auto",
+              padding: 0,
+              display: "inline-block",
             }}
           >
-            NEW QUESTION
-            <Writing size={50} />
-          </Button>
-        </Card>
-      </Grid.Col>
+            <Button
+              radius="xl"
+              variant="light"
+              color="blue"
+              onClick={() => setOpenedNQ(true)}
+              style={{
+                fontSize: 30,
+                width: "100%",
+                height: "100%",
+              }}
+            >
+              NEW QUESTION
+              <Writing size={50} />
+            </Button>
+          </Card>
+        </Grid.Col>
 
         {questions ? (
           questions.map((i: any) => {
