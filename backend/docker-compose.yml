@@ -190,19 +190,23 @@ services:
       - spinoza-dapr
 
 ############################
-# Dapr zipkin service
+# SignalR emulator service
 ############################
   signalr:
     image: ${DOCKER_REGISTRY-}signalremulator
     build:
       context: .
       dockerfile: ./LocalEnvironmentSupport/Dockerfile
-    ports:
-      - 8999:8999
-    networks:
-      - spinoza-dapr
+    #ports:
+    #  - 8999:8999
+    #  - 7071:7071
+    network_mode: host
+    volumes:
+     - ./workspace:/workspace
     environment:
-      - ASRS_EMULATOR_PORT=8999
+      - ASRS_EMULATOR_PORT=8888
+#      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:8888;http://+:7071
       
 ############################
 # Global settings
@@ -212,4 +216,5 @@ networks:
 
 volumes: 
   vol_cosmos:
+  workspace:
  

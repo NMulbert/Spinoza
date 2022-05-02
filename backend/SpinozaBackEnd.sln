@@ -41,9 +41,10 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "LocalEnvironmentSupport", "LocalEnvironmentSupport", "{C8B8D998-EDD8-4DC4-BC5D-96FF7A0796F9}"
 	ProjectSection(SolutionItems) = preProject
 		LocalEnvironmentSupport\Dockerfile = LocalEnvironmentSupport\Dockerfile
+		LocalEnvironmentSupport\settings.json = LocalEnvironmentSupport\settings.json
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SignalRConnectionSupport", "Managers\SignalRConnectionSupport\SignalRConnectionSupport.csproj", "{2955522E-5E9A-4F9C-B90D-6EFCCE78EFB7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SignalRConnectionSupport", "Managers\SignalRConnectionSupport\SignalRConnectionSupport.csproj", "{2955522E-5E9A-4F9C-B90D-6EFCCE78EFB7}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

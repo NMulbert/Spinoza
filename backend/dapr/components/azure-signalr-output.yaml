@@ -7,7 +7,7 @@ spec:
   version: v1
   metadata:
   - name: connectionString
-    value: Endpoint=https://signalr-negotiate;AccessKey=;Version=1.0;
+    value: Endpoint=http://localhost;Port=8999;AccessKey=ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789ABCDEFGH;Version=1.0;
   - name: hub 
     value: spinozahub
     
