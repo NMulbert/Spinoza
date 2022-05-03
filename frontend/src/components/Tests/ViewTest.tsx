@@ -218,7 +218,7 @@ function ViewTest() {
           test.questions.map((i: any) => {
             console.log(i);
             return (
-              <Grid.Col md={6} lg={3} key={i.id}>
+              <Grid.Col md={12} key={i.id}>
                 <QuestionInTest
                   removeQuestion={removeQuestion}
                   id={i}
