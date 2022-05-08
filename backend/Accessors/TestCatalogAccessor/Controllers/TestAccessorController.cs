@@ -72,6 +72,7 @@ namespace Spinoza.Backend.Accessor.TestCatalog.Controllers
             }
             return Problem(statusCode: (int)StatusCodes.Status500InternalServerError);
         }
+        
 
         [HttpPost("/azurequeueinput")]
         public async Task<IActionResult> GetTestDataInputFromQueueBinding()
@@ -186,6 +187,29 @@ namespace Spinoza.Backend.Accessor.TestCatalog.Controllers
             _logger?.LogInformation($"Here is the test that goona try to enter the database {body}");
             var newTest = JsonConvert.DeserializeObject<Models.Requests.Test>(body);
             return newTest ?? throw new Exception("Error when deserialize message body");
+        }
+
+        [HttpGet("/tests/count")]
+        public async Task<IActionResult> GetTotalTests()
+        {
+            try
+            {
+                int? dbTotalTests = await _cosmosDBWrapper.GetScalarCosmosQueryResult<int?>(new QueryDefinition("SELECT VALUE COUNT(1) FROM c"));
+           
+                if (dbTotalTests == null)
+                {
+                    return new NotFoundObjectResult("No Tests found");
+                }
+                //else
+                return new OkObjectResult(dbTotalTests);
+            }
+            catch (Exception ex) 
+            {
+                    _logger.LogError($"Error while getting tests: {ex.Message}");
+
+            }
+           
+            return Problem(statusCode: (int)StatusCodes.Status500InternalServerError);
         }
     }
 }
