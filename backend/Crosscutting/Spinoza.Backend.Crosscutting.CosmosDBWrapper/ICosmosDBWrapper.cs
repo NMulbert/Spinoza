@@ -26,4 +26,6 @@ public interface ICosmosDBWrapper
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
     Task<ItemResponse<T>?> UpdateItemAsync<T>(T newItem, Func<T, string?> eTagSelector, Func<T, Guid> idSelector, Func<T, T, T> merger, bool createIfNotExist = true, PartitionKey? partitionKey = null, CancellationToken cancellationToken = default(CancellationToken));
+
+    Task<TOut?> GetScalarCosmosQueryResult<TOut>(QueryDefinition queryDefinition);
 }

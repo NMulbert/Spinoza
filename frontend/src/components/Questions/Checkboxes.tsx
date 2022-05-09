@@ -1,115 +1,115 @@
-import { Button, Group, Radio, Textarea, Card, Checkbox } from "@mantine/core";
+import {
+  Checkbox,
+  Group,
+  Text,
+  Code,
+  Button,
+  Radio,
+  ActionIcon,
+  Textarea,
+  Card,
+} from "@mantine/core";
+import { useForm, formList } from "@mantine/form";
 import { useState } from "react";
-import { X } from "tabler-icons-react";
+import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
+import { GripVertical, X } from "tabler-icons-react";
 
-function Checkboxes() {
-  const [inputList, setInputList] = useState([{ answerOption: "" }]);
+function MultiChoice() {
   const [chooseMode, setChooseMode] = useState(false);
-  const [correctAnswers, setCorrectAnswers]: any = useState([]);
 
-  const handleInputChange = (e: any, index: number) => {
-    const { name, value } = e.target;
-    const list: any = [...inputList];
-    list[index][name] = value;
-    setInputList(list);
-  };
+  const form = useForm({
+    initialValues: {
+      answers: formList([{ description: "", isCorrect: false }]),
+    },
+  });
 
-  const handleAddClick = () => {
-    setInputList([...inputList, { answerOption: "" }]);
-  };
+  const fields = form.values.answers.map((_, index) => (
+    <Draggable key={index} index={index} draggableId={index.toString()}>
+      {(provided) => (
+        <Group ref={provided.innerRef} mt="xs" {...provided.draggableProps}>
+          <div {...provided.dragHandleProps}>
+            <GripVertical size={18} />{" "}
+          </div>
 
-  const handleRemoveClick = (index: any) => {
-    const list = [...inputList];
-    list.splice(index, 1);
-    setInputList(list);
-  };
+          {chooseMode ? (
+            <Checkbox
+              checked={_.isCorrect}
+              {...form.getListInputProps("answers", index, "isCorrect")}
+            />
+          ) : (
+            <Checkbox
+              disabled
+              checked={_.isCorrect}
+              {...form.getListInputProps("answers", index, "isCorrect")}
+            />
+          )}
+          <Textarea
+            placeholder="Add option"
+            autosize
+            minRows={1}
+            style={{ width: "80%" }}
+            autoFocus={true}
+            {...form.getListInputProps("answers", index, "description")}
+          />
+          <ActionIcon
+            color="red"
+            variant="hover"
+            onClick={() => form.removeListItem("answers", index)}
+          >
+            <X size={18} />
+          </ActionIcon>
+        </Group>
+      )}
+    </Draggable>
+  ));
 
   return (
-    <div>
-      <Card withBorder shadow="xs" p="lg" radius="sm">
-        {inputList.map((x, i) => {
-          return (
-            <div key={i}>
-              <Group>
-                {chooseMode ? (
-                  <Checkbox
-                    name="answerOption"
-                    value={x.answerOption}
-                    onChange={(e) => {
-                      handleInputChange(e, i);
-                      let temp = [...correctAnswers];
-                      e.target.checked ? (
-                        temp.push(e.target.value)
-                      ) : correctAnswers.length !== 0 ? (
-                        (temp = correctAnswers.filter(
-                          (answer: string) => answer !== e.target.value
-                        ))
-                      ) : (
-                        <> </>
-                      );
-                      setCorrectAnswers(temp);
-                    }}
-                  />
-                ) : (
-                  <Checkbox
-                    disabled
-                    name="answerOption"
-                    value={x.answerOption}
-                    onChange={(e) => handleInputChange(e, i)}
-                  />
-                )}
-                <Textarea
-                  name="answerOption"
-                  value={x.answerOption}
-                  onChange={(e) => handleInputChange(e, i)}
-                  style={{ width: "80%" }}
-                  autosize
-                  variant="unstyled"
-                  placeholder="Add option"
-                />
-                {inputList.length !== 1 && (
-                  <Button
-                    variant="subtle"
-                    radius="xl"
-                    color="gray"
-                    style={{}}
-                    onClick={() => handleRemoveClick(i)}
-                  >
-                    <X size={26} />
-                  </Button>
-                )}
-              </Group>
-
-              <div>
-                {inputList.length - 1 === i && (
-                  <Button
-                    radius="xl"
-                    variant="subtle"
-                    compact
-                    onClick={handleAddClick}
-                  >
-                    + Add option
-                  </Button>
-                )}
-                {inputList.length - 1 === i && (
-                  <Button
-                    radius="xl"
-                    variant="subtle"
-                    compact
-                    onClick={() => {
-                      setChooseMode(!chooseMode);
-                    }}
-                  >
-                    {chooseMode ? "Done" : "Correct answer"}
-                  </Button>
-                )}
-              </div>
+    <Card withBorder sx={{ maxWidth: "auto" }} mx="auto">
+      <DragDropContext
+        onDragEnd={({ destination, source }) =>
+          form.reorderListItem("answers", {
+            from: source.index,
+            to: destination!.index,
+          })
+        }
+      >
+        <Droppable droppableId="dnd-list" direction="vertical">
+          {(provided) => (
+            <div {...provided.droppableProps} ref={provided.innerRef}>
+              {fields}
+              {provided.placeholder}
             </div>
-          );
-        })}
-      </Card>
-    </div>
+          )}
+        </Droppable>
+      </DragDropContext>
+
+      <Group mt="md">
+        <Button
+          radius="xl"
+          variant="subtle"
+          compact
+          onClick={() =>
+            form.addListItem("answers", {
+              description: "",
+              isCorrect: false,
+            })
+          }
+        >
+          + Add option
+        </Button>
+        <Button
+          radius="xl"
+          variant="subtle"
+          compact
+          onClick={() => {
+            setChooseMode(!chooseMode);
+          }}
+        >
+          {chooseMode ? "Done" : "Correct answer"}
+        </Button>
+      </Group>
+    </Card>
   );
 }
 
-export default Checkboxes;
+export default MultiChoice;

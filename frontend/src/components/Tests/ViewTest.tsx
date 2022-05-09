@@ -10,12 +10,12 @@ import {
   Modal,
 } from "@mantine/core";
 import { CalendarTime, Edit, UserCircle } from "tabler-icons-react";
-import QuestionCard from "../Questions/QuestionCard";
 import NewQuestion from "../Questions/NewQuestion";
 import ChooseQuestion from "../Questions/ChooseQuestion";
 import MDEditor from "@uiw/react-md-editor";
 import { useParams } from "react-router-dom";
 import axios from "axios";
+import QuestionInTest from "./QuestionInTest";
 
 function ViewTest() {
   let { id } = useParams();
@@ -27,6 +27,7 @@ function ViewTest() {
     creationTimeUTC: "",
     questions: [],
   });
+
   useEffect(() => {
     let url = `http://localhost:50000/v1.0/invoke/catalogmanager/method/test/${id}`;
     fetch(url)
@@ -56,13 +57,28 @@ function ViewTest() {
     .split(" ");
   let creationTimeUTC = `${date[2]}/ ${date[1]}/ ${date[3]} | ${date[4]}`;
 
+  const UpdateQuestions = (questions: []) => {
+    setTest({
+      ...test,
+      questions: Array.from(new Set([...test.questions, ...questions])),
+    });
+  };
+
+  const removeQuestion = (removedQuestion: string) => {
+    setTest({
+      ...test,
+      questions: test.questions.filter(
+        (question) => question !== removedQuestion
+      ),
+    });
+  };
   return (
     <div>
       <Modal
         opened={openedNQ}
         onClose={() => setOpenedNQ(false)}
         title="New Question"
-        size="75%"
+        size="100%"
       >
         {<NewQuestion />}
       </Modal>
@@ -70,9 +86,14 @@ function ViewTest() {
         opened={openedEQ}
         onClose={() => setOpenedEQ(false)}
         title="Questions Catalog"
-        size="75%"
+        size="100%"
       >
-        {<ChooseQuestion />}
+        {
+          <ChooseQuestion
+            setOpenedEQ={setOpenedEQ}
+            UpdateQuestions={UpdateQuestions}
+          />
+        }
       </Modal>
 
       <Grid style={{ paddingLeft: "250px", paddingTop: "25px" }}>
@@ -193,27 +214,22 @@ function ViewTest() {
           <></>
         )}
 
-        {/* {test.questions.length !== 0 ? (
-          (console.log(test.questions.length),
+        {test.questions.length !== 0 ? (
           test.questions.map((i: any) => {
+            console.log(i);
             return (
-              <Grid.Col md={6} lg={3} key={i.id}>
-                <QuestionCard
-                  id={i.id}
-                  title={i.Title}
-                  description={i.Description}
-                  author={i.Author}
-                  tags={i.Tags}
-                  status={i.Status}
-                  version={i.Version}
+              <Grid.Col md={12} key={i.id}>
+                <QuestionInTest
+                  removeQuestion={removeQuestion}
+                  id={i}
+                  editMode={editMode}
                 />
               </Grid.Col>
             );
-          }))
+          })
         ) : (
           <></>
-        )} */}
-
+        )}
         <Grid.Col span={12}>
           <Group spacing="sm">
             <Button

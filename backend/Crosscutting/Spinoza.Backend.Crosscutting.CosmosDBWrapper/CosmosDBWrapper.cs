@@ -215,6 +215,12 @@ public class CosmosDBWrapper : ICosmosDBWrapper
             .WithParameter("@count", count);
         return await GetCosmosElementsAsync<TOut>(query);
     }
+    
+    public async Task<TOut?> GetScalarCosmosQueryResult<TOut>(QueryDefinition queryDefinition)
+    {
+        var queryResult = await GetCosmosElementsAsync<TOut>(queryDefinition);
+        return queryResult.FirstOrDefault();
+    }
 
     public async Task<ItemResponse<T>?> UpdateItemAsync<T>(T newItem, Func<T, string?> eTagSelector, Func<T, Guid> idSelector, Func<T, T, T> merger, bool createIfNotExist = true, PartitionKey? partitionKey = null, CancellationToken cancellationToken = default(CancellationToken))
     {
