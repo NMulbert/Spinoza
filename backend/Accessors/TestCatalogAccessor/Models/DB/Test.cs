@@ -9,7 +9,6 @@ namespace Spinoza.Backend.Accessor.TestCatalog.Models.DB
     {
 #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
 
-        [JsonProperty("id")]
         public string Id { get; set; }
 
         public string Title { get; set; }

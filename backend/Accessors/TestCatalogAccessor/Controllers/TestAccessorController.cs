@@ -73,7 +73,7 @@ namespace Spinoza.Backend.Accessor.TestCatalog.Controllers
             return Problem(statusCode: (int)StatusCodes.Status500InternalServerError);
         }
 
-        [HttpPost("/azurequeueinput")]
+        [HttpPost("/testaccessorrequestqueue")]
         public async Task<IActionResult> GetTestDataInputFromQueueBinding()
         {
            

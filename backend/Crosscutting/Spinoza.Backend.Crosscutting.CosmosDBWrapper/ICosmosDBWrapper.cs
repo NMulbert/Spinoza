@@ -1,4 +1,5 @@
 ﻿using Microsoft.Azure.Cosmos;
+using System.Text.Json.Nodes;
 
 namespace Spinoza.Backend.Crosscutting.CosmosDBWrapper;
 
@@ -11,6 +12,7 @@ public interface ICosmosDBWrapper
     Task<ItemResponse<T>> CreateItemAsync<T>(T item, PartitionKey? partitionKey = null, ItemRequestOptions? requestOptions = null, CancellationToken cancellationToken = default(CancellationToken));
     Task<IList<TOut>> GetCosmosElementsAsync<TOut>(QueryDefinition queryDefinition);
     Task<IList<TOut>> GetAllCosmosElementsAsync<TOut>(int skip = 0, int count = 50);
+    IAsyncEnumerable<JsonNode?> EnumerateItemsAsJsonAsync(string sqlQueryText);
     /// <summary>
     /// This function updates item
     /// </summary>

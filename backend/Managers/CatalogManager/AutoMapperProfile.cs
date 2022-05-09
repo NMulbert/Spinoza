@@ -22,6 +22,10 @@ internal class AutoMapperProfile : Profile
 
         CreateMap<CatalogManager.Models.AccessorResults.OpenTextQuestion, CatalogManager.Models.FrontendResponses.OpenTextQuestion>();
 
+        CreateMap<CatalogManager.Models.AccessorResults.Content, CatalogManager.Models.FrontendResponses.Content>();
+
+        CreateMap<CatalogManager.Models.AccessorResults.AnswerOption, CatalogManager.Models.FrontendResponses.AnswerOption>();
+
         CreateMap<CatalogManager.Models.FrontendRequests.Content, CatalogManager.Models.AccessorSubmits.Content>();
 
         CreateMap<CatalogManager.Models.FrontendRequests.AnswerOption, CatalogManager.Models.AccessorSubmits.AnswerOption>();

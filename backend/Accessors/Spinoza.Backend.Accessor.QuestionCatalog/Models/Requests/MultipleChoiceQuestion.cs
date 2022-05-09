@@ -2,7 +2,7 @@
 {
 #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
 
-    interface IQuestion
+    public interface IQuestion
     {
         string Type { get; set; }
         string MessageType { get; set; }

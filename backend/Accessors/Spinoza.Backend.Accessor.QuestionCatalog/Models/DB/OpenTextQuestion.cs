@@ -1,4 +1,6 @@
-﻿namespace Spinoza.Backend.Accessor.QuestionCatalog.Models.DB
+﻿using Newtonsoft.Json;
+
+namespace Spinoza.Backend.Accessor.QuestionCatalog.Models.DB
 {
 #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
     
