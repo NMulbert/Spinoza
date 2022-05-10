@@ -40,7 +40,7 @@ public class CosmosDBWrapper : ICosmosDBWrapper
             };
 
             // Create a new instance of the Cosmos Client
-            CosmosClient = new CosmosClient(configuration["ConnectionStrings:CosmosDB"],cosmosClientOptions);
+            CosmosClient = new CosmosClient(configuration["ConnectionStrings:CosmosDB"], cosmosClientOptions);
             Database = CreateDataBase(CosmosClient, logger, cosmosDbInformationProvider);
             Container = CreateDataBaseContainer(CosmosClient, logger, Database, cosmosDbInformationProvider);
         }
@@ -126,7 +126,16 @@ public class CosmosDBWrapper : ICosmosDBWrapper
     public async IAsyncEnumerable<JsonNode?> EnumerateItemsAsJsonAsync(string sqlQueryText)
     {
         QueryDefinition queryDefinition = new QueryDefinition(sqlQueryText);
-        var queryIterator = Container.GetItemQueryStreamIterator(queryDefinition);
+
+        await foreach (JsonNode? item in EnumerateItemsAsJsonAsync(queryDefinition))
+        {
+            yield return item;
+        }
+    }
+
+    public async IAsyncEnumerable<JsonNode?> EnumerateItemsAsJsonAsync(QueryDefinition sqlQueryDefinition)
+    {
+        var queryIterator = Container.GetItemQueryStreamIterator(sqlQueryDefinition);
 
 
         while (queryIterator.HasMoreResults)
@@ -147,24 +156,7 @@ public class CosmosDBWrapper : ICosmosDBWrapper
         }
     }
 
-    public async Task<IList<TOut>> GetCosmosElementsAsStreamAsync<TOut>(QueryDefinition queryDefinition)
-    {
 
-        var queryIterator = Container.GetItemQueryStreamIterator(queryDefinition);
-
-        List<TOut> itemList = new List<TOut>();
-        double totalRequestCharge = 0;
-
-        while (queryIterator.HasMoreResults)
-        {
-            var currentResultSet = await queryIterator.ReadNextAsync();
-            var jsonNode = JsonNode.Parse(currentResultSet.Content);
-            
-            
-        }
-
-        throw new NotImplementedException();
-    }
 
     public async Task<IList<TOut>> GetCosmosElementsAsync<TOut>(QueryDefinition queryDefinition)
     {
@@ -215,7 +207,7 @@ public class CosmosDBWrapper : ICosmosDBWrapper
             .WithParameter("@count", count);
         return await GetCosmosElementsAsync<TOut>(query);
     }
-    
+
     public async Task<TOut?> GetScalarCosmosQueryResult<TOut>(QueryDefinition queryDefinition)
     {
         var queryResult = await GetCosmosElementsAsync<TOut>(queryDefinition);
