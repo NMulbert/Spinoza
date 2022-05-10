@@ -48,7 +48,7 @@ const TestCard = ({
         display: "inline-block",
       }}
     >
-      <Title order={4} style={{ textAlign: "center" }}>
+      <Title order={4} style={{ height: 45, textAlign: "center" }}>
         {title}
       </Title>
       <Divider my="sm" color="blue" />

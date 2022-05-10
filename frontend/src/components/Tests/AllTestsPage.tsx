@@ -30,13 +30,13 @@ function AllTestsPage() {
       });
   }, [offset]);
 
-  // Get total page count
   useEffect(() => {
-    let url = "http://localhost:50000/v1.0/invoke/catalogmanager/method/tests";
+    let url =
+      "http://localhost:50000/v1.0/invoke/catalogmanager/method/tests/count";
     fetch(url)
       .then((res) => res.json())
       .then((result) => {
-        setPageCount(Math.ceil(result.length / limit));
+        setPageCount(Math.ceil(result / limit));
       });
   }, []);
 
