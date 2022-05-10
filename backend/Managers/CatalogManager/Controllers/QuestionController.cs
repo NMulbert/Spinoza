@@ -77,8 +77,6 @@ namespace CatalogManager.Controllers
 
         public async Task<IActionResult> GetQuestionById(Guid id)
         {
-
-
             try
             {
                 var accessorQuestionType = await _daprClient.InvokeMethodAsync<Models.AccessorResults.CommonQuestion>(HttpMethod.Get, "questionaccessor", $"question/{id}");

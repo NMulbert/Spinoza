@@ -13,6 +13,7 @@ public interface ICosmosDBWrapper
     Task<IList<TOut>> GetCosmosElementsAsync<TOut>(QueryDefinition queryDefinition);
     Task<IList<TOut>> GetAllCosmosElementsAsync<TOut>(int skip = 0, int count = 50);
     IAsyncEnumerable<JsonNode?> EnumerateItemsAsJsonAsync(string sqlQueryText);
+    IAsyncEnumerable<JsonNode?> EnumerateItemsAsJsonAsync(QueryDefinition sqlQueryDefinition);
     /// <summary>
     /// This function updates item
     /// </summary>
