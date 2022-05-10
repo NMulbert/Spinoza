@@ -10,8 +10,12 @@ interface QuestionsState {
 }
 
 function AllQuestionsPage() {
+  const dispatch = useDispatch();
+  let questions = useSelector((s: QuestionsState) => s.questions.questions);
+
   useEffect(() => {
-    let url = "./QuestionObject.json";
+    let url =
+      "http://localhost:50000/v1.0/invoke/catalogmanager/method/allquestions";
     fetch(url)
       .then((res) => res.json())
       .then((result) => {
@@ -20,9 +24,6 @@ function AllQuestionsPage() {
   }, []);
 
   const [openedNQ, setOpenedNQ] = useState(false);
-
-  const dispatch = useDispatch();
-  let questions = useSelector((s: QuestionsState) => s.questions.questions);
 
   return (
     <div
@@ -43,14 +44,14 @@ function AllQuestionsPage() {
         {<NewQuestion />}
       </Modal>
       <Grid>
-        <Grid.Col md={6} lg={4} xl={3}>
+        <Grid.Col md={6} lg={6} xl={3}>
           <Card
             withBorder
             shadow="xl"
             p="lg"
             radius="xl"
             style={{
-              height: 309,
+              height: "100%",
               width: "90%",
               minWidth: "90%",
               margin: "auto",
@@ -78,15 +79,15 @@ function AllQuestionsPage() {
         {questions ? (
           questions.map((i: any) => {
             return (
-              <Grid.Col md={6} lg={4} xl={3} key={i.id}>
+              <Grid.Col md={6} lg={6} xl={3} key={i.id}>
                 <QuestionCard
                   id={i.id}
-                  title={i.title}
-                  description={i.description}
-                  author={i.author}
+                  name={i.name}
+                  content={i.content}
+                  authorId={i.authorId}
+                  difficultyLevel={i.difficultyLevel}
+                  type={i.type}
                   tags={i.tags}
-                  status={i.status}
-                  version={i.version}
                 />
               </Grid.Col>
             );
