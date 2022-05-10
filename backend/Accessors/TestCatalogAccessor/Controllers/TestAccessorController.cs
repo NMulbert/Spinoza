@@ -74,7 +74,7 @@ namespace Spinoza.Backend.Accessor.TestCatalog.Controllers
         }
         
 
-        [HttpPost("/azurequeueinput")]
+        [HttpPost("/testaccessorrequestqueue")]
         public async Task<IActionResult> GetTestDataInputFromQueueBinding()
         {
            

@@ -6,17 +6,21 @@ using System.Linq;
 using System.Text;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Configuration;
+using System;
+using Newtonsoft.Json;
+using System.Text.Json.Nodes;
+using System.Text.Json;
 
 namespace Spinoza.Backend.Crosscutting.CosmosDBWrapper;
 
 public class CosmosDBWrapper : ICosmosDBWrapper
 {
     private readonly ILogger<CosmosDBWrapper> _logger;
-    
+
     public Database Database { get; init; }
     public Container Container { get; init; }
 
-public CosmosClient CosmosClient { get; init; }
+    public CosmosClient CosmosClient { get; init; }
 
     public CosmosDBWrapper(IConfiguration configuration, ILogger<CosmosDBWrapper> logger, ICosmosDbInformationProvider cosmosDbInformationProvider)
     {
@@ -24,7 +28,19 @@ public CosmosClient CosmosClient { get; init; }
         _logger = logger;
         try
         {
-            CosmosClient = new CosmosClient(configuration["ConnectionStrings:CosmosDB"]);
+            JsonSerializerOptions jsonSerializerOptions = new JsonSerializerOptions()
+            {
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+            };
+            CosmosSystemTextJsonSerializer cosmosSystemTextJsonSerializer
+            = new CosmosSystemTextJsonSerializer(jsonSerializerOptions);
+            CosmosClientOptions cosmosClientOptions = new CosmosClientOptions()
+            {
+                Serializer = cosmosSystemTextJsonSerializer
+            };
+
+            // Create a new instance of the Cosmos Client
+            CosmosClient = new CosmosClient(configuration["ConnectionStrings:CosmosDB"],cosmosClientOptions);
             Database = CreateDataBase(CosmosClient, logger, cosmosDbInformationProvider);
             Container = CreateDataBaseContainer(CosmosClient, logger, Database, cosmosDbInformationProvider);
         }
@@ -38,7 +54,7 @@ public CosmosClient CosmosClient { get; init; }
 
     public static Database CreateDataBase(CosmosClient cosmosClient, ILogger<CosmosDBWrapper> logger, ICosmosDbInformationProvider cosmosDbInformationProvider)
     {
-       
+
         return (CreateCosmosElementAsync<Database, DatabaseProperties>(cosmosClient, logger,
                 async () => await cosmosClient.CreateDatabaseIfNotExistsAsync(cosmosDbInformationProvider.DataBaseName),
                 () => cosmosClient.GetDatabase(cosmosDbInformationProvider.DataBaseName))).Result;
@@ -46,7 +62,7 @@ public CosmosClient CosmosClient { get; init; }
 
     public static Container CreateDataBaseContainer(CosmosClient cosmosClient, ILogger<CosmosDBWrapper> logger, Database database, ICosmosDbInformationProvider cosmosDbInformationProvider)
     {
-        
+
         if (cosmosDbInformationProvider.UniqueKeys.Any())
         {
             return (CreateCosmosElementAsync<Container, ContainerProperties>(cosmosClient, logger,
@@ -107,6 +123,48 @@ public CosmosClient CosmosClient { get; init; }
                 () => response!);
     }
 
+    public async IAsyncEnumerable<JsonNode?> EnumerateItemsAsJsonAsync(string sqlQueryText)
+    {
+        QueryDefinition queryDefinition = new QueryDefinition(sqlQueryText);
+        var queryIterator = Container.GetItemQueryStreamIterator(queryDefinition);
+
+
+        while (queryIterator.HasMoreResults)
+        {
+            var currentResultSet = await queryIterator.ReadNextAsync();
+
+            var jsonNode = JsonNode.Parse(currentResultSet.Content);
+            var items = jsonNode!.Root["Documents"]!.AsArray();
+
+            while (items.Any())
+            {
+                var item = items[0];
+                items.Remove(item);
+
+                yield return item;
+            }
+
+        }
+    }
+
+    public async Task<IList<TOut>> GetCosmosElementsAsStreamAsync<TOut>(QueryDefinition queryDefinition)
+    {
+
+        var queryIterator = Container.GetItemQueryStreamIterator(queryDefinition);
+
+        List<TOut> itemList = new List<TOut>();
+        double totalRequestCharge = 0;
+
+        while (queryIterator.HasMoreResults)
+        {
+            var currentResultSet = await queryIterator.ReadNextAsync();
+            var jsonNode = JsonNode.Parse(currentResultSet.Content);
+            
+            
+        }
+
+        throw new NotImplementedException();
+    }
 
     public async Task<IList<TOut>> GetCosmosElementsAsync<TOut>(QueryDefinition queryDefinition)
     {
@@ -177,7 +235,7 @@ public CosmosClient CosmosClient { get; init; }
 
             try
             {
-               
+
                 var query = new QueryDefinition("SELECT * FROM ITEMS item WHERE item.id = @id").WithParameter("@id", idSelector(newItem).ToString().ToUpper());
                 var dbItem = (await GetCosmosElementsAsync<T>(query)).FirstOrDefault();
                 if (dbItem == null)
@@ -228,5 +286,5 @@ public CosmosClient CosmosClient { get; init; }
         return result;
 
     }
-    
+
 }
