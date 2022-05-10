@@ -9,6 +9,8 @@ internal class AutoMapperProfile : Profile
             .ForMember(dest => dest.MessageType, opt => opt.Ignore());
 
         CreateMap<CatalogManager.Models.AccessorResults.TestChangeResult, CatalogManager.Models.FrontendResponses.TestChangeResult>();
+
+        CreateMap<CatalogManager.Models.AccessorResults.QuestionChangeResult, CatalogManager.Models.FrontendResponses.QuestionChangeResult>();
         
         CreateMap<CatalogManager.Models.AccessorResults.Test, CatalogManager.Models.FrontendResponses.Test>();
 
@@ -29,10 +31,6 @@ internal class AutoMapperProfile : Profile
         CreateMap<CatalogManager.Models.FrontendRequests.Content, CatalogManager.Models.AccessorSubmits.Content>();
 
         CreateMap<CatalogManager.Models.FrontendRequests.AnswerOption, CatalogManager.Models.AccessorSubmits.AnswerOption>();
-
-        CreateMap<CatalogManager.Models.AccessorResults.AnswerOption, CatalogManager.Models.FrontendResponses.AnswerOption>();
-
-        CreateMap<CatalogManager.Models.AccessorResults.Content, CatalogManager.Models.FrontendResponses.Content>();
 
     }
 }

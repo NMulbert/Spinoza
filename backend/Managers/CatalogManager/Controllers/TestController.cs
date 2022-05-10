@@ -105,7 +105,6 @@ namespace CatalogManager.Controllers
         [HttpGet("/tests/count")]
         public async Task<IActionResult> GetTotalTests()
         {
-            _logger.LogInformation("****************************");
             
             try
             {

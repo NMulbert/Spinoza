@@ -69,7 +69,7 @@ namespace Spinoza.Backend.Accessor.QuestionCatalog.Controllers
                 item.AsObject().Remove("_rid");
                 item.AsObject().Remove("_etag");
                 item.AsObject().Remove("_self");
-                item.AsObject().Remove("attachments");
+                item.AsObject().Remove("_attachments");
                 item.AsObject().Remove("_ts");
 
 
@@ -90,7 +90,6 @@ namespace Spinoza.Backend.Accessor.QuestionCatalog.Controllers
         {
             try
             {
-
                 var query = new QueryDefinition("SELECT * FROM ITEMS item WHERE item.id = @id").WithParameter("@id", id.ToString().ToUpper());
 
                 var dbQuestion = (await _cosmosDBWrapper.GetCosmosElementsAsync<Models.DB.IQuestion>(query)).FirstOrDefault();
@@ -123,7 +122,6 @@ namespace Spinoza.Backend.Accessor.QuestionCatalog.Controllers
 
                     return new OkObjectResult(questionResultModel);
                 }
-
             }
             catch (Exception ex)
             {
@@ -136,79 +134,59 @@ namespace Spinoza.Backend.Accessor.QuestionCatalog.Controllers
 
         public async Task<IActionResult> InputFromQueueBinding([FromBody] JsonNode question)
         {
-            System.Diagnostics.Debugger.Launch();
+           // System.Diagnostics.Debugger.Launch();
 
             try
             {
-                var result = await _cosmosDBWrapper.CreateItemAsync(question);
-                if (result.StatusCode.IsOk())
+                Models.Responses.QuestionChangeResult? result = null;
+
+                if ((string)question["messageType"]! == "AddQuestion")
                 {
-                    //return CreateTestResult(dbTest.Id, "Create", $"Test {dbTest.Title} has been created", 2);
-
+                    result = await CreateQuestionAsync(question);
                 }
-                //else
-                // return CreateTestResult(dbTest.Id, "Create", $"Test {dbTest.Title} creation has been failed", 3, false);
+                else if ((string)question["messageType"]! == "UpdateQuestion")
+                {
+                    _logger.LogInformation("UpdateQuestion is not implemented yet");
+                }
+                else
+                {
+                    result = CreateQuestionResult((string)question["id"]!, "UnknownRequest", "Understand only CreateQuestion or UpdateQuestion", 1, false);
+                }
 
+                _logger.LogInformation("QuestionChangeResult reason: {0}", result.Reason);
 
-                //var questionRequest = await GetMessageFromBodyAsync<JsonNode>();
-                //Models.Responses.QuestionChangeResult? result = null;
-
-                //switch (questionRequest.MessageType)
-                //{
-                //    case "CreateQuestion":
-
-                //        result = await CreateQuestionAsync(questionRequest);
-                //        await PublishQuestiontResultAsync(result);
-                //        return Ok();
-
-                //    case "UpdateQuestion":
-
-                //        // result = await UpdateQuestionAsync(questionRequest);
-                //        return Ok();
-
-                //    default:
-                //        break;
-                //}
-
+                await PublishQuestionResultAsync(result);
+                return Ok();
             }
             catch (Exception ex)
             {
                 _logger.LogError($"Error while creatring or updating a question: {ex.Message}");
+                var result = CreateQuestionResult((string)question["id"] ?? Guid.Empty.ToString(), "Unknown", $"InternalServerError: {ex.Message}", 666, false);
+                await PublishQuestionResultAsync(result);
 
             }
             return Problem(statusCode: (int)StatusCodes.Status500InternalServerError);
         }
 
-        private async Task PublishQuestiontResultAsync(Models.Responses.QuestionChangeResult questionChangeResult)
-        {
-            try
-            {
-                await _daprClient.PublishEventAsync("pubsub", "question-topic", questionChangeResult);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError($"GetQuestiontFromQueueRequestAsync: error getting question from queue: {ex.Message}");
-            }
-        }
 
-        private async Task<Models.Responses.QuestionChangeResult> CreateQuestionAsync<TQuestion>(TQuestion questionRequest) where TQuestion : Models.DB.IQuestion
+        private async Task<Models.Responses.QuestionChangeResult> CreateQuestionAsync(JsonNode question)
         {
 
-            var dbQuestion = _mapper.Map<TQuestion>(questionRequest);
+            question.AsObject().Remove("messageType");
+            var response = await _cosmosDBWrapper.CreateItemAsync(question);
 
-            var result = await _cosmosDBWrapper.CreateItemAsync(dbQuestion);
-
-            if (result.StatusCode.IsOk())
+            if (response.StatusCode.IsOk())
             {
-                return CreateQuestionResult(dbQuestion.Id, "Create", $"Question {dbQuestion.Name} has been created", 2);
-
+                return CreateQuestionResult((string)question["id"]!, "Create", $"Question {question["name"]} has been created", 2);
             }
-            return CreateQuestionResult(dbQuestion.Id, "Create", $"Question {dbQuestion.Name} creation has failed", 3, false);
+
+            return CreateQuestionResult((string)question["id"]!, "Create", $"Question {question["name"]} creation has been failed", 3, false);
+
         }
 
         private Models.Responses.QuestionChangeResult CreateQuestionResult(string questionId, string messageType, string reason, int reasonId, bool isSuccess = true)
         {
-            return new Models.Responses.QuestionChangeResult()
+            return new Models.Responses.QuestionChangeResult() 
             {
                 Id = questionId,
                 MessageType = messageType,
@@ -220,34 +198,19 @@ namespace Spinoza.Backend.Accessor.QuestionCatalog.Controllers
             };
         }
 
-        //private async Task<TQuestion> GetMessageFromBodyAsync<TQuestion>() where TQuestion : Models.Requests.IQuestion
-        //{
-        //    var streamReader = new StreamReader(Request.Body);
-        //    var body = await streamReader.ReadToEndAsync();
-        //    _logger?.LogInformation($"Here is the question that is going to the datebase {body}");
-        //    var newQuestion = JsonConvert.DeserializeObject<Models.Requests.IQuestion>(body);
 
 
-        //    switch (newQuestion?.Type)
-        //    {
-        //        case "MultipleChoiceQuestion":
-
-        //            var multipleChoiceQuestion = JsonConvert.DeserializeObject<Models.Requests.MultipleChoiceQuestion>(body);
-        //            return multipleChoiceQuestion ?? throw new Exception("Error when deserialize message body");
-
-        //        case "OpenTextQuestion":
-
-        //            var openTextQuestion = JsonConvert.DeserializeObject<Models.Requests.OpenTextQuestion>(body);
-        //            return openTextQuestion ?? throw new Exception("Error when deserialize message body");
-
-        //        default:
-        //            throw new Exception("Error when deserialize message body");
-        //    }
-
-
-
-
-        //}
+        private async Task PublishQuestionResultAsync(Models.Responses.QuestionChangeResult questionChangeResult)
+        {
+            try
+            {
+                await _daprClient.PublishEventAsync("pubsub", "question-topic", questionChangeResult);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"InputFromQueueBinding: error getting question from queue: {ex.Message}");
+            }
+        }
     }
 
 }
