@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   RadioGroup,
   Radio,
@@ -15,9 +15,9 @@ import {
 import { Hash } from "tabler-icons-react";
 import MDEditor from "@uiw/react-md-editor";
 import MultiChoice from "./MultiChoice";
-import Checkboxes from "./Checkboxes";
 import { v4 as uuidv4 } from "uuid";
 import axios from "axios";
+import { ConsoleLogger } from "@microsoft/signalr/dist/esm/Utils";
 
 function NewQuestion() {
   const [dataHash, setHashData] = useState([
@@ -28,11 +28,13 @@ function NewQuestion() {
   ]);
 
   const [answerType, setAnswerType] = useState("OpenTextQuestion");
+  const [multiArr, setMultiArr] = useState([]);
+  const [questionTxt, setQuestionTxt] = useState("");
 
   let protoType: any =
     answerType === "OpenTextQuestion"
-      ? ""
-      : { questionText: "", answerOptions: [] };
+      ? questionTxt
+      : { questionText: questionTxt, answerOptions: multiArr };
 
   const [questionValues, setQuestionValues] = useState({
     MessageType: "AddQuestion",
@@ -49,6 +51,15 @@ function NewQuestion() {
     content: protoType,
   });
 
+  useEffect(() => {
+    answerType === "MultipleChoiceQuestion"
+      ? setQuestionValues({
+          ...questionValues,
+          content: { questionText: questionTxt, answerOptions: multiArr },
+        })
+      : setQuestionValues({ ...questionValues, content: questionTxt });
+  }, [questionTxt, multiArr]);
+
   return (
     <div>
       <SimpleGrid cols={1}>
@@ -58,6 +69,7 @@ function NewQuestion() {
             style={{ width: "50%", textAlign: "left" }}
             placeholder="Question Name"
             radius="xs"
+            maxLength={40}
             onChange={(e: any) => {
               setQuestionValues({ ...questionValues, name: e.target.value });
             }}
@@ -83,18 +95,9 @@ function NewQuestion() {
         </div>
         <div className="container">
           <MDEditor
-            value={
-              answerType === "MultipleChoiceQuestion"
-                ? questionValues.content.questionText
-                : questionValues.content
-            }
+            value={questionTxt}
             onChange={(e: any) => {
-              answerType === "MultipleChoiceQuestion"
-                ? setQuestionValues({
-                    ...questionValues,
-                    content: { questionText: e, answerOptions: [] },
-                  })
-                : setQuestionValues({ ...questionValues, content: e });
+              setQuestionTxt(e);
             }}
           />
         </div>
@@ -110,7 +113,6 @@ function NewQuestion() {
             data={[
               { value: "OpenTextQuestion", label: "Text" },
               { value: "MultipleChoiceQuestion", label: "Multiple Choice" },
-              { value: "Checkboxes", label: "Checkboxes" },
             ]}
             onChange={(value: any) => {
               setAnswerType(value);
@@ -121,13 +123,13 @@ function NewQuestion() {
             }}
           />
           <Space h="xs" />
+
           {answerType === "MultipleChoiceQuestion" ? (
-            <MultiChoice />
-          ) : answerType === "Checkboxes" ? (
-            <Checkboxes />
+            <MultiChoice setMultiArr={setMultiArr} />
           ) : (
             <></>
           )}
+
           <Space h="xs" />
           <RadioGroup
             value={questionValues.difficultyLevel}
@@ -182,7 +184,6 @@ function NewQuestion() {
           </Group>
         </div>
       </SimpleGrid>
-      {console.log(questionValues)}
     </div>
   );
 }

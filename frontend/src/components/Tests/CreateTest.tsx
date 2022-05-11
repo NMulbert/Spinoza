@@ -5,11 +5,8 @@ import {
   Group,
   Button,
   SimpleGrid,
-  Modal,
   MultiSelect,
 } from "@mantine/core";
-import ChooseQuestion from "../Questions/ChooseQuestion";
-import NewQuestion from "../Questions/NewQuestion";
 import axios from "axios";
 import { InputLabel } from "@mui/material";
 import MDEditor from "@uiw/react-md-editor";
@@ -51,6 +48,7 @@ function CreateTest() {
             style={{ width: "40%", textAlign: "left" }}
             placeholder="Test title"
             radius="xs"
+            maxLength={40}
             onChange={(e: any) => {
               setTestsValues({ ...testValues, title: e.target.value });
             }}
