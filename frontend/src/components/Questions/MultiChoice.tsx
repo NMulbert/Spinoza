@@ -1,26 +1,30 @@
 import {
   Group,
-  Text,
-  Code,
   Button,
   Radio,
   ActionIcon,
   Textarea,
   Card,
+  Checkbox,
 } from "@mantine/core";
 import { useForm, formList } from "@mantine/form";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import { GripVertical, X } from "tabler-icons-react";
 
-function MultiChoice() {
+function MultiChoice({ setMultiArr }: any) {
   const [chooseMode, setChooseMode] = useState(false);
+  const [checkboxMode, setCheckboxMode] = useState(false);
 
   const form = useForm({
     initialValues: {
       answers: formList([{ description: "", isCorrect: false }]),
     },
   });
+
+  useEffect(() => {
+    setMultiArr(form.values.answers);
+  }, [form.values.answers]);
 
   const fields = form.values.answers.map((_, index) => (
     <Draggable key={index} index={index} draggableId={index.toString()}>
@@ -30,7 +34,20 @@ function MultiChoice() {
             <GripVertical size={18} />{" "}
           </div>
 
-          {chooseMode ? (
+          {checkboxMode ? (
+            chooseMode ? (
+              <Checkbox
+                checked={_.isCorrect}
+                {...form.getListInputProps("answers", index, "isCorrect")}
+              />
+            ) : (
+              <Checkbox
+                disabled
+                checked={_.isCorrect}
+                {...form.getListInputProps("answers", index, "isCorrect")}
+              />
+            )
+          ) : chooseMode ? (
             <Radio
               name="Answer"
               checked={_.isCorrect}
@@ -108,6 +125,16 @@ function MultiChoice() {
           }
         >
           + Add option
+        </Button>
+        <Button
+          radius="xl"
+          variant="subtle"
+          compact
+          onClick={() => {
+            setCheckboxMode(!checkboxMode);
+          }}
+        >
+          {checkboxMode ? "Radio" : "Checkbox"}
         </Button>
         <Button
           radius="xl"
