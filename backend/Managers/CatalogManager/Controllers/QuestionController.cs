@@ -156,6 +156,26 @@ namespace CatalogManager.Controllers
             }
             return Problem(statusCode: (int)StatusCodes.Status500InternalServerError);
         }
+
+        
+        [HttpGet("/questions/count")]
+        public async Task<IActionResult> GetTotalQuestionCount()
+        {
+            try
+            {
+                var dbTotalQuestions = await _daprClient.InvokeMethodAsync<int>(HttpMethod.Get, "questionaccessor", "/questions/count");
+                _logger.LogInformation($"GetTotalQuestionCount: accessor returns {dbTotalQuestions}");
+                return new OkObjectResult(dbTotalQuestions);
+            }
+            catch(Exception ex)
+            {
+                _logger.LogError($"Error while getting total questions number. Error: {ex.Message}");
+            }
+            return Problem(statusCode: (int)StatusCodes.Status500InternalServerError);
+        }
+
     }
+    
+   
 
 }
