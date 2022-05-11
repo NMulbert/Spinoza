@@ -143,6 +143,7 @@ namespace Spinoza.Backend.Accessor.QuestionCatalog.Controllers
             {
                 return CreateQuestionResult((string)question["id"]!, "Create", $"Question: {question["name"]} has been created", 2);
             }
+            
 
             return CreateQuestionResult((string)question["id"]!, "Create", $"Question {question["name"]} creation has been failed", 3, false);
 
@@ -161,9 +162,7 @@ namespace Spinoza.Backend.Accessor.QuestionCatalog.Controllers
                 ResourceType = "Question"
             };
         }
-
-
-
+        
         private async Task PublishQuestionResultAsync(Models.Responses.QuestionChangeResult questionChangeResult)
         {
             try
@@ -175,6 +174,29 @@ namespace Spinoza.Backend.Accessor.QuestionCatalog.Controllers
                 _logger.LogError($"InputFromQueueBinding: error getting question from queue: {ex.Message}");
             }
         }
+
+        [HttpGet("/questions/count")]
+        public async Task<IActionResult> GetTotalQuestionCount()
+        {
+            try
+            {
+                int? dbTotalQuestions = await _cosmosDBWrapper.GetScalarCosmosQueryResult<int?>(new QueryDefinition("SELECT VALUE COUNT(1) FROM c"));
+                if (dbTotalQuestions == null)
+                {
+                    return new NotFoundObjectResult("No Questions found");
+                }
+                //else
+                return new OkObjectResult(dbTotalQuestions);
+
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Error while getting questions: {ex.Message}");
+            }
+            return Problem(statusCode: (int)StatusCodes.Status500InternalServerError);
+
+        }
+
     }
 
 }
