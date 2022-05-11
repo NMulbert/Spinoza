@@ -37,30 +37,12 @@ namespace CatalogManager.Controllers
             return await PostNewOrUpdateQuestionToQueue(true);
         }
 
-
-        [HttpGet("/questions")]
-        public async Task<IActionResult> GetAll(int? offset, int? limit)
-        {
-            try
-            {
-                var allAccessorQuestions = await _daprClient.InvokeMethodAsync<List<Models.AccessorResults.IQuestion>>(HttpMethod.Get, "questionaccessor", $"questionaccessor/questions?offset={offset ?? 0 }&limit={limit ?? 100}");
-                var questionsModelResult = _mapper.Map<List<Models.FrontendResponses.IQuestion>>(allAccessorQuestions);
-                _logger?.LogInformation($"returned {questionsModelResult.Count} questions");
-                return new OkObjectResult(questionsModelResult);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError($"Error while getting all questions: {ex.Message}");
-            }
-            return Problem(statusCode: (int)StatusCodes.Status500InternalServerError);
-        }
-
         [HttpGet("/allquestions")]
-        public async Task<IActionResult> GetAllQuestions()
+        public async Task<IActionResult> GetAllQuestions(int? offset, int? limit)
         {
             try
             {
-                var allAccessorQuestions = await _daprClient.InvokeMethodAsync<JsonArray>(HttpMethod.Get, "questionaccessor", $"questionaccessor/allquestions");
+                var allAccessorQuestions = await _daprClient.InvokeMethodAsync<JsonArray>(HttpMethod.Get, "questionaccessor", $"questionaccessor/allquestions?offset={offset ?? 0 }&limit={limit ?? 100}");
 
                 _logger?.LogInformation($"returned {allAccessorQuestions.Count} questions");
 

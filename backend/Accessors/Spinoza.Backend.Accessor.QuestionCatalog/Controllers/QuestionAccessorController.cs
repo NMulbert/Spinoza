@@ -28,32 +28,11 @@ namespace Spinoza.Backend.Accessor.QuestionCatalog.Controllers
             _mapper = mapper;
         }
 
-        [HttpGet("/questions")]
-        public async Task<IActionResult> GetQuestions(int? offset, int? limit)
-        {
-            try
-            {
-                var dbQuestions = await _cosmosDBWrapper.GetAllCosmosElementsAsync<Models.DB.IQuestion>(offset ?? 0, limit ?? 100);
-
-                var resultQuestions = _mapper.Map<List<Models.Results.IQuestion>>(dbQuestions);
-
-                return new OkObjectResult(resultQuestions);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError($"Error while getting questions: {ex.Message}");
-
-            }
-            return Problem(statusCode: (int)StatusCodes.Status500InternalServerError);
-        }
-
         [HttpGet("allquestions")]
-        public async Task<IActionResult> QueryAllQuestionsAsync()
+        public async Task<IActionResult> QueryAllQuestionsAsync(int? offset, int? limit)
         {
 
-
-            var sqlQueryText = "SELECT * FROM c";
-
+            var sqlQueryText = new QueryDefinition("SELECT * FROM c OFFSET @offset LIMIT @limit").WithParameter("@offset", offset).WithParameter("@limit", limit);
 
             JsonArray allQuestions = new JsonArray();
 
@@ -106,7 +85,7 @@ namespace Spinoza.Backend.Accessor.QuestionCatalog.Controllers
                 RemoveDBRelatedProperties(dbQuestion);
 
                 return new OkObjectResult(dbQuestion);
-               
+
             }
             catch (Exception ex)
             {
@@ -119,8 +98,6 @@ namespace Spinoza.Backend.Accessor.QuestionCatalog.Controllers
 
         public async Task<IActionResult> InputFromQueueBinding([FromBody] JsonNode question)
         {
-            // System.Diagnostics.Debugger.Launch();
-
             try
             {
                 Models.Responses.QuestionChangeResult? result = null;
@@ -156,7 +133,6 @@ namespace Spinoza.Backend.Accessor.QuestionCatalog.Controllers
 
         private async Task<Models.Responses.QuestionChangeResult> CreateQuestionAsync(JsonNode question)
         {
-            //System.Diagnostics.Debugger.Launch();
             question["creationTimeUTC"] = DateTimeOffset.UtcNow;
             question["lastUpdateCreationTimeUTC"] = DateTimeOffset.UtcNow;
             question["previousVersionId"] = "none";
