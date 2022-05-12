@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Modal, Grid, Card, Text, Loader, Button } from "@mantine/core";
+import { Modal, Grid, Card, Text, Loader, Button, Center, Pagination } from "@mantine/core";
 import QuestionCard from "../Questions/QuestionCard";
 import NewQuestion from "./NewQuestion";
 import { useDispatch, useSelector } from "react-redux";
@@ -10,18 +10,37 @@ interface QuestionsState {
 }
 
 function AllQuestionsPage() {
+  // Pagination
+  const [limit] = useState(11);
+  const [offset, setOffset] = useState(0);
+  const [pageCount, setPageCount] = useState(0);
+
   const dispatch = useDispatch();
   let questions = useSelector((s: QuestionsState) => s.questions.questions);
 
+  // Get limited quantity of tests
   useEffect(() => {
-    let url =
-      "http://localhost:50000/v1.0/invoke/catalogmanager/method/allquestions";
-    fetch(url)
+    let url2 = `http://localhost:50000/v1.0/invoke/catalogmanager/method/allquestions?offset=${offset}&limit=${limit}`;
+    fetch(url2)
       .then((res) => res.json())
       .then((result) => {
         dispatch(loadQuestions(result));
       });
+  }, [offset]);
+
+  useEffect(() => {
+    let url =
+      "http://localhost:50000/v1.0/invoke/catalogmanager/method/questions/count";
+    fetch(url)
+      .then((res) => res.json())
+      .then((result) => {
+        setPageCount(Math.ceil(result / limit));
+      });
   }, []);
+
+  const handlePageClick = (e: any) => {
+    setOffset((e - 1) * limit);
+  };
 
   const [openedNQ, setOpenedNQ] = useState(false);
 
@@ -97,6 +116,15 @@ function AllQuestionsPage() {
             <Loader />
           </>
         )}
+        <Grid.Col>
+          <Center>
+            <Pagination
+              onChange={handlePageClick}
+              total={pageCount}
+              withEdges
+            />
+          </Center>
+        </Grid.Col>
       </Grid>
     </div>
   );

@@ -8,6 +8,7 @@ import {
   TextInput,
   MultiSelect,
   Modal,
+  TypographyStylesProvider,
 } from "@mantine/core";
 import { CalendarTime, Edit, UserCircle } from "tabler-icons-react";
 import NewQuestion from "../Questions/NewQuestion";
@@ -96,7 +97,13 @@ function ViewTest() {
         }
       </Modal>
 
-      <Grid style={{ paddingLeft: "250px", paddingTop: "25px" }}>
+      <Grid
+        style={{
+          paddingLeft: "250px",
+          paddingTop: "25px",
+          backgroundColor: "#f0f0f0",
+        }}
+      >
         <Grid.Col span={12}>
           <Edit
             size={60}
@@ -109,7 +116,6 @@ function ViewTest() {
 
           {editMode ? (
             <TextInput
-              label="Test title:"
               style={{ width: "90%" }}
               value={test.title}
               onChange={(e) => {
@@ -134,8 +140,13 @@ function ViewTest() {
           </Group>
         </Grid.Col>
 
-        <Grid.Col span={12}>
-          <Title order={5}>Description:</Title>
+        <Grid.Col span={12} data-color-mode="light">
+          <Title
+            order={5}
+            style={{ textDecoration: "underline", marginBottom: 5 }}
+          >
+            Description:
+          </Title>
           {editMode ? (
             <MDEditor
               style={{ width: "90%" }}
@@ -146,17 +157,22 @@ function ViewTest() {
             />
           ) : (
             <MDEditor.Markdown
-              style={{ backgroundColor: "white", color: "black" }}
+              style={{ backgroundColor: "#f0f0f0", color: "black" }}
               source={test.description}
             />
           )}
         </Grid.Col>
 
         <Grid.Col span={12}>
+          <Title
+            order={5}
+            style={{ textDecoration: "underline", marginBottom: 5 }}
+          >
+            Tags:
+          </Title>
           {editMode ? (
             <MultiSelect
               data={dataHash}
-              label="Tags:"
               style={{ width: "90%", textAlign: "left" }}
               placeholder="#Tags"
               radius="xs"
@@ -186,8 +202,12 @@ function ViewTest() {
 
         {editMode ? (
           <Grid.Col span={12}>
-            <Title order={5}>Questions:</Title>
-            <br />
+            <Title
+              order={5}
+              style={{ textDecoration: "underline", marginBottom: 5 }}
+            >
+              Questions:
+            </Title>
             <Group spacing="sm">
               <Button
                 variant="outline"
@@ -216,9 +236,8 @@ function ViewTest() {
 
         {test.questions.length !== 0 ? (
           test.questions.map((i: any) => {
-            console.log(i);
             return (
-              <Grid.Col md={12} key={i.id}>
+              <Grid.Col md={12} key={i}>
                 <QuestionInTest
                   removeQuestion={removeQuestion}
                   id={i}

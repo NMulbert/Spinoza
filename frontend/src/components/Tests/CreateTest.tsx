@@ -45,7 +45,7 @@ function CreateTest() {
         <div>
           <InputLabel>Test title:</InputLabel>
           <TextInput
-            style={{ width: "40%", textAlign: "left" }}
+            style={{ width: "50%", textAlign: "left" }}
             placeholder="Test title"
             radius="xs"
             maxLength={40}
@@ -54,11 +54,11 @@ function CreateTest() {
             }}
           />
         </div>
-        <div>
+        <div data-color-mode="light">
           <InputLabel>Description:</InputLabel>
           <MDEditor
             value={testValues.description}
-            style={{ width: "40%" }}
+            style={{ width: "50%" }}
             onChange={(e: any) => {
               setTestsValues({ ...testValues, description: e });
             }}
@@ -68,7 +68,7 @@ function CreateTest() {
           <InputLabel>Tags:</InputLabel>
           <MultiSelect
             data={dataHash}
-            style={{ width: "40%", textAlign: "left" }}
+            style={{ width: "50%", textAlign: "left" }}
             placeholder="#Tags"
             radius="xs"
             searchable
