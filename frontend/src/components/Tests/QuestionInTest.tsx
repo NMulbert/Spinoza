@@ -1,6 +1,6 @@
-import { Button, ActionIcon, Card, Grid, Title, Text } from "@mantine/core";
-import React from "react";
-import { X } from "tabler-icons-react";
+import { Button, ActionIcon, Card, Grid, Title, Text, Group, Divider } from "@mantine/core";
+import React, { useEffect, useState } from "react";
+import { CalendarTime, Stars, UserCircle, X } from "tabler-icons-react";
 
 type QuestionData = {
   id: string;
@@ -8,7 +8,28 @@ type QuestionData = {
   editMode: boolean;
 };
 
-function Preview({ id, removeQuestion, editMode }: QuestionData) {
+function Preview({
+  id,
+  removeQuestion,
+  editMode,
+}: QuestionData) {
+  const [questionTest, setQuestionTest] = useState({
+    name: "",
+    authorId: "",
+    type: "",
+    difficultyLevel: "",
+    content: "" || {questionText: ""}
+  });
+
+  useEffect(() => {
+    let url = `http://localhost:50000/v1.0/invoke/catalogmanager/method/question/${id}`;
+    fetch(url)
+      .then((res) => res.json())
+      .then((result) => {
+        setQuestionTest(result);
+      });
+  }, []);
+
   return (
     <Card
       withBorder
@@ -40,19 +61,18 @@ function Preview({ id, removeQuestion, editMode }: QuestionData) {
         <></>
       )}
 
-      <Title order={3}>Question name {id}</Title>
+      <Title order={3}>{questionTest.name}</Title>
+      <Divider my="sm" color="blue" />
       <Text lineClamp={2}>
-        From Bulbapedia: Bulbasaur is a small, quadrupedal Pokémon that has
-        blue-green skin with darker patches. It has red eyes with white pupils,
-        pointed, ear-like structures on top of its head, and a short, blunt
-        snout with a wide mouth. A pair of small, pointed teeth are visible in
-        the upper jaw when its mouth is open.From Bulbapedia: Bulbasaur is a
-        small, quadrupedal Pokémon that has blue-green skin with darker patches.
-        It has red eyes with white pupils, pointed, ear-like structures on top
-        of its head, and a short, blunt snout with a wide mouth. A pair of
-        small, pointed teeth are visible in the upper jaw when its mouth is
-        open.
+        {questionTest.type === "MultipleChoiceQuestion" ? (
+          questionTest.content.questionText
+        ) : questionTest.type === "OpenTextQuestion" ? (
+          questionTest.content
+        ) : (
+          <></>
+        )}
       </Text>
+
       <Button
         size="xs"
         radius="lg"
@@ -62,6 +82,24 @@ function Preview({ id, removeQuestion, editMode }: QuestionData) {
       >
         Open
       </Button>
+      <Group
+        style={{ marginTop: 14, color: "#444848", float: "right" }}
+        spacing="xs"
+        position="center"
+      >
+        <UserCircle size={18} />
+        <Text size="xs" weight={700}>
+          {questionTest.authorId}
+        </Text>
+        <CalendarTime size={18} />
+        <Text size="xs" weight={700}>
+          Creation Date
+        </Text>
+        <Stars size={18} />
+        <Text size="xs" weight={700}>
+          Difficulty: {questionTest.difficultyLevel}
+        </Text>
+      </Group>
     </Card>
   );
 }

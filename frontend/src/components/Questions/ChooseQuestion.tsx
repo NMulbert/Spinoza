@@ -28,7 +28,8 @@ function ChooseQuestion({ UpdateQuestions, setOpenedEQ }: QuestionsState) {
   const [selectedQuestions, setSelectedQuestions] = useState([]);
   const [questions, setQuestions] = useState([]);
   useEffect(() => {
-    let url = "/QuestionObject.json";
+    let url =
+      "http://localhost:50000/v1.0/invoke/catalogmanager/method/allquestions";
     fetch(url)
       .then((res) => res.json())
       .then((result) => {
@@ -73,7 +74,9 @@ function ChooseQuestion({ UpdateQuestions, setOpenedEQ }: QuestionsState) {
           </Group>
         </div>
         <div>
-          <ScrollArea style={{ height: 450, width: "100%" }}>
+          <ScrollArea
+            style={{ height: 450, width: "100%", backgroundColor: "#f0f0f0" }}
+          >
             {
               <SimpleGrid style={{ textAlign: "center" }} cols={3}>
                 {questions.length !== 0 ? (
@@ -84,12 +87,12 @@ function ChooseQuestion({ UpdateQuestions, setOpenedEQ }: QuestionsState) {
                         selectedQuestions={selectedQuestions}
                         key={i.id}
                         id={i.id}
-                        title={i.title}
-                        description={i.description}
-                        author={i.author}
+                        name={i.name}
+                        content={i.content}
+                        authorId={i.authorId}
+                        difficultyLevel={i.difficultyLevel}
+                        type={i.type}
                         tags={i.tags}
-                        status={i.status}
-                        version={i.version}
                       />
                     );
                   })

@@ -93,7 +93,7 @@ function NewQuestion() {
             }}
           />
         </div>
-        <div className="container">
+        <div className="container" data-color-mode="light">
           <MDEditor
             value={questionTxt}
             onChange={(e: any) => {

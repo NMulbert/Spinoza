@@ -1,26 +1,28 @@
 import React, { useState } from "react";
 import { Group, Button, Text, Badge, Card, Space } from "@mantine/core";
+import MDEditor from "@uiw/react-md-editor";
+import { CalendarTime, Stars, UserCircle } from "tabler-icons-react";
 
 type QuestionData = {
   id: string;
-  title: string;
-  description: string;
-  author: any;
+  name: string;
+  content: any;
+  authorId: any;
+  difficultyLevel: string;
+  type: string;
   tags: any;
-  status: string;
-  version: string;
   selectedQuestions: string[];
   setSelectedQuestions: (questions: any) => void;
 };
 
 function ExistingQuestion({
   id,
-  title,
-  description,
-  author,
+  name,
+  content,
+  authorId,
+  difficultyLevel,
+  type,
   tags,
-  status,
-  version,
   setSelectedQuestions,
   selectedQuestions,
 }: QuestionData) {
@@ -36,18 +38,28 @@ function ExistingQuestion({
             ? {
                 border: "1px solid rgb(34, 139, 230)",
                 backgroundColor: "rgb(231, 245, 255)",
+                height: "100%",
+                margin: 10
               }
-            : {}
+            : { height: "100%", margin: 10}
         }
       >
-        <Text weight="bold">{title}</Text>
-        <Text
-          size="sm"
-          weight="500"
-        >{`${author.firstName} ${author.lastName}`}</Text>
-        <Text size="sm" weight="500">
-          Date
-        </Text>
+        <Text size="lg" weight="bold">{name}</Text>
+        <Group style={{ color: "#444848" }} spacing="xs" position="center">
+          <UserCircle size={18} />
+          <Text size="xs" weight={700}>
+            {authorId}
+          </Text>
+          {/* <CalendarTime size={18} />
+          <Text size="xs" weight={700}>
+            Creation Date
+          </Text> */}
+          <Stars size={18} />
+          <Text size="xs" weight={700}>
+            Difficulty: {difficultyLevel}
+          </Text>
+        </Group>
+
         <Space h="md" />
         <Group position="center" spacing="xs">
           {tags.map((i: any) => {
@@ -59,9 +71,17 @@ function ExistingQuestion({
           })}
         </Group>
         <Space h="xs" />
-        <Text size="sm" lineClamp={3}>
-          {description}
-        </Text>
+        <Card.Section style={{ margin: 5, height: 80 }}>
+          <Text lineClamp={3} size="md" weight={500}>
+            {type === "MultipleChoiceQuestion" ? (
+              content.questionText
+            ) : type === "OpenTextQuestion" ? (
+              content
+            ) : (
+              <></>
+            )}
+          </Text>
+        </Card.Section>
         <Space h="md" />
         <Button
           onClick={() => {
@@ -71,7 +91,6 @@ function ExistingQuestion({
                   selectedQuestions.filter((question) => question !== id)
                 )
               : setSelectedQuestions([...selectedQuestions, id]);
-            console.log(selectedQuestions.length);
           }}
           variant="outline"
           radius="lg"
