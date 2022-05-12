@@ -11,16 +11,16 @@ public class Test3 {
 		// Invoke Browser
 		// Test For Add Question To Test
 		
-		System.setProperty("webdriver.chrome.driver", "E:\\Github\\Spinoza_Automation\\Spinoza\\lib\\chromedriver.exe");
+		System.setProperty("webdriver.chrome.driver", ".\\lib\\chromedriver.exe");
 		WebDriver driver = new ChromeDriver();
 		driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
 
 		driver.manage().window().maximize();
 		driver.get("http://localhost:3000/");
 
-		System.out.println("TEST START - ADD TO QUESTION");
+		System.out.println("TEST START - ADD QUESTION TO TEST");
 		EditTest(driver);
-		System.out.println("TEST END - ADD TO QUESTION");
+		System.out.println("TEST END - ADD QUESTION TO TEST");
 
 		Thread.sleep(3000);
 		driver.quit();
