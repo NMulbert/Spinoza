@@ -12,16 +12,16 @@ public class Test2 {
 		// Invoke Browser
 		// Test Edit Test
 		
-		System.setProperty("webdriver.chrome.driver", "E:\\Github\\Spinoza_Automation\\Spinoza\\lib\\chromedriver.exe");
+		System.setProperty("webdriver.chrome.driver", ".\\lib\\chromedriver.exe");
 		WebDriver driver = new ChromeDriver();
 		driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
 
 		driver.manage().window().maximize();
 		driver.get("http://localhost:3000/");
 
-		System.out.println("TEST START - EDIT");
+		System.out.println("TEST START - TEST EDIT");
 		EditTest(driver);
-		System.out.println("TEST END - EDIT");
+		System.out.println("TEST END - TEST EDIT");
 
 		Thread.sleep(3000);
 		driver.quit();

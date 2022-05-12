@@ -14,16 +14,16 @@ public class Test1 {
 		// Invoke Browser
 		// Test Create Test
 
-		System.setProperty("webdriver.chrome.driver", "E:\\Github\\Spinoza_Automation\\Spinoza\\lib\\chromedriver.exe");
+		System.setProperty("webdriver.chrome.driver", ".\\lib\\chromedriver.exe");
 		WebDriver driver = new ChromeDriver();
 		driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
 
 		driver.manage().window().maximize();
 		driver.get("http://localhost:3000/");
 
-		System.out.println("TEST START - CREATE");
+		System.out.println("TEST START - TEST CREATE");
 		CreateNewTest(driver);
-		System.out.println("TEST END - CREATE");
+		System.out.println("TEST END - TEST CREATE");
 		
 		Thread.sleep(5000);
 		driver.quit();
@@ -78,7 +78,6 @@ public class Test1 {
 	private static void AddTags(WebDriver driver) {
 		try {
 			WebElement Tags = driver.findElement(By.xpath("//input[@placeholder='#Tags']"));
-			Tags.click();
 			Tags.sendKeys("React", Keys.ENTER);
 			Tags.sendKeys("C#", Keys.ENTER);
 			Tags.sendKeys("JavaScript", Keys.ENTER);
@@ -92,24 +91,29 @@ public class Test1 {
 	}
 	
 	private static void SaveTest(WebDriver driver) {
-		driver.findElement(By.cssSelector(
-				"button[class='mantine-Button-gradient mantine-Button-root mantine-Group-child mantine-e8vnjr']"))
-				.click();
-
-		WebDriverWait wait = new WebDriverWait(driver, 15);
-		wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//div[@role='alert']")));
-		
-		String alert = driver.findElement(By.xpath("//div[@role='alert']")).getText();
-		
-		if(alert.contains("InternalServerError")) {
-			System.out.println("TEST FAILED");
+		try {
+			driver.findElement(By.cssSelector(
+					"button[class='mantine-Button-gradient mantine-Button-root mantine-Group-child mantine-e8vnjr']"))
+			.click();
+			
+			WebDriverWait wait = new WebDriverWait(driver, 15);
+			wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//div[@role='alert']")));
+			
+			String alert = driver.findElement(By.xpath("//div[@role='alert']")).getText();
+			
+			if(alert.contains("InternalServerError")) {
+				System.out.println("TEST FAILED");
+			}
+			else {
+				System.out.println("TEST SUCCESS");
+			}
+			
+			driver.findElement(By.xpath("//span[contains(text(),'Tests')]")).click();
+			
+		} catch (Exception e) {
+			System.out.println("Error = Save As Draft");
+			System.out.println(e);
 		}
-		else {
-			System.out.println("TEST SUCCESS");
-		}
-		
-		driver.findElement(By.xpath("//span[contains(text(),'Tests')]")).click();
-		
 	}
 
 }
