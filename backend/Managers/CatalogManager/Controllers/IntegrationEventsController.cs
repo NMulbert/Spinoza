@@ -28,14 +28,14 @@ namespace CatalogManager.Controllers
         [Topic("pubsub", "test-topic")]
         public async Task<IActionResult> OnTestCreated([FromBody] Models.AccessorResults.TestChangeResult accessorTestChangeResult)
         {
-            
+
             try
             {
                 
                 var frontendTestChangeResult = _mapper.Map<Models.FrontendResponses.TestChangeResult>(accessorTestChangeResult);
                 _logger?.LogInformation($"Message received: {frontendTestChangeResult.Id}");
-               await PublishMessageToSignalRAsync(frontendTestChangeResult);
-                
+                await PublishMessageToSignalRAsync(frontendTestChangeResult);
+
                 return Ok();
             }
             catch (Exception ex)
@@ -44,6 +44,41 @@ namespace CatalogManager.Controllers
             }
             return Problem(statusCode: (int)StatusCodes.Status500InternalServerError);
         }
+
+
+
+        //[Topic("pubsub", "question-topic")]
+        //public async Task<IActionResult> OnQuestionCreated([FromBody] Models.AccessorResults.QuestionChangeResult accessorQuestionChangeResult)
+        //{
+        //    //System.Diagnostics.Debugger.Launch();
+        //    try
+        //    {
+        //        var frontendQuestionChangeResult = _mapper.Map<Models.FrontendResponses.QuestionChangeResult>(accessorQuestionChangeResult);
+        //        _logger?.LogInformation($"Message received: {frontendQuestionChangeResult.Id}");
+        //        await PublishQuestionMessageToSignalRAsync(frontendQuestionChangeResult);
+
+        //        return Ok();
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        _logger.LogError($"error Pubsub reciver: {ex.Message}");
+        //    }
+        //    return Problem(statusCode: (int)StatusCodes.Status500InternalServerError);
+        //}
+
+
+        //private async Task<IActionResult> PublishQuestionMessageToSignalRAsync(Models.FrontendResponses.QuestionChangeResult frontendQuestionChangeResult)
+        //{
+        //    Data data = new();
+        //    Argument argument = new Argument();
+        //    argument.Sender = "dapr";
+        //    argument.Text = frontendQuestionChangeResult;
+        //    data.Arguments = new Argument[] { argument };
+        //    //Dictionary<string, string> newmetadata = new Dictionary<string, string>() { { "hub", "spinozahub" } };
+        //    //var metadata = new Dictionary<string, string>() { { "spinozaHub", "Test" } };
+        //    await _daprClient.InvokeBindingAsync("azuresignalroutput", "create", data);
+        //    return Ok();
+        //}
 
         private async Task<IActionResult> PublishMessageToSignalRAsync(Models.FrontendResponses.TestChangeResult frontendTestChangeResult)
         {

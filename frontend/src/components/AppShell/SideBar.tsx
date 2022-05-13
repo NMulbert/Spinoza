@@ -117,7 +117,7 @@ export function Sidebar() {
     <div>
       <Navbar
         width={{ base: 240 }}
-        height={"90vh"}
+        height={"91.5vh"}
         p="md"
         style={{ position: "fixed" }}
       >

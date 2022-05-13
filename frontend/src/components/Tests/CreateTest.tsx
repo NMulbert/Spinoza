@@ -5,11 +5,8 @@ import {
   Group,
   Button,
   SimpleGrid,
-  Modal,
   MultiSelect,
 } from "@mantine/core";
-import ChooseQuestion from "../Questions/ChooseQuestion";
-import NewQuestion from "../Questions/NewQuestion";
 import axios from "axios";
 import { InputLabel } from "@mui/material";
 import MDEditor from "@uiw/react-md-editor";
@@ -48,19 +45,20 @@ function CreateTest() {
         <div>
           <InputLabel>Test title:</InputLabel>
           <TextInput
-            style={{ width: "40%", textAlign: "left" }}
+            style={{ width: "50%", textAlign: "left" }}
             placeholder="Test title"
             radius="xs"
+            maxLength={40}
             onChange={(e: any) => {
               setTestsValues({ ...testValues, title: e.target.value });
             }}
           />
         </div>
-        <div>
+        <div data-color-mode="light">
           <InputLabel>Description:</InputLabel>
           <MDEditor
             value={testValues.description}
-            style={{ width: "40%" }}
+            style={{ width: "50%" }}
             onChange={(e: any) => {
               setTestsValues({ ...testValues, description: e });
             }}
@@ -70,7 +68,7 @@ function CreateTest() {
           <InputLabel>Tags:</InputLabel>
           <MultiSelect
             data={dataHash}
-            style={{ width: "40%", textAlign: "left" }}
+            style={{ width: "50%", textAlign: "left" }}
             placeholder="#Tags"
             radius="xs"
             searchable
@@ -97,6 +95,7 @@ function CreateTest() {
                     "http://localhost:50000/v1.0/invoke/catalogmanager/method/test",
                     JSON.stringify({ ...testValues })
                   );
+                  setTestsValues({ ...testValues, id: uuidv4().toUpperCase() });
                 } catch (err) {
                   console.log(err);
                 }

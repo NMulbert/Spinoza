@@ -8,14 +8,15 @@ import {
   TextInput,
   MultiSelect,
   Modal,
+  TypographyStylesProvider,
 } from "@mantine/core";
 import { CalendarTime, Edit, UserCircle } from "tabler-icons-react";
-import QuestionCard from "../Questions/QuestionCard";
 import NewQuestion from "../Questions/NewQuestion";
 import ChooseQuestion from "../Questions/ChooseQuestion";
 import MDEditor from "@uiw/react-md-editor";
 import { useParams } from "react-router-dom";
 import axios from "axios";
+import QuestionInTest from "./QuestionInTest";
 
 function ViewTest() {
   let { id } = useParams();
@@ -27,6 +28,7 @@ function ViewTest() {
     creationTimeUTC: "",
     questions: [],
   });
+
   useEffect(() => {
     let url = `http://localhost:50000/v1.0/invoke/catalogmanager/method/test/${id}`;
     fetch(url)
@@ -56,13 +58,28 @@ function ViewTest() {
     .split(" ");
   let creationTimeUTC = `${date[2]}/ ${date[1]}/ ${date[3]} | ${date[4]}`;
 
+  const UpdateQuestions = (questions: []) => {
+    setTest({
+      ...test,
+      questions: Array.from(new Set([...test.questions, ...questions])),
+    });
+  };
+
+  const removeQuestion = (removedQuestion: string) => {
+    setTest({
+      ...test,
+      questions: test.questions.filter(
+        (question) => question !== removedQuestion
+      ),
+    });
+  };
   return (
     <div>
       <Modal
         opened={openedNQ}
         onClose={() => setOpenedNQ(false)}
         title="New Question"
-        size="75%"
+        size="100%"
       >
         {<NewQuestion />}
       </Modal>
@@ -70,12 +87,23 @@ function ViewTest() {
         opened={openedEQ}
         onClose={() => setOpenedEQ(false)}
         title="Questions Catalog"
-        size="75%"
+        size="100%"
       >
-        {<ChooseQuestion />}
+        {
+          <ChooseQuestion
+            setOpenedEQ={setOpenedEQ}
+            UpdateQuestions={UpdateQuestions}
+          />
+        }
       </Modal>
 
-      <Grid style={{ paddingLeft: "250px", paddingTop: "25px" }}>
+      <Grid
+        style={{
+          paddingLeft: "250px",
+          paddingTop: "25px",
+          backgroundColor: "#f0f0f0",
+        }}
+      >
         <Grid.Col span={12}>
           <Edit
             size={60}
@@ -88,7 +116,6 @@ function ViewTest() {
 
           {editMode ? (
             <TextInput
-              label="Test title:"
               style={{ width: "90%" }}
               value={test.title}
               onChange={(e) => {
@@ -113,8 +140,13 @@ function ViewTest() {
           </Group>
         </Grid.Col>
 
-        <Grid.Col span={12}>
-          <Title order={5}>Description:</Title>
+        <Grid.Col span={12} data-color-mode="light">
+          <Title
+            order={5}
+            style={{ textDecoration: "underline", marginBottom: 5 }}
+          >
+            Description:
+          </Title>
           {editMode ? (
             <MDEditor
               style={{ width: "90%" }}
@@ -125,17 +157,22 @@ function ViewTest() {
             />
           ) : (
             <MDEditor.Markdown
-              style={{ backgroundColor: "white", color: "black" }}
+              style={{ backgroundColor: "#f0f0f0", color: "black" }}
               source={test.description}
             />
           )}
         </Grid.Col>
 
         <Grid.Col span={12}>
+          <Title
+            order={5}
+            style={{ textDecoration: "underline", marginBottom: 5 }}
+          >
+            Tags:
+          </Title>
           {editMode ? (
             <MultiSelect
               data={dataHash}
-              label="Tags:"
               style={{ width: "90%", textAlign: "left" }}
               placeholder="#Tags"
               radius="xs"
@@ -165,8 +202,12 @@ function ViewTest() {
 
         {editMode ? (
           <Grid.Col span={12}>
-            <Title order={5}>Questions:</Title>
-            <br />
+            <Title
+              order={5}
+              style={{ textDecoration: "underline", marginBottom: 5 }}
+            >
+              Questions:
+            </Title>
             <Group spacing="sm">
               <Button
                 variant="outline"
@@ -193,27 +234,21 @@ function ViewTest() {
           <></>
         )}
 
-        {/* {test.questions.length !== 0 ? (
-          (console.log(test.questions.length),
+        {test.questions.length !== 0 ? (
           test.questions.map((i: any) => {
             return (
-              <Grid.Col md={6} lg={3} key={i.id}>
-                <QuestionCard
-                  id={i.id}
-                  title={i.Title}
-                  description={i.Description}
-                  author={i.Author}
-                  tags={i.Tags}
-                  status={i.Status}
-                  version={i.Version}
+              <Grid.Col md={12} key={i}>
+                <QuestionInTest
+                  removeQuestion={removeQuestion}
+                  id={i}
+                  editMode={editMode}
                 />
               </Grid.Col>
             );
-          }))
+          })
         ) : (
           <></>
-        )} */}
-
+        )}
         <Grid.Col span={12}>
           <Group spacing="sm">
             <Button

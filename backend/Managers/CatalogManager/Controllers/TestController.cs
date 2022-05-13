@@ -97,9 +97,29 @@ namespace CatalogManager.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError("Error when {0} ending addtest post: {1}", isUpdate ? "updating" : "creating", ex.Message);
+                _logger.LogError("Error when {0} ending add test post: {1}", isUpdate ? "updating" : "creating", ex.Message);
             }
             return Problem(statusCode: (int)StatusCodes.Status500InternalServerError);
+        }
+
+        [HttpGet("/tests/count")]
+        public async Task<IActionResult> GetTotalTests()
+        {
+            
+            try
+            {
+                var dbTotalTests = await _daprClient.InvokeMethodAsync<int>(HttpMethod.Get, "testaccessor", "/tests/count");
+
+                    _logger.LogInformation($"GetTotalTests: accessor returns {dbTotalTests}");
+                   
+                return new OkObjectResult(dbTotalTests);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Error while getting total tests number. Error: {ex.Message}");
+            }
+            return Problem(statusCode: (int)StatusCodes.Status500InternalServerError);
+
         }
     }
 }

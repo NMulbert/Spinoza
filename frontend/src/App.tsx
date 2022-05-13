@@ -23,12 +23,8 @@ function App() {
         <Route path="/" element={<Sidebar />}>
           <Route index element={<AllTestsPage />} />
           <Route path="/tests" element={<AllTestsPage />} />
+          <Route path={`/tests/:id`} element={<ViewTest />} />
           <Route path="/create-test" element={<CreateTest />} />
-          {tests?.map((e: any) => {
-            return (
-              <Route key={e?.id} path={`/tests/:id`} element={<ViewTest />} />
-            );
-          })}
           <Route path="/questions" element={<AllQuestionsPage />} />
           <Route path="*" element={<PageNotFound />} />
         </Route>

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   RadioGroup,
   Radio,
@@ -15,7 +15,9 @@ import {
 import { Hash } from "tabler-icons-react";
 import MDEditor from "@uiw/react-md-editor";
 import MultiChoice from "./MultiChoice";
-import Checkboxes from "./Checkboxes";
+import { v4 as uuidv4 } from "uuid";
+import axios from "axios";
+import { ConsoleLogger } from "@microsoft/signalr/dist/esm/Utils";
 
 function NewQuestion() {
   const [dataHash, setHashData] = useState([
@@ -24,11 +26,39 @@ function NewQuestion() {
     "JavaScript",
     "Python",
   ]);
-  const [questionValue, setQuestionValue] = useState(
-    "**Write question here...**"
-  );
 
-  const [answerType, setAnswerType] = useState("Text");
+  const [answerType, setAnswerType] = useState("OpenTextQuestion");
+  const [multiArr, setMultiArr] = useState([]);
+  const [questionTxt, setQuestionTxt] = useState("");
+
+  let protoType: any =
+    answerType === "OpenTextQuestion"
+      ? questionTxt
+      : { questionText: questionTxt, answerOptions: multiArr };
+
+  const [questionValues, setQuestionValues] = useState({
+    MessageType: "AddQuestion",
+    id: uuidv4().toUpperCase(),
+    name: "",
+    difficultyLevel: "1",
+    type: "OpenTextQuestion",
+    status: "Draft",
+    authorId: "alonf@zion-net.co.il",
+    tags: [{ name: "", status: "" }],
+    schemaVersion: "1.0",
+    testVersion: "1.0",
+    previousVersionId: "none",
+    content: protoType,
+  });
+
+  useEffect(() => {
+    answerType === "MultipleChoiceQuestion"
+      ? setQuestionValues({
+          ...questionValues,
+          content: { questionText: questionTxt, answerOptions: multiArr },
+        })
+      : setQuestionValues({ ...questionValues, content: questionTxt });
+  }, [questionTxt, multiArr]);
 
   return (
     <div>
@@ -39,6 +69,10 @@ function NewQuestion() {
             style={{ width: "50%", textAlign: "left" }}
             placeholder="Question Name"
             radius="xs"
+            maxLength={40}
+            onChange={(e: any) => {
+              setQuestionValues({ ...questionValues, name: e.target.value });
+            }}
           />
           <MultiSelect
             data={dataHash}
@@ -51,13 +85,19 @@ function NewQuestion() {
             creatable
             getCreateLabel={(query) => `+ Create ${query}`}
             onCreate={(query) => setHashData((current) => [...current, query])}
+            onChange={(e: any) => {
+              setQuestionValues({
+                ...questionValues,
+                tags: e,
+              });
+            }}
           />
         </div>
-        <div className="container">
+        <div className="container" data-color-mode="light">
           <MDEditor
-            value={questionValue}
-            onChange={(val) => {
-              setQuestionValue(val!);
+            value={questionTxt}
+            onChange={(e: any) => {
+              setQuestionTxt(e);
             }}
           />
         </div>
@@ -71,29 +111,42 @@ function NewQuestion() {
             radius="sm"
             color="green"
             data={[
-              { value: "Text", label: "Text" },
-              { value: "MultipleChoice", label: "Multiple Choice" },
-              { value: "Checkboxes", label: "Checkboxes" },
+              { value: "OpenTextQuestion", label: "Text" },
+              { value: "MultipleChoiceQuestion", label: "Multiple Choice" },
             ]}
-            onChange={(value) => {
+            onChange={(value: any) => {
               setAnswerType(value);
+              setQuestionValues({
+                ...questionValues,
+                type: value,
+              });
             }}
           />
           <Space h="xs" />
-          {answerType === "MultipleChoice" ? (
-            <MultiChoice />
-          ) : answerType === "Checkboxes" ? (
-            <Checkboxes />
+
+          {answerType === "MultipleChoiceQuestion" ? (
+            <MultiChoice setMultiArr={setMultiArr} />
           ) : (
             <></>
           )}
+
           <Space h="xs" />
-          <RadioGroup label="Select level:" required>
-            <Radio value="level1" label="1" />
-            <Radio value="level2" label="2" />
-            <Radio value="level3" label="3" />
-            <Radio value="level4" label="4" />
-            <Radio value="level5" label="5" />
+          <RadioGroup
+            value={questionValues.difficultyLevel}
+            onChange={(value: any) => {
+              setQuestionValues({
+                ...questionValues,
+                difficultyLevel: value,
+              });
+            }}
+            label="Select level:"
+            required
+          >
+            <Radio value="1" label="1" />
+            <Radio value="2" label="2" />
+            <Radio value="3" label="3" />
+            <Radio value="4" label="4" />
+            <Radio value="5" label="5" />
           </RadioGroup>
           <Space h="xs" />
           <Divider size="xs" variant="dotted" />
@@ -104,6 +157,20 @@ function NewQuestion() {
               radius="lg"
               variant="gradient"
               gradient={{ from: "#838685", to: "#cfd0d0" }}
+              onClick={async () => {
+                try {
+                  const response = await axios.post(
+                    "http://localhost:50000/v1.0/invoke/catalogmanager/method/question",
+                    JSON.stringify({ ...questionValues })
+                  );
+                  setQuestionValues({
+                    ...questionValues,
+                    id: uuidv4().toUpperCase(),
+                  });
+                } catch (err) {
+                  console.log(err);
+                }
+              }}
             >
               Save as Draft
             </Button>

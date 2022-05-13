@@ -1,104 +1,153 @@
-import { Button, Group, Radio, Textarea, Card, Checkbox } from "@mantine/core";
-import { useState } from "react";
-import { X } from "tabler-icons-react";
+import {
+  Group,
+  Button,
+  Radio,
+  ActionIcon,
+  Textarea,
+  Card,
+  Checkbox,
+} from "@mantine/core";
+import { useForm, formList } from "@mantine/form";
+import { useEffect, useState } from "react";
+import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
+import { GripVertical, X } from "tabler-icons-react";
 
-function MultiChoice() {
-  const [inputList, setInputList] = useState([{ answerOption: "" }]);
+function MultiChoice({ setMultiArr }: any) {
   const [chooseMode, setChooseMode] = useState(false);
-  const [correctAnswer, setCorrectAnswer] = useState("");
+  const [checkboxMode, setCheckboxMode] = useState(false);
 
-  const handleInputChange = (e: any, index: number) => {
-    const { name, value } = e.target;
-    const list: any = [...inputList];
-    list[index][name] = value;
-    setInputList(list);
-  };
+  const form = useForm({
+    initialValues: {
+      answers: formList([{ description: "", isCorrect: false }]),
+    },
+  });
 
-  const handleAddClick = () => {
-    setInputList([...inputList, { answerOption: "" }]);
-  };
+  useEffect(() => {
+    setMultiArr(form.values.answers);
+  }, [form.values.answers]);
 
-  const handleRemoveClick = (index: any) => {
-    const list = [...inputList];
-    list.splice(index, 1);
-    setInputList(list);
-  };
+  const fields = form.values.answers.map((_, index) => (
+    <Draggable key={index} index={index} draggableId={index.toString()}>
+      {(provided) => (
+        <Group ref={provided.innerRef} mt="xs" {...provided.draggableProps}>
+          <div {...provided.dragHandleProps}>
+            <GripVertical size={18} />{" "}
+          </div>
+
+          {checkboxMode ? (
+            chooseMode ? (
+              <Checkbox
+                checked={_.isCorrect}
+                {...form.getListInputProps("answers", index, "isCorrect")}
+              />
+            ) : (
+              <Checkbox
+                disabled
+                checked={_.isCorrect}
+                {...form.getListInputProps("answers", index, "isCorrect")}
+              />
+            )
+          ) : chooseMode ? (
+            <Radio
+              name="Answer"
+              checked={_.isCorrect}
+              value={_.description}
+              onChange={() => {
+                {
+                  form.setListItem("answers", index, {
+                    description: _.description,
+                    isCorrect: true,
+                  });
+                }
+                {
+                  form.values.answers.map((e: any) => (e.isCorrect = false));
+                }
+              }}
+            />
+          ) : (
+            <Radio
+              disabled
+              checked={_.isCorrect}
+              name="Answer"
+              value={_.description}
+            />
+          )}
+          <Textarea
+            placeholder="Add option"
+            autosize
+            minRows={1}
+            style={{ width: "80%" }}
+            autoFocus={true}
+            {...form.getListInputProps("answers", index, "description")}
+          />
+          <ActionIcon
+            color="red"
+            variant="hover"
+            onClick={() => form.removeListItem("answers", index)}
+          >
+            <X size={18} />
+          </ActionIcon>
+        </Group>
+      )}
+    </Draggable>
+  ));
 
   return (
-    <div>
-      <Card withBorder shadow="xs" p="lg" radius="sm">
-        {inputList.map((x, i) => {
-          return (
-            <div key={i}>
-              <Group>
-                {chooseMode ? (
-                  <Radio
-                    name="answerOption"
-                    value={x.answerOption}
-                    onChange={(e) => {
-                      handleInputChange(e, i);
-                      setCorrectAnswer(e.target.value);
-                    }}
-                  />
-                ) : (
-                  <Radio
-                    disabled
-                    name="answerOption"
-                    value={x.answerOption}
-                    onChange={(e) => handleInputChange(e, i)}
-                  />
-                )}
-                <Textarea
-                  name="answerOption"
-                  value={x.answerOption}
-                  onChange={(e) => handleInputChange(e, i)}
-                  style={{ width: "80%" }}
-                  autosize
-                  variant="unstyled"
-                  placeholder="Add option"
-                />
-                {inputList.length !== 1 && (
-                  <Button
-                    variant="subtle"
-                    radius="xl"
-                    color="gray"
-                    style={{}}
-                    onClick={() => handleRemoveClick(i)}
-                  >
-                    <X size={26} />
-                  </Button>
-                )}
-              </Group>
-
-              <div>
-                {inputList.length - 1 === i && (
-                  <Button
-                    radius="xl"
-                    variant="subtle"
-                    compact
-                    onClick={handleAddClick}
-                  >
-                    + Add option
-                  </Button>
-                )}
-                {inputList.length - 1 === i && (
-                  <Button
-                    radius="xl"
-                    variant="subtle"
-                    compact
-                    onClick={() => {
-                      setChooseMode(!chooseMode);
-                    }}
-                  >
-                    Correct answer
-                  </Button>
-                )}
-              </div>
+    <Card withBorder sx={{ maxWidth: "auto" }} mx="auto">
+      <DragDropContext
+        onDragEnd={({ destination, source }) =>
+          form.reorderListItem("answers", {
+            from: source.index,
+            to: destination!.index,
+          })
+        }
+      >
+        <Droppable droppableId="dnd-list" direction="vertical">
+          {(provided) => (
+            <div {...provided.droppableProps} ref={provided.innerRef}>
+              {fields}
+              {provided.placeholder}
             </div>
-          );
-        })}
-      </Card>
-    </div>
+          )}
+        </Droppable>
+      </DragDropContext>
+
+      <Group mt="md">
+        <Button
+          radius="xl"
+          variant="subtle"
+          compact
+          onClick={() =>
+            form.addListItem("answers", {
+              description: "",
+              isCorrect: false,
+            })
+          }
+        >
+          + Add option
+        </Button>
+        <Button
+          radius="xl"
+          variant="subtle"
+          compact
+          onClick={() => {
+            setCheckboxMode(!checkboxMode);
+          }}
+        >
+          {checkboxMode ? "Radio" : "Checkbox"}
+        </Button>
+        <Button
+          radius="xl"
+          variant="subtle"
+          compact
+          onClick={() => {
+            setChooseMode(!chooseMode);
+          }}
+        >
+          {chooseMode ? "Done" : "Correct answer"}
+        </Button>
+      </Group>
+    </Card>
   );
 }
 

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Modal, Grid, Card, Text, Loader, Button } from "@mantine/core";
+import { Modal, Grid, Card, Text, Loader, Button, Center, Pagination } from "@mantine/core";
 import QuestionCard from "../Questions/QuestionCard";
 import NewQuestion from "./NewQuestion";
 import { useDispatch, useSelector } from "react-redux";
@@ -10,19 +10,39 @@ interface QuestionsState {
 }
 
 function AllQuestionsPage() {
+  // Pagination
+  const [limit] = useState(11);
+  const [offset, setOffset] = useState(0);
+  const [pageCount, setPageCount] = useState(0);
+
+  const dispatch = useDispatch();
+  let questions = useSelector((s: QuestionsState) => s.questions.questions);
+
+  // Get limited quantity of tests
   useEffect(() => {
-    let url = "./QuestionObject.json";
-    fetch(url)
+    let url2 = `http://localhost:50000/v1.0/invoke/catalogmanager/method/allquestions?offset=${offset}&limit=${limit}`;
+    fetch(url2)
       .then((res) => res.json())
       .then((result) => {
         dispatch(loadQuestions(result));
       });
+  }, [offset]);
+
+  useEffect(() => {
+    let url =
+      "http://localhost:50000/v1.0/invoke/catalogmanager/method/questions/count";
+    fetch(url)
+      .then((res) => res.json())
+      .then((result) => {
+        setPageCount(Math.ceil(result / limit));
+      });
   }, []);
 
-  const [openedNQ, setOpenedNQ] = useState(false);
+  const handlePageClick = (e: any) => {
+    setOffset((e - 1) * limit);
+  };
 
-  const dispatch = useDispatch();
-  let questions = useSelector((s: QuestionsState) => s.questions.questions);
+  const [openedNQ, setOpenedNQ] = useState(false);
 
   return (
     <div
@@ -38,55 +58,55 @@ function AllQuestionsPage() {
         opened={openedNQ}
         onClose={() => setOpenedNQ(false)}
         title="New Question"
-        size="75%"
+        size="100%"
       >
         {<NewQuestion />}
       </Modal>
-<Grid>
-      <Grid.Col md={6} lg={4} xl={3}>
-        <Card
-          withBorder
-          shadow="xl"
-          p="lg"
-          radius="xl"
-          style={{
-            height: 309,
-            width: "90%",
-            minWidth: "90%",
-            margin: "auto",
-            padding: 0,
-            display: "inline-block",
-          }}
-        >
-          <Button
+      <Grid>
+        <Grid.Col md={6} lg={6} xl={3}>
+          <Card
+            withBorder
+            shadow="xl"
+            p="lg"
             radius="xl"
-            variant="light"
-            color="blue"
-            onClick={() => setOpenedNQ(true)}
             style={{
-              fontSize: 30,
-              width: "100%",
               height: "100%",
+              width: "90%",
+              minWidth: "90%",
+              margin: "auto",
+              padding: 0,
+              display: "inline-block",
             }}
           >
-            NEW QUESTION
-            <Writing size={50} />
-          </Button>
-        </Card>
-      </Grid.Col>
+            <Button
+              radius="xl"
+              variant="light"
+              color="blue"
+              onClick={() => setOpenedNQ(true)}
+              style={{
+                fontSize: 30,
+                width: "100%",
+                height: "100%",
+              }}
+            >
+              NEW QUESTION
+              <Writing size={50} />
+            </Button>
+          </Card>
+        </Grid.Col>
 
         {questions ? (
           questions.map((i: any) => {
             return (
-              <Grid.Col md={6} lg={4} xl={3} key={i.id}>
+              <Grid.Col md={6} lg={6} xl={3} key={i.id}>
                 <QuestionCard
                   id={i.id}
-                  title={i.title}
-                  description={i.description}
-                  author={i.author}
+                  name={i.name}
+                  content={i.content}
+                  authorId={i.authorId}
+                  difficultyLevel={i.difficultyLevel}
+                  type={i.type}
                   tags={i.tags}
-                  status={i.status}
-                  version={i.version}
                 />
               </Grid.Col>
             );
@@ -96,6 +116,15 @@ function AllQuestionsPage() {
             <Loader />
           </>
         )}
+        <Grid.Col>
+          <Center>
+            <Pagination
+              onChange={handlePageClick}
+              total={pageCount}
+              withEdges
+            />
+          </Center>
+        </Grid.Col>
       </Grid>
     </div>
   );

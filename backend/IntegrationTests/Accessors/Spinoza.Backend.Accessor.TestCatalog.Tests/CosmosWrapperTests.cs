@@ -1,9 +1,9 @@
 using Microsoft.Azure.Cosmos;
-using Newtonsoft.Json;
 using Spinoza.Backend.Crosscutting.CosmosDBWrapper;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json.Serialization;
 using Xunit;
 
 namespace Spinoza.Backend.Accessor.TestCatalog.Tests
@@ -11,26 +11,19 @@ namespace Spinoza.Backend.Accessor.TestCatalog.Tests
 #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
     class TestItem 
     {
-        [JsonProperty("_etag")]
+        [JsonPropertyName("_etag")]
         public string ETag { get; set; }
 
-       
-
-        [JsonProperty("title")]
         public string Title { get; set; }
 
-        [JsonProperty(PropertyName = "ttl", NullValueHandling = NullValueHandling.Ignore)]
-        public int? TTL { get; set; }
+        [JsonPropertyName("ttl")]
+        public int TTL { get; set; } = int.MaxValue;
 
-        [JsonProperty("questions")]
         public List<Guid> Questions { get; set; } = new List<Guid>();
 
-        [JsonProperty("id")]
         public string Id { get; set; }
 
-        [JsonProperty("description")]
         public string Descrition { get; set; }
-        [JsonProperty("testVersion")]
         public string TestVersion { get; set; } = "1.0";
 
 
