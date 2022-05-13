@@ -7,7 +7,7 @@ spec:
   version: v1
   metadata:
   - name: connectionString
-    value: Endpoint=http://localhost;Port=8999;AccessKey=ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789ABCDEFGH;Version=1.0;
+    value: Endpoint=http://host.docker.internal:8888;Port=8888;AccessKey=ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789ABCDEFGH;Version=1.0;
+    #value: Endpoint=https://spinozasignalr.service.signalr.net;AccessKey=PX2Iu99frJJAapzcp/qQSco3gF6rjdWrhqMisv4mTeI=;Version=1.0;
   - name: hub 
     value: spinozahub
-    

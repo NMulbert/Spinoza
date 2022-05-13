@@ -47,13 +47,15 @@ namespace CatalogManager.Controllers
 
         private async Task<IActionResult> PublishMessageToSignalRAsync(Models.FrontendResponses.TestChangeResult frontendTestChangeResult)
         {
+            var variableValue = Environment.GetEnvironmentVariable("SignalRHubVariable")!;
             Data data = new ();
             Argument  argument = new Argument();
             argument.Sender = "dapr";
             argument.Text = frontendTestChangeResult;
             data.Arguments = new Argument [] {argument};
-            //Dictionary<string, string> newmetadata = new Dictionary<string, string>() { { "hub", "spinozahub" } };
+            //Dictionary<string, string> newmetadata = new Dictionary<string, string>() { { "hub", "spinozahub" },{"group","test" } };
             //var metadata = new Dictionary<string, string>() { { "spinozaHub", "Test" } };
+            //await _daprClient.InvokeBindingAsync("azuresignalroutput", "create", data, newmetadata);
             await _daprClient.InvokeBindingAsync("azuresignalroutput", "create", data);
             return Ok();
         }

@@ -41,15 +41,17 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 app.UseCors(MyAllowSpecificOrigins);
-app.UseHttpsRedirection();
-app.UseRouting();
+//app.UseHttpsRedirection();
+//app.UseRouting();
 app.UseAuthorization();
 app.UseCloudEvents();
 app.Urls.Add("http://*:80");
-app.UseEndpoints(endpoints =>
-{
+app.MapControllers();
+app.MapSubscribeHandler();
+//app.UseEndpoints(endpoints =>
+//{
 
-    endpoints.MapSubscribeHandler();
-    endpoints.MapControllers();
-});
+//    endpoints.MapSubscribeHandler();
+//    endpoints.MapControllers();
+//});
 app.Run();

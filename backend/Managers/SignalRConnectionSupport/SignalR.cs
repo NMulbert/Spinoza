@@ -9,9 +9,11 @@ namespace SignalRConnectionSupport
 {
     public static class SignalR
 	{
+		static string value = Environment.GetEnvironmentVariable("SignalRHubVariable")!;
 		[FunctionName("negotiate")]
 		public static IActionResult Negotiate(
 			[HttpTrigger(AuthorizationLevel.Anonymous)] HttpRequest req,
+			//[SignalRConnectionInfo(HubName = "%SignalRHubVariable%")] SignalRConnectionInfo connectionInfo, ILogger log)
 			[SignalRConnectionInfo(HubName = "spinozahub")] SignalRConnectionInfo connectionInfo, ILogger log)
 
 		{

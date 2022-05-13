@@ -12,11 +12,11 @@ import { Notify } from "./components/Notify";
 const root = createRoot(document.getElementById("root") as HTMLDivElement);
 root.render(
   <Provider store={store}>
-    <AzureAD provider={signInAuthProvider} forceLogin={true}>
+    {/* <AzureAD provider={signInAuthProvider} forceLogin={true}> */}
       <BrowserRouter>
         <App />
       </BrowserRouter>
       <Notify />
-    </AzureAD>
+    {/* </AzureAD> */}
   </Provider>
 );

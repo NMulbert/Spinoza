@@ -17,6 +17,7 @@ services:
       - redis
       - placement
       - rabbitmq
+      - catalogmanager
     networks:
       - spinoza-dapr
     environment:
@@ -35,10 +36,10 @@ services:
         - "./dapr/:/dapr"
     depends_on:
       - rabbitmq
-      - testaccessor
-      - signalr
+      #- signalr
       - azurite
       - cosmosdb
+      - testaccessor
     network_mode: "service:testaccessor"
 
   #############################################
@@ -51,12 +52,12 @@ services:
       dockerfile: ./Managers/CatalogManager/Dockerfile
     ports:
       - 5007:80
-      - 50005:3500
+      - 50000:3500
       - 50001:50001
     depends_on:
-      - rabbitmq
       - redis
       - placement
+      - rabbitmq
     networks:
       - spinoza-dapr
     environment:
@@ -74,11 +75,11 @@ services:
     volumes:
         - "./dapr/:/dapr"
     depends_on:
-      - catalogmanager
       - rabbitmq
-      - signalr
+      #- signalr
       - azurite
       - cosmosdb
+      - catalogmanager
     
     network_mode: "service:catalogmanager"
 
@@ -192,21 +193,21 @@ services:
 ############################
 # SignalR emulator service
 ############################
-  signalr:
-    image: ${DOCKER_REGISTRY-}signalremulator
-    build:
-      context: .
-      dockerfile: ./LocalEnvironmentSupport/Dockerfile
-    #ports:
-    #  - 8999:8999
-    #  - 7071:7071
-    network_mode: host
-    volumes:
-     - ./workspace:/workspace
-    environment:
-      - ASRS_EMULATOR_PORT=8888
-#      - ASPNETCORE_ENVIRONMENT=Development
-      - ASPNETCORE_URLS=http://+:8888;http://+:7071
+#  signalr:
+#    image: ${DOCKER_REGISTRY-}signalremulator
+#    build:
+#      context: .
+#      dockerfile: ./LocalEnvironmentSupport/Dockerfile
+#    #ports:
+#    #  - 8999:8999
+#    #  - 7071:7071
+#    network_mode: host
+#    volumes:
+#     - ./workspace:/workspace
+#    environment:
+#      - ASRS_EMULATOR_PORT=8888
+##      - ASPNETCORE_ENVIRONMENT=Development
+#      - ASPNETCORE_URLS=http://+:8888;http://+:7071
       
 ############################
 # Global settings

@@ -5,7 +5,8 @@ import MuiAlert from "@mui/material/Alert";
 
 export const Notify = () => {
   const hubConnection = new signalR.HubConnectionBuilder()
-    .withUrl("https://signalr-management.azurewebsites.net/api")
+    // .withUrl("https://signalr-management.azurewebsites.net/api")
+    .withUrl("http://localhost:80/api")
     .configureLogging(signalR.LogLevel.Information)
     .build();
 
