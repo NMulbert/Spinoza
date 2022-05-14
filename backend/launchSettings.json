@@ -15,7 +15,9 @@
         "zipkin": "StartWithoutDebugging",
         "rabbitmq": "StartWithoutDebugging",
         "signalr": "StartWithoutDebugging",
-        "signalr-negotiate": "StartWithoutDebugging"
+        "signalr-negotiate": "StartWithoutDebugging",
+        "spinozabackendaccessorquestioncatalog": "StartWithoutDebugging",
+        "questionaccessor-dapr": "StartWithoutDebugging"
       }
     }
   }

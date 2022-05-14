@@ -41,7 +41,47 @@ services:
       - cosmosdb
       - testaccessor
     network_mode: "service:testaccessor"
-
+   
+  #############################################
+  # Question Accessor Microservice + Dapr sidecar
+  #############################################
+  spinoza.backend.accessor.questioncatalog:
+    image: ${DOCKER_REGISTRY-}spinozabackendaccessorquestioncatalog
+    build:
+      context: .
+      dockerfile: ./Accessors/Spinoza.Backend.Accessor.QuestionCatalog/Dockerfile
+    ports:
+      - 5009:80
+      - 50003:3500
+      - 50011:50001
+    depends_on:
+      - redis
+      - placement
+      - rabbitmq
+      - catalogmanager
+    networks:
+      - spinoza-dapr
+    environment:
+      - ASPNETCORE_URLS=http://spinoza.backend.accessor.questioncatalog:80
+      - ASPNETCORE_ENVIRONMENT=Development
+  questionaccessor-dapr:
+    image: "daprio/daprd:edge"
+    command: ["./daprd",
+     "-app-id", "questionaccessor",
+     "-app-port", "80",
+     "-dapr-http-port", "3500",
+     "-placement-host-address", "placement:50006",
+     "-components-path", "/dapr/components",
+     "-config", "/dapr/config.yaml"]
+    volumes:
+        - "./dapr/:/dapr"
+    depends_on:
+      - rabbitmq
+      #- signalr
+      - azurite
+      - cosmosdb
+      - spinoza.backend.accessor.questioncatalog
+    network_mode: "service:spinoza.backend.accessor.questioncatalog"
   #############################################
   # Catalog Manager Microservice + Dapr sidecar
   #############################################

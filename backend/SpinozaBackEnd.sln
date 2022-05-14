@@ -29,6 +29,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Components", "Components", 
 	ProjectSection(SolutionItems) = preProject
 		dapr\components\azure-signalr-output.yaml = dapr\components\azure-signalr-output.yaml
 		dapr\components\pubsub.yaml = dapr\components\pubsub.yaml
+		question-accessor-requests-queue.yaml = question-accessor-requests-queue.yaml
 		dapr\components\statestore.yaml = dapr\components\statestore.yaml
 		dapr\components\test-accessor-requests-queue.yaml = dapr\components\test-accessor-requests-queue.yaml
 	EndProjectSection
@@ -46,9 +47,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "LocalEnvironmentSupport", "
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SignalRConnectionSupport", "Managers\SignalRConnectionSupport\SignalRConnectionSupport.csproj", "{2955522E-5E9A-4F9C-B90D-6EFCCE78EFB7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Spinoza.Backend.Accessor.QuestionCatalog", "Accessors\Spinoza.Backend.Accessor.QuestionCatalog\Spinoza.Backend.Accessor.QuestionCatalog.csproj", "{E6B0AA2E-4A4D-4139-9408-A6D1F739C822}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Spinoza.Backend.Accessor.QuestionCatalog", "Accessors\Spinoza.Backend.Accessor.QuestionCatalog\Spinoza.Backend.Accessor.QuestionCatalog.csproj", "{E6B0AA2E-4A4D-4139-9408-A6D1F739C822}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Spinoza.Backend.Accessor.TagCatalog", "Accessors\Spinoza.Backend.Accessor.TagCatalog\Spinoza.Backend.Accessor.TagCatalog.csproj", "{C8E90FF0-276A-4284-872B-4A13D111082C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Spinoza.Backend.Accessor.TagCatalog", "Accessors\Spinoza.Backend.Accessor.TagCatalog\Spinoza.Backend.Accessor.TagCatalog.csproj", "{C8E90FF0-276A-4284-872B-4A13D111082C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

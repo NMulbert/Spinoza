@@ -36,24 +36,25 @@ public class CosmosDBWrapper : ICosmosDBWrapper
             = new CosmosSystemTextJsonSerializer(jsonSerializerOptions);
             CosmosClientOptions cosmosClientOptions = new CosmosClientOptions()
             {
-                Serializer = cosmosSystemTextJsonSerializer
+                Serializer = cosmosSystemTextJsonSerializer,
+                 HttpClientFactory = () =>
+                 {
+                     HttpMessageHandler httpMessageHandler = new HttpClientHandler()
+                     {
+                         ServerCertificateCustomValidationCallback = (req, cert, chain, errors) => true
+                     };
+                     return new HttpClient(httpMessageHandler);
+                 },
+                ConnectionMode = ConnectionMode.Gateway
             };
 
             // Create a new instance of the Cosmos Client
-            CosmosClient = new CosmosClient(configuration["ConnectionStrings:CosmosDB"], cosmosClientOptions);
+            //CosmosClient = new CosmosClient(configuration["ConnectionStrings:CosmosDB"], cosmosClientOptions);
             //todo: inject the correct cosmosDB client
-            CosmosClientOptions cosmosClientOptions = new CosmosClientOptions()
-            {
-                HttpClientFactory = () =>
-                {
-                    HttpMessageHandler httpMessageHandler = new HttpClientHandler()
-                    {
-                        ServerCertificateCustomValidationCallback = (req, cert, chain, errors) => true
-                    };
-                    return new HttpClient(httpMessageHandler);
-                },
-                ConnectionMode = ConnectionMode.Gateway
-            };
+            //CosmosClientOptions cosmosClientOptions = new CosmosClientOptions()
+            //{
+               
+            //};
 
             //CosmosClient = new CosmosClient(configuration["ConnectionStrings:CosmosDB"], cosmosClientOptions);
             //todo: move this to compose environment variable
