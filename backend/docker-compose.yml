@@ -17,7 +17,7 @@ services:
       - redis
       - placement
       - rabbitmq
-      - catalogmanager
+      #- catalogmanager
     networks:
       - spinoza-dapr
     environment:
@@ -25,6 +25,12 @@ services:
       - ASPNETCORE_ENVIRONMENT=Development
   testaccessor-dapr:
     image: "daprio/daprd:edge"
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
     command: ["./daprd",
      "-app-id", "testaccessor",
      "-app-port", "80",
@@ -32,6 +38,7 @@ services:
      "-placement-host-address", "placement:50006",
      "-components-path", "/dapr/components",
      "-config", "/dapr/config.yaml"]
+    
     volumes:
         - "./dapr/:/dapr"
     depends_on:
@@ -58,7 +65,7 @@ services:
       - redis
       - placement
       - rabbitmq
-      - catalogmanager
+      #- testaccessor
     networks:
       - spinoza-dapr
     environment:
@@ -66,6 +73,12 @@ services:
       - ASPNETCORE_ENVIRONMENT=Development
   questionaccessor-dapr:
     image: "daprio/daprd:edge"
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s 
     command: ["./daprd",
      "-app-id", "questionaccessor",
      "-app-port", "80",
@@ -73,6 +86,7 @@ services:
      "-placement-host-address", "placement:50006",
      "-components-path", "/dapr/components",
      "-config", "/dapr/config.yaml"]
+    
     volumes:
         - "./dapr/:/dapr"
     depends_on:
@@ -105,6 +119,12 @@ services:
       - ASPNETCORE_URLS=http://catalogmanager:80
   catalogmanager-dapr:
     image: "daprio/daprd:edge"
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
     command: ["./daprd",
      "-app-id", "catalogmanager",
      "-app-port", "80",
@@ -112,6 +132,7 @@ services:
      "-dapr-http-port", "3500",
      "-components-path", "/dapr/components",
      "-config", "/dapr/config.yaml"]
+    
     volumes:
         - "./dapr/:/dapr"
     depends_on:
@@ -258,4 +279,5 @@ networks:
 volumes: 
   vol_cosmos:
   workspace:
- 
+
+
