@@ -1,0 +1,13 @@
+{
+  "profiles": {
+    "SignalRConnectionSupport": {
+      "commandName": "Project"
+    },
+    "Docker": {
+      "commandName": "Docker",
+      "launchUrl": "{Scheme}://{ServiceHost}:{ServicePort}",
+      "httpPort": 30080,
+      "useSSL": false
+    }
+  }
+}

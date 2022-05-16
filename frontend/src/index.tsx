@@ -16,7 +16,7 @@ ReactDOM.render(
         <App />
       </BrowserRouter>
       <Notify />
-    </AzureAD>
+   </AzureAD>
   </Provider>,
   document.getElementById("root")
 );
