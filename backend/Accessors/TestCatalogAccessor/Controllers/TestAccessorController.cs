@@ -6,7 +6,8 @@ using Microsoft.Azure.Cosmos.Linq;
 using Newtonsoft.Json;
 using Spinoza.Backend.Accessor.TestCatalog.Models;
 using Spinoza.Backend.Crosscutting.CosmosDBWrapper;
-
+using System;
+using System.Text.Json.Nodes;
 
 namespace Spinoza.Backend.Accessor.TestCatalog.Controllers
 {
@@ -34,7 +35,7 @@ namespace Spinoza.Backend.Accessor.TestCatalog.Controllers
         {
             try
             {
-                
+
                 var dbTests = await _cosmosDBWrapper.GetAllCosmosElementsAsync<Models.DB.Test>(offset ?? 0, limit ?? 100);
                 var resultTests = _mapper.Map<List<Models.Results.Test>>(dbTests);
 
@@ -47,7 +48,31 @@ namespace Spinoza.Backend.Accessor.TestCatalog.Controllers
             }
             return Problem(statusCode: (int)StatusCodes.Status500InternalServerError);
         }
-        
+
+        [HttpGet("/testquestions/{id:Guid}")]
+        public async Task<IActionResult> GetQuestionsByTestId(Guid id)
+        {
+            try
+            {
+                //System.Diagnostics.Debugger.Launch();
+
+                var query = new QueryDefinition("SELECT item.questions FROM ITEMS item WHERE item.id = @id").WithParameter("@id", id.ToString().ToUpper());
+
+                JsonArray allTestQuestionsIds = new JsonArray();
+
+                var dbTestQuestionsIds = await _cosmosDBWrapper.GetCosmosElementsAsync<JsonNode>(query);
+
+                allTestQuestionsIds = dbTestQuestionsIds[0]["questions"]!.AsArray();
+
+                return new OkObjectResult(allTestQuestionsIds);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Error while getting test questions: {ex.Message}");
+            }
+            return Problem(statusCode: (int)StatusCodes.Status500InternalServerError);
+        }
+
         [HttpGet("/test/{id:Guid}")]
 
         public async Task<IActionResult> GetTest(Guid id)
@@ -84,9 +109,9 @@ namespace Spinoza.Backend.Accessor.TestCatalog.Controllers
                 Models.Responses.TestChangeResult? result = null;
                 if (testRequest.MessageType == "CreateTest")
                 {
-                    result = await CreateTestAsync(testRequest);                    
+                    result = await CreateTestAsync(testRequest);
                 }
-                else if(testRequest.MessageType == "UpdateTest")
+                else if (testRequest.MessageType == "UpdateTest")
                 {
                     result = await UpdateTestAsync(testRequest);
                 }
@@ -100,7 +125,7 @@ namespace Spinoza.Backend.Accessor.TestCatalog.Controllers
             catch (Exception ex)
             {
                 _logger.LogError($"Error while creatring or updating a test: {ex.Message}");
-                var result = CreateTestResult( testRequest?.Id ?? Guid.Empty.ToString(), "Unknown" ,$"InternalServerError: {ex.Message}", 666, false);
+                var result = CreateTestResult(testRequest?.Id ?? Guid.Empty.ToString(), "Unknown", $"InternalServerError: {ex.Message}", 666, false);
                 await PublishTestResultAsync(result);
             }
             return Problem(statusCode: (int)StatusCodes.Status500InternalServerError);
@@ -112,21 +137,21 @@ namespace Spinoza.Backend.Accessor.TestCatalog.Controllers
             {
                 Id = testId,
                 MessageType = messageType,
-                ActionResult = isSuccess? "Success" : "Error",
+                ActionResult = isSuccess ? "Success" : "Error",
                 Reason = reason,
                 Sender = "Catalog",
                 ReasonId = reasonId,
                 ResourceType = "Test"
             };
         }
-        
-        
+
+
         private async Task<Models.Responses.TestChangeResult> CreateTestAsync(Models.Requests.Test testRequest)
         {
 
             var dbTest = _mapper.Map<Models.DB.Test>(testRequest);
             var result = await _cosmosDBWrapper.CreateItemAsync(dbTest);
-            if(result.StatusCode.IsOk())
+            if (result.StatusCode.IsOk())
             {
                 return CreateTestResult(dbTest.Id, "Create", $"Test {dbTest.Title} has been created", 2);
 
@@ -149,10 +174,10 @@ namespace Spinoza.Backend.Accessor.TestCatalog.Controllers
         }
         public async Task<Models.Responses.TestChangeResult> UpdateTestAsync(Models.Requests.Test testRequest)
         {
-           
+
             var newDbTest = _mapper.Map<Models.DB.Test>(testRequest);
-            var result = await _cosmosDBWrapper.UpdateItemAsync(newDbTest, item => item._etag, item =>  Guid.Parse(item.Id), TestMerger);
-            if(result != null && result.StatusCode.IsOk())
+            var result = await _cosmosDBWrapper.UpdateItemAsync(newDbTest, item => item._etag, item => Guid.Parse(item.Id), TestMerger);
+            if (result != null && result.StatusCode.IsOk())
             {
                 return CreateTestResult(newDbTest.Id, "Update", $"Test {newDbTest.Title} has been updated", 4);
             }
@@ -188,7 +213,7 @@ namespace Spinoza.Backend.Accessor.TestCatalog.Controllers
             try
             {
                 int? dbTotalTests = await _cosmosDBWrapper.GetScalarCosmosQueryResult<int?>(new QueryDefinition("SELECT VALUE COUNT(1) FROM c"));
-           
+
                 if (dbTotalTests == null)
                 {
                     return new NotFoundObjectResult("No Tests found");
@@ -196,12 +221,12 @@ namespace Spinoza.Backend.Accessor.TestCatalog.Controllers
                 //else
                 return new OkObjectResult(dbTotalTests);
             }
-            catch (Exception ex) 
+            catch (Exception ex)
             {
-                    _logger.LogError($"Error while getting tests: {ex.Message}");
+                _logger.LogError($"Error while getting tests: {ex.Message}");
 
             }
-           
+
             return Problem(statusCode: (int)StatusCodes.Status500InternalServerError);
         }
     }
