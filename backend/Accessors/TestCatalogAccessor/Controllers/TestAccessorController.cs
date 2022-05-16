@@ -97,17 +97,14 @@ namespace Spinoza.Backend.Accessor.TestCatalog.Controllers
             }
             return Problem(statusCode: (int)StatusCodes.Status500InternalServerError);
         }
-
+        
 
         [HttpPost("/testaccessorrequestqueue")]
         public async Task<IActionResult> GetTestDataInputFromQueueBinding()
         {
-
-
             Models.Requests.Test? testRequest = null;
             try
             {
-
                 testRequest = await GetMessageFromBodyAsync();
                 Models.Responses.TestChangeResult? result = null;
                 if (testRequest.MessageType == "CreateTest")
@@ -116,16 +113,12 @@ namespace Spinoza.Backend.Accessor.TestCatalog.Controllers
                 }
                 else if (testRequest.MessageType == "UpdateTest")
                 {
-
-
                     result = await UpdateTestAsync(testRequest);
                 }
                 else
                 {
                     result = CreateTestResult(testRequest.Id, "UnknownRequest", "Understand only CreateTest or UpdateTest", 1, false);
-
                 }
-
                 await PublishTestResultAsync(result);
                 return Ok();
             }
@@ -136,9 +129,9 @@ namespace Spinoza.Backend.Accessor.TestCatalog.Controllers
                 await PublishTestResultAsync(result);
             }
             return Problem(statusCode: (int)StatusCodes.Status500InternalServerError);
-
         }
-        private Models.Responses.TestChangeResult CreateTestResult(string testId, string messageType, string reason, int reasonId, bool isSuccess = true)
+        
+        private Models.Responses.TestChangeResult CreateTestResult(string testId, string messageType, string reason, int reasonId, bool isSuccess=true )
         {
             return new Models.Responses.TestChangeResult()
             {

@@ -1,5 +1,3 @@
-
-
 using AutoMapper;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -43,14 +41,17 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 app.UseCors(MyAllowSpecificOrigins);
-app.UseHttpsRedirection();
-app.UseRouting();
+//app.UseHttpsRedirection();
+//app.UseRouting();
 app.UseAuthorization();
 app.UseCloudEvents();
-app.UseEndpoints(endpoints =>
-{
+app.Urls.Add("http://*:80");
+app.MapControllers();
+app.MapSubscribeHandler();
+//app.UseEndpoints(endpoints =>
+//{
 
-    endpoints.MapSubscribeHandler();
-    endpoints.MapControllers();
-});
+//    endpoints.MapSubscribeHandler();
+//    endpoints.MapControllers();
+//});
 app.Run();

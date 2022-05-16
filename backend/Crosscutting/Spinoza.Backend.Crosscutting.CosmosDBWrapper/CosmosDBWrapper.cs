@@ -1,13 +1,8 @@
 ﻿using Microsoft.Azure.Cosmos;
 using Polly;
-using Microsoft.Azure.Cosmos.Linq;
-using System.Web;
-using System.Linq;
 using System.Text;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Configuration;
-using System;
-using Newtonsoft.Json;
 using System.Text.Json.Nodes;
 using System.Text.Json;
 
@@ -36,11 +31,29 @@ public class CosmosDBWrapper : ICosmosDBWrapper
             = new CosmosSystemTextJsonSerializer(jsonSerializerOptions);
             CosmosClientOptions cosmosClientOptions = new CosmosClientOptions()
             {
-                Serializer = cosmosSystemTextJsonSerializer
+                Serializer = cosmosSystemTextJsonSerializer,
+                 HttpClientFactory = () =>
+                 {
+                     HttpMessageHandler httpMessageHandler = new HttpClientHandler()
+                     {
+                         ServerCertificateCustomValidationCallback = (req, cert, chain, errors) => true
+                     };
+                     return new HttpClient(httpMessageHandler);
+                 },
+                ConnectionMode = ConnectionMode.Gateway
             };
 
             // Create a new instance of the Cosmos Client
-            CosmosClient = new CosmosClient(configuration["ConnectionStrings:CosmosDB"], cosmosClientOptions);
+            //CosmosClient = new CosmosClient(configuration["ConnectionStrings:CosmosDB"], cosmosClientOptions);
+            //todo: inject the correct cosmosDB client
+            //CosmosClientOptions cosmosClientOptions = new CosmosClientOptions()
+            //{
+               
+            //};
+
+            //CosmosClient = new CosmosClient(configuration["ConnectionStrings:CosmosDB"], cosmosClientOptions);
+            //todo: move this to compose environment variable
+            CosmosClient = new CosmosClient(configuration["ConnectionStringsCompose:CosmosDB"], cosmosClientOptions);
             Database = CreateDataBase(CosmosClient, logger, cosmosDbInformationProvider);
             Container = CreateDataBaseContainer(CosmosClient, logger, Database, cosmosDbInformationProvider);
         }
@@ -52,7 +65,7 @@ public class CosmosDBWrapper : ICosmosDBWrapper
     }
 
 
-    public static Database CreateDataBase(CosmosClient cosmosClient, ILogger<CosmosDBWrapper> logger, ICosmosDbInformationProvider cosmosDbInformationProvider)
+    private static Database CreateDataBase(CosmosClient cosmosClient, ILogger<CosmosDBWrapper> logger, ICosmosDbInformationProvider cosmosDbInformationProvider)
     {
 
         return (CreateCosmosElementAsync<Database, DatabaseProperties>(cosmosClient, logger,
@@ -60,7 +73,7 @@ public class CosmosDBWrapper : ICosmosDBWrapper
                 () => cosmosClient.GetDatabase(cosmosDbInformationProvider.DataBaseName))).Result;
     }
 
-    public static Container CreateDataBaseContainer(CosmosClient cosmosClient, ILogger<CosmosDBWrapper> logger, Database database, ICosmosDbInformationProvider cosmosDbInformationProvider)
+    private static Container CreateDataBaseContainer(CosmosClient cosmosClient, ILogger<CosmosDBWrapper> logger, Database database, ICosmosDbInformationProvider cosmosDbInformationProvider)
     {
 
         if (cosmosDbInformationProvider.UniqueKeys.Any())
@@ -81,12 +94,13 @@ public class CosmosDBWrapper : ICosmosDBWrapper
                 .CreateIfNotExistsAsync(),
                 () => database.GetContainer(cosmosDbInformationProvider.ContainerName))).Result;
     }
-    public static async Task<TOut> CreateCosmosElementAsync<TOut, TProperties>(CosmosClient cosmosClient, ILogger<CosmosDBWrapper> logger, Func<Task<Response<TProperties>?>> createFuncAsync, Func<TOut> returnFunc)
+
+    private static async Task<TOut> CreateCosmosElementAsync<TOut, TProperties>(CosmosClient cosmosClient, ILogger<CosmosDBWrapper> logger, Func<Task<Response<TProperties>?>> createFuncAsync, Func<TOut> returnFunc)
     {
         var polly = Policy
-         .Handle<CosmosException>()
+         .Handle<CosmosException>(ex => ex.StatusCode != System.Net.HttpStatusCode.Conflict)
          //Todo: move 3 to configuration
-         .RetryAsync(3, (exception, retryCount, context) => logger.LogError($"try: {retryCount}, Exception: {exception.Message}"));
+         .RetryAsync(3, (exception, retryCount, _) => logger.LogError($"try: {retryCount}, Exception: {exception.Message}"));
 
         var result = await polly.ExecuteAsync(async () =>
         {
@@ -106,6 +120,7 @@ public class CosmosDBWrapper : ICosmosDBWrapper
                     //Todo: move 1 to configuration
                     throw;
                 }
+                
                 //else
                 logger.LogError($"CreateCosmosElementAsync: Error accessing cosmosDB, Error : {cosmosException.Message}");
                 throw;// new Exception("Error accessing cosmosDB", cosmosException);
@@ -198,7 +213,6 @@ public class CosmosDBWrapper : ICosmosDBWrapper
             _logger.LogError($"GetCosmosElementsAsync: Error accessing cosmosDB, Error : {ex.Message}");
             throw;
         }
-
     }
 
     public async Task<IList<TOut>> GetAllCosmosElementsAsync<TOut>(int skip = 0, int count = 50)
@@ -220,7 +234,7 @@ public class CosmosDBWrapper : ICosmosDBWrapper
         var polly = Policy
         .Handle<CosmosException>()
         //Todo: move 3 to configuration
-        .RetryAsync(3, (exception, retryCount, context) => _logger.LogError($"try: {retryCount}, Exception: {exception.Message}"));
+        .RetryAsync(3, (exception, retryCount, _) => _logger.LogError($"try: {retryCount}, Exception: {exception.Message}"));
 
         var result = await polly.ExecuteAsync(async () =>
         {
