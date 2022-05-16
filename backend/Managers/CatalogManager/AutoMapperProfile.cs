@@ -31,6 +31,8 @@ internal class AutoMapperProfile : Profile
         CreateMap<CatalogManager.Models.FrontendRequests.Content, CatalogManager.Models.AccessorSubmits.Content>();
 
         CreateMap<CatalogManager.Models.FrontendRequests.AnswerOption, CatalogManager.Models.AccessorSubmits.AnswerOption>();
+        
+        CreateMap<CatalogManager.Models.AccessorResults.TagChangeResult, CatalogManager.Models.FrontendResponses.TagChangeResult>();
 
     }
 }
