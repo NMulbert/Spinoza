@@ -31,6 +31,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Components", "Components", 
 		dapr\components\pubsub.yaml = dapr\components\pubsub.yaml
 		question-accessor-requests-queue.yaml = question-accessor-requests-queue.yaml
 		dapr\components\statestore.yaml = dapr\components\statestore.yaml
+		dapr\components\tag-accessor-requests-queue.yaml = dapr\components\tag-accessor-requests-queue.yaml
 		dapr\components\test-accessor-requests-queue.yaml = dapr\components\test-accessor-requests-queue.yaml
 	EndProjectSection
 EndProject
