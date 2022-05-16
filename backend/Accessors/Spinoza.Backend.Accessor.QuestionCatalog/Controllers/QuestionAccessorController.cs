@@ -66,6 +66,41 @@ namespace Spinoza.Backend.Accessor.QuestionCatalog.Controllers
             item.AsObject().Remove("_ts");
         }
 
+        [HttpGet("/testquestions")]
+        public async Task<IActionResult> GetTestQuestions([FromQuery(Name = "questionsids")] string allTestQuestionsIds)
+        {
+            try
+            {
+                char[] separators = new char[] { '[', ']', ',' };
+
+                string[] ids = allTestQuestionsIds.Split(separators, StringSplitOptions.RemoveEmptyEntries);
+
+                string strQuery = $"SELECT * FROM ITEMS item WHERE item.id IN ({string.Join(",", ids)})";
+
+                JsonArray allTestQuestions = new JsonArray();
+
+              await  foreach (JsonNode? item in _cosmosDBWrapper.EnumerateItemsAsJsonAsync(strQuery))
+                {
+                    if (item == null)
+                    {
+                        _logger.LogWarning("GetTestQuestions: Skipping null item.");
+                        continue;
+                    }
+                    _logger.LogInformation("Question with id: {0} has been added to the array.", item["id"]);
+
+                    RemoveDBRelatedProperties(item);
+
+                    allTestQuestions.Add(item);
+                }
+                return new OkObjectResult(allTestQuestions);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Error while getting test questions: {allTestQuestionsIds} Error: {ex.Message}");
+            }
+            return Problem(statusCode: (int)StatusCodes.Status500InternalServerError);
+        }
+
         [HttpGet("/question/{id:Guid}")]
 
         public async Task<IActionResult> GetQuestionById(Guid id)
@@ -85,7 +120,6 @@ namespace Spinoza.Backend.Accessor.QuestionCatalog.Controllers
                 RemoveDBRelatedProperties(dbQuestion);
 
                 return new OkObjectResult(dbQuestion);
-
             }
             catch (Exception ex)
             {
@@ -143,7 +177,7 @@ namespace Spinoza.Backend.Accessor.QuestionCatalog.Controllers
             {
                 return CreateQuestionResult((string)question["id"]!, "Create", $"Question: {question["name"]} has been created", 2);
             }
-            
+
 
             return CreateQuestionResult((string)question["id"]!, "Create", $"Question {question["name"]} creation has been failed", 3, false);
 
@@ -162,7 +196,7 @@ namespace Spinoza.Backend.Accessor.QuestionCatalog.Controllers
                 ResourceType = "Question"
             };
         }
-        
+
         private async Task PublishQuestionResultAsync(Models.Responses.QuestionChangeResult questionChangeResult)
         {
             try

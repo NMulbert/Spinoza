@@ -3,6 +3,8 @@ using CatalogManager.Models;
 using Dapr.Client;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
+using System;
+using System.Text.Json.Nodes;
 
 namespace CatalogManager.Controllers
 {
@@ -18,13 +20,13 @@ namespace CatalogManager.Controllers
         {
             _logger = logger;
             _daprClient = daprClient;
-            _mapper = mapper;  
+            _mapper = mapper;
         }
 
         [HttpPost("/test")]
         public async Task<IActionResult> PostNewTestToQueue()
         {
-            
+
             return await PostNewOrUpdateTestToQueue(false);
         }
 
@@ -38,10 +40,10 @@ namespace CatalogManager.Controllers
         [HttpGet("/tests")]
         public async Task<IActionResult> GetAll(int? offset, int? limit)
         {
-            
+
             try
             {
-             
+
                 var allAccessorTests = await _daprClient.InvokeMethodAsync<List<Models.AccessorResults.Test>>(HttpMethod.Get, "testaccessor", $"testaccessor/tests?offset={offset ?? 0 }&limit={limit ?? 100}");
                 var frontendAllTestModelResult = _mapper.Map<List<Models.FrontendResponses.Test>>(allAccessorTests);
                 _logger?.LogInformation($"returned {frontendAllTestModelResult.Count} tests");
@@ -54,15 +56,31 @@ namespace CatalogManager.Controllers
             return Problem(statusCode: (int)StatusCodes.Status500InternalServerError);
         }
 
+        [HttpGet("/testquestions/{id:Guid}")]
+        public async Task<IActionResult> GetQuestionsByTestId(Guid id)
+        {
+            try
+            {
+                var allTestQuestionsIds = await _daprClient.InvokeMethodAsync<JsonArray>(HttpMethod.Get, "testaccessor", $"testquestions/{id}");
+
+                var allTestQuestions = await _daprClient.InvokeMethodAsync<JsonArray>(HttpMethod.Get, "questionaccessor", $"testquestions?questionsids={allTestQuestionsIds}");
+
+                return new OkObjectResult(allTestQuestions);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Error while getting all test questions: {ex.Message}");
+            }
+            return Problem(statusCode: (int)StatusCodes.Status500InternalServerError);
+        }
+
+
         [HttpGet("/test/{id:Guid}")]
 
         public async Task<IActionResult> GetTest(Guid id)
         {
-          
             try
             {
-                
-                
                 var accessorTest = await _daprClient.InvokeMethodAsync<Models.AccessorResults.Test>(HttpMethod.Get, "testaccessor", $"test/{id}");
                 if (accessorTest == null)
                 {
@@ -105,13 +123,13 @@ namespace CatalogManager.Controllers
         [HttpGet("/tests/count")]
         public async Task<IActionResult> GetTotalTests()
         {
-            
+
             try
             {
                 var dbTotalTests = await _daprClient.InvokeMethodAsync<int>(HttpMethod.Get, "testaccessor", "/tests/count");
 
-                    _logger.LogInformation($"GetTotalTests: accessor returns {dbTotalTests}");
-                   
+                _logger.LogInformation($"GetTotalTests: accessor returns {dbTotalTests}");
+
                 return new OkObjectResult(dbTotalTests);
             }
             catch (Exception ex)
