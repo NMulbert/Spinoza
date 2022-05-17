@@ -63,7 +63,16 @@ namespace CatalogManager.Controllers
             {
                 var allTestQuestionsIds = await _daprClient.InvokeMethodAsync<JsonArray>(HttpMethod.Get, "testaccessor", $"testquestions/{id}");
 
+                if (!allTestQuestionsIds.Any())
+                {
+                    _logger.LogInformation($"Test Id {id} has no questions");
+
+                    return new OkObjectResult(new JsonArray());
+                }
+
                 var allTestQuestions = await _daprClient.InvokeMethodAsync<JsonArray>(HttpMethod.Get, "questionaccessor", $"testquestions?questionsids={allTestQuestionsIds}");
+
+                _logger.LogInformation($"Test Id {id} has {allTestQuestions.Count} questions");
 
                 return new OkObjectResult(allTestQuestions);
             }
