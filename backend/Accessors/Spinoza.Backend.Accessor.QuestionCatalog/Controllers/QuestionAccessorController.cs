@@ -79,7 +79,7 @@ namespace Spinoza.Backend.Accessor.QuestionCatalog.Controllers
 
                 JsonArray allTestQuestions = new JsonArray();
 
-              await  foreach (JsonNode? item in _cosmosDBWrapper.EnumerateItemsAsJsonAsync(strQuery))
+                await foreach (JsonNode? item in _cosmosDBWrapper.EnumerateItemsAsJsonAsync(strQuery))
                 {
                     if (item == null)
                     {
@@ -142,7 +142,7 @@ namespace Spinoza.Backend.Accessor.QuestionCatalog.Controllers
                 }
                 else if ((string)question["messageType"]! == "UpdateQuestion")
                 {
-                    _logger.LogInformation("UpdateQuestion is not implemented yet");
+                    result = await UpdateQuestionsAsync(question);
                 }
                 else
                 {
@@ -164,6 +164,23 @@ namespace Spinoza.Backend.Accessor.QuestionCatalog.Controllers
             return Problem(statusCode: (int)StatusCodes.Status500InternalServerError);
         }
 
+        public async Task<Models.Responses.QuestionChangeResult?> UpdateQuestionsAsync(JsonNode question)
+        {
+            question["lastUpdateCreationTimeUTC"] = DateTimeOffset.UtcNow;
+            question.AsObject().Remove("messageType");
+            var result = await _cosmosDBWrapper.UpdateItemAsync<JsonNode>(question, item => (string?)item["_etag"], item => Guid.Parse(item["id"]!.ToString()), TestMerger);
+            if (result != null && result.StatusCode.IsOk())
+            {
+                return CreateQuestionResult((string)question["id"]!, "Update", $"Question: {question["name"]} has been updated", 8);
+            }
+            //else
+            return CreateQuestionResult((string)question["id"]!, "Update", $"Question {question["name"]} Update has failed", 9, false);
+
+            JsonNode TestMerger(JsonNode dbItem, JsonNode newItem)
+            {
+                return newItem;
+            }
+        }
 
         private async Task<Models.Responses.QuestionChangeResult> CreateQuestionAsync(JsonNode question)
         {
