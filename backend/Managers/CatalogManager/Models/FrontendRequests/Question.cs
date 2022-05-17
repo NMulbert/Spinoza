@@ -7,12 +7,16 @@
          string Type { get; set; }
          string MessageType { get; set; }
          string QuestionVersion { get; set; }
+         
+         public string[] Tags { get; set; }
     }
     public class CommonQuestion : IQuestion
     {
         public string Type { get; set; }
         public string MessageType { get; set; }
         public string QuestionVersion { get; set; }
+        
+        public string[] Tags { get; set; }
     }
 
     public class MultipleChoiceQuestion : IQuestion

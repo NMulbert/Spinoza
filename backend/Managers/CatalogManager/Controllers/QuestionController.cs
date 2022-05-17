@@ -2,8 +2,8 @@
 using Dapr.Client;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
-using System;
 using System.Text.Json.Nodes;
+using CatalogManager.Models.FrontendRequests;
 
 namespace CatalogManager.Controllers
 {
@@ -38,8 +38,9 @@ namespace CatalogManager.Controllers
         }
 
         [HttpGet("/allquestions")]
-        public async Task<IActionResult> GetAllQuestions(int? offset, int? limit)
+        public async Task<IActionResult> GetAllQuestions(int? offset, int? limit , string []? tag)
         {
+            
             try
             {
                 var allAccessorQuestions = await _daprClient.InvokeMethodAsync<JsonArray>(HttpMethod.Get, "questionaccessor", $"questionaccessor/allquestions?offset={offset ?? 0 }&limit={limit ?? 100}");
@@ -137,6 +138,7 @@ namespace CatalogManager.Controllers
 
                 async Task<IActionResult> PostQueue<TQuestion>() where TQuestion : Models.FrontendRequests.IQuestion
                 {
+                  
                     var questionRequest = JsonConvert.DeserializeObject<TQuestion>(body);
 
                     var questionModel = _mapper.Map<TQuestion>(questionRequest);
@@ -145,10 +147,23 @@ namespace CatalogManager.Controllers
 
                     questionModel.QuestionVersion = "1.0";
                     questionModel.MessageType = isUpdate ? "UpdateQuestion" : "AddQuestion";
+                    
                     await _daprClient.InvokeBindingAsync("questionaccessorrequestqueue", "create", questionModel);
 
+                    if (questionModel.Tags.Any())
+                    {
+                          _logger.LogInformation($"pushing {questionModel.Tags.Length} tags to the tagaccessorrequestqueue");  
+                         await _daprClient.InvokeBindingAsync("tagaccessorrequestqueue", "create", questionModel.Tags);
+                    }
+                    else
+                    {
+                        _logger.LogInformation("questions with no tags");  
+                    }
+                    
                     return Ok("Accepted");
                 }
+                
+                
             }
             catch (Exception ex)
             {
