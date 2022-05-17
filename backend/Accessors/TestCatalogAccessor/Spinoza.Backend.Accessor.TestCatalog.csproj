@@ -24,4 +24,8 @@
     <ProjectReference Include="..\..\Crosscutting\Spinoza.Backend.Crosscutting.CosmosDBWrapper\Spinoza.Backend.Crosscutting.CosmosDBWrapper.csproj" />
   </ItemGroup>
 
+    <PropertyGroup>
+        <ErrorOnDuplicatePublishOutputFiles>false</ErrorOnDuplicatePublishOutputFiles>
+    </PropertyGroup>
+
 </Project>
