@@ -30,16 +30,29 @@ namespace Spinoza.Backend.Accessor.TestCatalog.Controllers
             _mapper = mapper;
         }
 
+       
         [HttpGet("tests")]
-        public async Task<IActionResult> GetTests(int? offset, int? limit)
+        public async Task<IActionResult> GetTests(int? offset, int? limit,  string? tags )
         {
+          
             try
             {
+                IList<Models.DB.Test>? dbTests ;
+                   
+                if (tags == null)
+                {
+                    dbTests = await _cosmosDBWrapper.GetAllCosmosElementsAsync<Models.DB.Test>(offset ?? 0, limit ?? 100);
+                }
+                else
+                {
+                    dbTests = await _cosmosDBWrapper.GetCosmosElementsAsync<Models.DB.Test>(new QueryDefinition($"SELECT * FROM TESTS test WHERE test.tags IN ({tags})").WithParameter("@skip", offset ?? 0)
+                        .WithParameter("@count", limit ?? 100));
+                    
+                }
 
-                var dbTests = await _cosmosDBWrapper.GetAllCosmosElementsAsync<Models.DB.Test>(offset ?? 0, limit ?? 100);
                 var resultTests = _mapper.Map<List<Models.Results.Test>>(dbTests);
-
                 return new OkObjectResult(resultTests);
+               
             }
             catch (Exception ex)
             {
@@ -47,8 +60,11 @@ namespace Spinoza.Backend.Accessor.TestCatalog.Controllers
 
             }
             return Problem(statusCode: (int)StatusCodes.Status500InternalServerError);
+            
+            
         }
 
+        
         [HttpGet("/testquestions/{id:Guid}")]
         public async Task<IActionResult> GetQuestionsByTestId(Guid id)
         {
