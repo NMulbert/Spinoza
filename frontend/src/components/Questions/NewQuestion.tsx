@@ -30,6 +30,7 @@ function NewQuestion() {
   const [answerType, setAnswerType] = useState("OpenTextQuestion");
   const [multiArr, setMultiArr] = useState([]);
   const [questionTxt, setQuestionTxt] = useState("");
+  const [validateName, setValidateName] = useState("");
 
   let protoType: any =
     answerType === "OpenTextQuestion"
@@ -66,6 +67,7 @@ function NewQuestion() {
         <div>
           <TextInput
             label="Question Name:"
+            error={validateName}
             style={{ width: "50%", textAlign: "left" }}
             placeholder="Question Name"
             radius="xs"
@@ -158,17 +160,21 @@ function NewQuestion() {
               variant="gradient"
               gradient={{ from: "#838685", to: "#cfd0d0" }}
               onClick={async () => {
-                try {
-                  const response = await axios.post(
-                    "http://localhost:50000/v1.0/invoke/catalogmanager/method/question",
-                    JSON.stringify({ ...questionValues })
-                  );
-                  setQuestionValues({
-                    ...questionValues,
-                    id: uuidv4().toUpperCase(),
-                  });
-                } catch (err) {
-                  console.log(err);
+                if (questionValues.name.trim().length !== 0) {
+                  try {
+                    const response = await axios.post(
+                      "http://localhost:50000/v1.0/invoke/catalogmanager/method/question",
+                      JSON.stringify({ ...questionValues })
+                    );
+                    setQuestionValues({
+                      ...questionValues,
+                      id: uuidv4().toUpperCase(),
+                    });
+                  } catch (err) {
+                    console.log(err);
+                  }
+                } else {
+                  setValidateName("Question name is a required field");
                 }
               }}
             >

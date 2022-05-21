@@ -20,6 +20,8 @@ function CreateTest() {
     "Python",
   ]);
 
+  const [validateTitle, setValidateTitle] = useState("");
+
   const [testValues, setTestsValues] = useState({
     MessageType: "CreateTest",
     id: uuidv4().toUpperCase(),
@@ -45,6 +47,7 @@ function CreateTest() {
         <div>
           <InputLabel>Test title:</InputLabel>
           <TextInput
+            error={validateTitle}
             style={{ width: "50%", textAlign: "left" }}
             placeholder="Test title"
             radius="xs"
@@ -90,14 +93,21 @@ function CreateTest() {
               variant="gradient"
               gradient={{ from: "#217ad2", to: "#4fbaee" }}
               onClick={async () => {
-                try {
-                  const response = await axios.post(
-                    "http://localhost:50000/v1.0/invoke/catalogmanager/method/test",
-                    JSON.stringify({ ...testValues })
-                  );
-                  setTestsValues({ ...testValues, id: uuidv4().toUpperCase() });
-                } catch (err) {
-                  console.log(err);
+                if (testValues.title.trim().length !== 0) {
+                  try {
+                    const response = await axios.post(
+                      "http://localhost:50000/v1.0/invoke/catalogmanager/method/test",
+                      JSON.stringify({ ...testValues })
+                    );
+                    setTestsValues({
+                      ...testValues,
+                      id: uuidv4().toUpperCase(),
+                    });
+                  } catch (err) {
+                    console.log(err);
+                  }
+                } else {
+                  setValidateTitle("Title is a required field");
                 }
               }}
             >
