@@ -4,25 +4,22 @@ import MDEditor from "@uiw/react-md-editor";
 import { CalendarTime, Stars, UserCircle } from "tabler-icons-react";
 
 type QuestionData = {
-  id: string;
-  name: string;
-  content: any;
-  authorId: any;
-  difficultyLevel: string;
-  type: string;
-  tags: any;
+  question: {
+    id: string;
+    name: string;
+    content: any;
+    authorId: any;
+    difficultyLevel: string;
+    type: string;
+    tags: any;
+  };
+
   selectedQuestions: string[];
   setSelectedQuestions: (questions: any) => void;
 };
 
 function ExistingQuestion({
-  id,
-  name,
-  content,
-  authorId,
-  difficultyLevel,
-  type,
-  tags,
+  question,
   setSelectedQuestions,
   selectedQuestions,
 }: QuestionData) {
@@ -39,16 +36,18 @@ function ExistingQuestion({
                 border: "1px solid rgb(34, 139, 230)",
                 backgroundColor: "rgb(231, 245, 255)",
                 height: "100%",
-                margin: 10
+                margin: 10,
               }
-            : { height: "100%", margin: 10}
+            : { height: "100%", margin: 10 }
         }
       >
-        <Text size="lg" weight="bold">{name}</Text>
+        <Text size="lg" weight="bold">
+          {question.name}
+        </Text>
         <Group style={{ color: "#444848" }} spacing="xs" position="center">
           <UserCircle size={18} />
           <Text size="xs" weight={700}>
-            {authorId}
+            {question.authorId}
           </Text>
           {/* <CalendarTime size={18} />
           <Text size="xs" weight={700}>
@@ -56,13 +55,13 @@ function ExistingQuestion({
           </Text> */}
           <Stars size={18} />
           <Text size="xs" weight={700}>
-            Difficulty: {difficultyLevel}
+            Difficulty: {question.difficultyLevel}
           </Text>
         </Group>
 
         <Space h="md" />
         <Group position="center" spacing="xs">
-          {tags.map((i: any) => {
+          {question.tags.map((i: any) => {
             return (
               <Badge key={i} color="pink" variant="light">
                 {i}
@@ -73,10 +72,10 @@ function ExistingQuestion({
         <Space h="xs" />
         <Card.Section style={{ margin: 5, height: 80 }}>
           <Text lineClamp={3} size="md" weight={500}>
-            {type === "MultipleChoiceQuestion" ? (
-              content.questionText
-            ) : type === "OpenTextQuestion" ? (
-              content
+            {question.type === "MultipleChoiceQuestion" ? (
+              question.content.questionText
+            ) : question.type === "OpenTextQuestion" ? (
+              question.content
             ) : (
               <></>
             )}
@@ -85,12 +84,16 @@ function ExistingQuestion({
         <Space h="md" />
         <Button
           onClick={() => {
+            console.log(selectedQuestions);
             setSelected(!selected);
             selected
               ? setSelectedQuestions(
-                  selectedQuestions.filter((question) => question !== id)
+                  selectedQuestions.filter(
+                    (filteredQuestion: any) =>
+                      filteredQuestion.id !== question.id
+                  )
                 )
-              : setSelectedQuestions([...selectedQuestions, id]);
+              : setSelectedQuestions([...selectedQuestions, question]);
           }}
           variant="outline"
           radius="lg"

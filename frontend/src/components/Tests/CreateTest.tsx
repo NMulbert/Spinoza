@@ -11,15 +11,14 @@ import axios from "axios";
 import { InputLabel } from "@mui/material";
 import MDEditor from "@uiw/react-md-editor";
 import { v4 as uuidv4 } from "uuid";
-
+import { useSelector } from "react-redux";
+interface TagsState {
+  tags: { tags: [] };
+}
 function CreateTest() {
-  const [dataHash, setHashData] = useState([
-    "React",
-    "C#",
-    "JavaScript",
-    "Python",
-  ]);
+  let tags = useSelector((s: TagsState) => s.tags.tags);
 
+  const [dataHash, setHashData]: any = useState([]);
   const [testValues, setTestsValues] = useState({
     MessageType: "CreateTest",
     id: uuidv4().toUpperCase(),
@@ -67,14 +66,16 @@ function CreateTest() {
         <div>
           <InputLabel>Tags:</InputLabel>
           <MultiSelect
-            data={dataHash}
+            data={[...dataHash, ...tags]}
             style={{ width: "50%", textAlign: "left" }}
             placeholder="#Tags"
             radius="xs"
             searchable
             creatable
             getCreateLabel={(query) => `+ Create ${query}`}
-            onCreate={(query) => setHashData((current) => [...current, query])}
+            onCreate={(query) =>
+              setHashData((current: any) => [...current, query])
+            }
             onChange={(e: any) => {
               setTestsValues({
                 ...testValues,

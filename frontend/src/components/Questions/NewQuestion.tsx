@@ -18,15 +18,15 @@ import MultiChoice from "./MultiChoice";
 import { v4 as uuidv4 } from "uuid";
 import axios from "axios";
 import { ConsoleLogger } from "@microsoft/signalr/dist/esm/Utils";
+import { useSelector } from "react-redux";
+interface TagsState {
+  tags: { tags: [] };
+}
 
 function NewQuestion() {
-  const [dataHash, setHashData] = useState([
-    "React",
-    "C#",
-    "JavaScript",
-    "Python",
-  ]);
+  let tags = useSelector((s: TagsState) => s.tags.tags);
 
+  const [dataHash, setHashData]: any = useState([]);
   const [answerType, setAnswerType] = useState("OpenTextQuestion");
   const [multiArr, setMultiArr] = useState([]);
   const [questionTxt, setQuestionTxt] = useState("");
@@ -75,7 +75,7 @@ function NewQuestion() {
             }}
           />
           <MultiSelect
-            data={dataHash}
+            data={[...tags, ...dataHash]}
             label="Tags:"
             placeholder="Select tags"
             icon={<Hash />}
@@ -84,7 +84,9 @@ function NewQuestion() {
             searchable
             creatable
             getCreateLabel={(query) => `+ Create ${query}`}
-            onCreate={(query) => setHashData((current) => [...current, query])}
+            onCreate={(query) =>
+              setHashData((current: any) => [...current, query])
+            }
             onChange={(e: any) => {
               setQuestionValues({
                 ...questionValues,

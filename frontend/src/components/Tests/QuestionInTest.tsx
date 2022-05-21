@@ -15,46 +15,22 @@ import React, { useEffect, useState } from "react";
 import { CalendarTime, Stars, UserCircle, X } from "tabler-icons-react";
 
 type QuestionData = {
-  id: string;
-  removeQuestion: (question: string) => void;
+  question: {
+    id: string;
+    name: string;
+    type: string;
+    tags: string[];
+    content: {
+      answerOptions?: any;
+    };
+    authorId: string;
+    difficultyLevel: string;
+  };
+  removeQuestion: (question: { id: string }) => void;
   editMode: boolean;
 };
 
-function Preview({ id, removeQuestion, editMode }: QuestionData) {
-  const [answerType, setAnswerType] = useState();
-  const [questionTxt, setQuestionTxt] = useState("");
-  const [correctAnswers, setCorrectAnswers] = useState(0);
-  const [answers, setAnswers]: any = useState([]);
-
-  let protoType: any =
-    answerType === "OpenTextQuestion"
-      ? questionTxt
-      : { questionText: questionTxt, answerOptions: [] };
-
-  const [questionTest, setQuestionTest] = useState({
-    name: "",
-    authorId: "",
-    type: "",
-    difficultyLevel: "",
-    tags: [],
-    content: protoType,
-  });
-
-  useEffect(() => {
-    let url = `http://localhost:50000/v1.0/invoke/catalogmanager/method/question/${id}`;
-    fetch(url)
-      .then((res) => res.json())
-      .then((result) => {
-        setQuestionTest(result);
-        setAnswerType(result.type);
-        setQuestionTxt(
-          result.type === "MultipleChoiceQuestion"
-            ? result.content.questionText
-            : result.content
-        );
-      });
-  }, []);
-
+function Preview({ question, removeQuestion, editMode }: QuestionData) {
   return (
     <Card
       withBorder
@@ -70,7 +46,7 @@ function Preview({ id, removeQuestion, editMode }: QuestionData) {
         display: "inline-block",
       }}
     >
-{console.log("hi")}
+      {console.log("hi")}
       {editMode ? (
         <ActionIcon
           color="red"
@@ -78,7 +54,7 @@ function Preview({ id, removeQuestion, editMode }: QuestionData) {
           radius="lg"
           style={{ float: "right", cursor: "pointer" }}
           onClick={() => {
-            removeQuestion(id);
+            removeQuestion(question);
           }}
         >
           <X size={24} />
@@ -87,9 +63,9 @@ function Preview({ id, removeQuestion, editMode }: QuestionData) {
         <></>
       )}
 
-      <Title order={3}>{questionTest.name}</Title>
+      <Title order={3}>{question.name}</Title>
       <Group spacing="xs" style={{ paddingTop: 5 }}>
-        {questionTest.tags?.map((i: any) => {
+        {question.tags?.map((i: any) => {
           return (
             <Badge key={i} color="pink" variant="light">
               {i}
@@ -100,11 +76,11 @@ function Preview({ id, removeQuestion, editMode }: QuestionData) {
       <Divider my="xs" color="blue" />
 
       <div data-color-mode="light">
-        <MDEditor.Markdown source={questionTxt} />
+        <MDEditor.Markdown source={question.content as string} />
       </div>
 
-      {questionTest.type === "MultipleChoiceQuestion" ? (
-        questionTest.content.answerOptions.map((e: any) => (
+      {question.type === "MultipleChoiceQuestion" ? (
+        question.content.answerOptions.map((e: any) => (
           <Radio
             key={e.description}
             disabled
@@ -170,7 +146,7 @@ function Preview({ id, removeQuestion, editMode }: QuestionData) {
       >
         <UserCircle size={18} />
         <Text size="xs" weight={700}>
-          {questionTest.authorId}
+          {question.authorId}
         </Text>
         <CalendarTime size={18} />
         <Text size="xs" weight={700}>
@@ -178,7 +154,7 @@ function Preview({ id, removeQuestion, editMode }: QuestionData) {
         </Text>
         <Stars size={18} />
         <Text size="xs" weight={700}>
-          Difficulty: {questionTest.difficultyLevel}
+          Difficulty: {question.difficultyLevel}
         </Text>
       </Group>
     </Card>
