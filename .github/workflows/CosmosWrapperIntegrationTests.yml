@@ -2,17 +2,17 @@ name: Cosmos Wrapper Integration Tests
 
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - main
-    paths:
-      - backend/**
-  pull_request:
-    types: [opened, synchronize, reopened, closed]
-    branches:
-      - main
-    paths:
-      - backend/**
+#   push:
+#     branches:
+#       - main
+#     paths:
+#       - backend/**
+#   pull_request:
+#     types: [opened, synchronize, reopened, closed]
+#     branches:
+#       - main
+#     paths:
+#       - backend/**
 
 jobs:
   build:
