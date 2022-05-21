@@ -53,7 +53,7 @@ public class CosmosDBWrapper : ICosmosDBWrapper
 
             //CosmosClient = new CosmosClient(configuration["ConnectionStrings:CosmosDB"], cosmosClientOptions);
             //todo: move this to compose environment variable
-            CosmosClient = new CosmosClient(configuration["ConnectionStringsCompose:CosmosDB"], cosmosClientOptions);
+            CosmosClient = new CosmosClient(configuration["ConnectionStrings:CosmosDB"], cosmosClientOptions);
             Database = CreateDataBase(CosmosClient, logger, cosmosDbInformationProvider);
             Container = CreateDataBaseContainer(CosmosClient, logger, Database, cosmosDbInformationProvider);
         }
