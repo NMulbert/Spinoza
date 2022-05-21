@@ -16,10 +16,10 @@ on:
 
 jobs:
   build:
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
     defaults:
       run:
-        shell: cmd
+        shell: bash
         working-directory: backend
     steps:
     - uses: actions/checkout@v3
