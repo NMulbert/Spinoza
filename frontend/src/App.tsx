@@ -1,20 +1,26 @@
-import React from "react";
+import React, { useEffect } from "react";
 import "./App.css";
 import { Route, Routes } from "react-router-dom";
 import { PageNotFound } from "./components/PageNotFound";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import ViewTest from "./components/Tests/ViewTest";
 import { Sidebar } from "./components/AppShell/SideBar";
 import Header from "./components/AppShell/Header";
 import AllTestsPage from "./components/Tests/AllTestsPage";
 import AllQuestionsPage from "./components/Questions/AllQuestionsPage";
 import CreateTest from "./components/Tests/CreateTest";
-interface TestsState {
-  tests: { tests: [] };
-}
+import { loadTags } from "./redux/Reducers/tags/tags-actions";
 
 function App() {
-  let tests = useSelector((s: TestsState) => s.tests.tests);
+  const dispatch = useDispatch();
+  useEffect(() => {
+    let url = "http://localhost:50000/v1.0/invoke/catalogmanager/method/tags";
+    fetch(url)
+      .then((res) => res.json())
+      .then((result) => {
+        dispatch(loadTags(result));
+      });
+  }, []);
 
   return (
     <div className="App">

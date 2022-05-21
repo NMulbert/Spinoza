@@ -17,16 +17,32 @@ import MDEditor from "@uiw/react-md-editor";
 import { useParams } from "react-router-dom";
 import axios from "axios";
 import QuestionInTest from "./QuestionInTest";
+import { useSelector } from "react-redux";
+interface TagsState {
+  tags: { tags: [] };
+}
 
 function ViewTest() {
   let { id } = useParams();
-  let [test, setTest] = useState({
+
+  let [questions, setQuestions] = useState([]);
+  useEffect(() => {
+    let url = `http://localhost:50000/v1.0/invoke/catalogmanager/method/testquestions/${id}`;
+    fetch(url)
+      .then((res) => res.json())
+      .then((result) => {
+        setQuestions(result);
+      });
+  }, []);
+
+  let [test, setTest]: any = useState({
     title: "",
     description: "",
     tags: [],
     authorId: "",
     creationTimeUTC: "",
     questionsRefs: [],
+    questions: questions,
   });
 
   useEffect(() => {
@@ -34,17 +50,14 @@ function ViewTest() {
     fetch(url)
       .then((res) => res.json())
       .then((result) => {
-        setTest(result);
-      });
+        setTest({ ...result, questions: [...questions] });
+      })
+      .then(() => console.log([...questions]));
   }, []);
 
   const [editMode, setEditMode] = useState(false);
-  const [dataHash, setHashData] = useState([
-    "React",
-    "C#",
-    "JavaScript",
-    "Python",
-  ]);
+  let tags = useSelector((s: TagsState) => s.tags.tags);
+  const [dataHash, setHashData]: any = useState([]);
   const [openedNQ, setOpenedNQ] = useState(false);
   const [openedEQ, setOpenedEQ] = useState(false);
 
@@ -58,19 +71,49 @@ function ViewTest() {
     .split(" ");
   let creationTimeUTC = `${date[2]}/ ${date[1]}/ ${date[3]} | ${date[4]}`;
 
-  const UpdateQuestions = (questions: []) => {
+  const UpdateQuestions = (updatedQuestions: []) => {
+    let resArr: any = [];
+    questions.length > 0
+      ? [...questions, ...updatedQuestions].filter((item: any) => {
+          var i = resArr.findIndex((x: any) => x.id === item.id);
+          if (i <= -1) {
+            resArr.push({ ...item, id: item.id });
+          }
+          return null;
+        })
+      : updatedQuestions.filter((item: any) => {
+          var i = resArr.findIndex((x: any) => x.id === item.id);
+          if (i <= -1) {
+            resArr.push({ ...item, id: item.id });
+          }
+          return null;
+        });
+    setQuestions(resArr);
     setTest({
       ...test,
-      questionsRefs: Array.from(new Set([...test.questionsRefs, ...questions])),
+      questionsRefs: [
+        ...test.questionsRefs,
+        ...updatedQuestions.map((question: { id: string }) => {
+          return question.id;
+        }),
+      ],
     });
   };
 
-  const removeQuestion = (removedQuestion: string) => {
+  const removeQuestion = (removedQuestion: { id: string }) => {
+    setQuestions(
+      questions.filter(
+        (question: { id: string }) => question.id !== removedQuestion.id
+      )
+    );
+
     setTest({
       ...test,
-      questionsRefs: test.questionsRefs.filter(
-        (question) => question !== removedQuestion
-      ),
+      questionsRefs: [
+        ...test.questionsRefs.filter(
+          (question: string) => question !== removedQuestion.id
+        ),
+      ],
     });
   };
   return (
@@ -171,22 +214,25 @@ function ViewTest() {
             Tags:
           </Title>
           {editMode ? (
-            <MultiSelect
-              data={dataHash}
-              style={{ width: "90%", textAlign: "left" }}
-              placeholder="#Tags"
-              radius="xs"
-              searchable
-              creatable
-              getCreateLabel={(query) => `+ Create ${query}`}
-              onCreate={(query) =>
-                setHashData((current) => [...current, query])
-              }
-              value={test.tags}
-              onChange={(e: any) => {
-                setTest({ ...test, tags: e });
-              }}
-            />
+            (console.log(tags),
+            (
+              <MultiSelect
+                data={[...tags, ...dataHash]}
+                style={{ width: "90%", textAlign: "left" }}
+                placeholder="#Tags"
+                radius="xs"
+                searchable
+                creatable
+                getCreateLabel={(query) => `+ Create ${query}`}
+                onCreate={(query) =>
+                  setHashData((current: any) => [...current, query])
+                }
+                value={test.tags}
+                onChange={(e: any) => {
+                  setTest({ ...test, tags: e });
+                }}
+              />
+            ))
           ) : (
             <Group spacing="xs">
               {test.tags?.map((i: any) => {
@@ -234,21 +280,20 @@ function ViewTest() {
           <></>
         )}
 
-        {test.questionsRefs.length !== 0 ? (
-          test.questionsRefs.map((i: any) => {
-            return (
-              <Grid.Col md={12} key={i}>
-                <QuestionInTest
-                  removeQuestion={removeQuestion}
-                  id={i}
-                  editMode={editMode}
-                />
-              </Grid.Col>
-            );
-          })
-        ) : (
-          <></>
-        )}
+        {questions.length > 0
+          ? questions.map((question: any) => {
+              console.log(question);
+              return (
+                <Grid.Col md={12} key={question.id}>
+                  <QuestionInTest
+                    removeQuestion={removeQuestion}
+                    question={question}
+                    editMode={editMode}
+                  />
+                </Grid.Col>
+              );
+            })
+          : console.log(questions)}
         <Grid.Col span={12}>
           <Group spacing="sm">
             <Button
