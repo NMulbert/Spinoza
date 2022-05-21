@@ -1,4 +1,4 @@
-name: .NET Docker Compose
+name: Cosmos Wrapper Integration Tests
 
 on:
   workflow_dispatch:
