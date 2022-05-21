@@ -26,7 +26,7 @@ function ViewTest() {
     tags: [],
     authorId: "",
     creationTimeUTC: "",
-    questions: [],
+    questionsRefs: [],
   });
 
   useEffect(() => {
@@ -61,14 +61,14 @@ function ViewTest() {
   const UpdateQuestions = (questions: []) => {
     setTest({
       ...test,
-      questions: Array.from(new Set([...test.questions, ...questions])),
+      questionsRefs: Array.from(new Set([...test.questionsRefs, ...questions])),
     });
   };
 
   const removeQuestion = (removedQuestion: string) => {
     setTest({
       ...test,
-      questions: test.questions.filter(
+      questionsRefs: test.questionsRefs.filter(
         (question) => question !== removedQuestion
       ),
     });
@@ -234,8 +234,8 @@ function ViewTest() {
           <></>
         )}
 
-        {test.questions.length !== 0 ? (
-          test.questions.map((i: any) => {
+        {test.questionsRefs.length !== 0 ? (
+          test.questionsRefs.map((i: any) => {
             return (
               <Grid.Col md={12} key={i}>
                 <QuestionInTest
