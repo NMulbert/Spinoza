@@ -124,7 +124,7 @@ function ViewTest() {
         title="New Question"
         size="100%"
       >
-        {<NewQuestion />}
+        {<NewQuestion UpdateQuestions={UpdateQuestions} />}
       </Modal>
       <Modal
         opened={openedEQ}

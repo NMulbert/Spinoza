@@ -23,7 +23,7 @@ interface TagsState {
   tags: { tags: [] };
 }
 
-function NewQuestion() {
+function NewQuestion({ UpdateQuestions}: any) {
   let tags = useSelector((s: TagsState) => s.tags.tags);
 
   const [dataHash, setHashData]: any = useState([]);
@@ -172,6 +172,7 @@ function NewQuestion() {
                       ...questionValues,
                       id: uuidv4().toUpperCase(),
                     });
+                    UpdateQuestions([questionValues]);
                   } catch (err) {
                     console.log(err);
                   }
