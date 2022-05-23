@@ -9,7 +9,7 @@ FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
 WORKDIR /src
 COPY ["Managers/SignalRConnectionSupport/SignalRConnectionSupport.csproj", "Managers/SignalRConnectionSupport/"]
 RUN dotnet restore "Managers/SignalRConnectionSupport/SignalRConnectionSupport.csproj"
-COPY .. .
+COPY . .
 WORKDIR "/src/Managers/SignalRConnectionSupport"
 RUN dotnet build "SignalRConnectionSupport.csproj" -c Release -o /app/build
 

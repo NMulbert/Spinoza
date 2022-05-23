@@ -29,14 +29,16 @@ namespace CatalogManager.Controllers
             try
             {
                 var frontendQuestionChangeResult = _mapper.Map<Models.FrontendResponses.QuestionChangeResult>(accessorQuestionChangeResult);
-                _logger?.LogInformation($"Message received: {frontendQuestionChangeResult.Id}");
+                _logger?.LogInformation($"OnQuestionCreated: Message received: {frontendQuestionChangeResult.Id}");
                 await PublishQuestionMessageToSignalRAsync(frontendQuestionChangeResult);
 
                 return Ok();
             }
             catch (Exception ex)
             {
-                _logger.LogError($"error Pubsub reciver: {ex.Message}");
+                _logger.LogError($"OnQuestionCreated: Error Pubsub reciver: {ex.Message}");
+                if (ex.InnerException != null)
+                    _logger.LogError($"OnQuestionCreated: Error Pubsub reciver, inner exception: {ex.InnerException.Message}");
             }
             return Problem(statusCode: (int)StatusCodes.Status500InternalServerError);
         }

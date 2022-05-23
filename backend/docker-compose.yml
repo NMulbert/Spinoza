@@ -4,7 +4,7 @@ services:
   ###########################################
   # Test Accessor Microservice + Dapr sidecar
   ###########################################
-  testaccessor:
+  spinoza.backend.accessors.testaccessor:
     image: ${DOCKER_REGISTRY-}testcatalogaccessor
     build:
       context: .
@@ -17,7 +17,8 @@ services:
       - redis
       - placement
       - rabbitmq
-      #- catalogmanager
+      - cosmosdb
+      - zipkin
     networks:
       - spinoza-dapr
     environment:
@@ -29,7 +30,7 @@ services:
       restart_policy:
         condition: on-failure
         delay: 5s
-        max_attempts: 3
+        max_attempts: 10
         window: 120s
     command: ["./daprd",
      "-app-id", "testaccessor",
@@ -38,21 +39,16 @@ services:
      "-placement-host-address", "placement:50006",
      "-components-path", "/dapr/components",
      "-config", "/dapr/config.yaml"]
-    
     volumes:
         - "./dapr/:/dapr"
     depends_on:
-      - rabbitmq
-      #- signalr
-      - azurite
-      - cosmosdb
-      - testaccessor
-    network_mode: "service:testaccessor"
+      - spinoza.backend.accessors.testaccessor
+    network_mode: "service:spinoza.backend.accessors.testaccessor"
    
   #############################################
   # Question Accessor Microservice + Dapr sidecar
   #############################################
-  spinoza.backend.accessor.questioncatalog:
+  spinoza.backend.accessors.questioncatalog:
     image: ${DOCKER_REGISTRY-}spinozabackendaccessorquestioncatalog
     build:
       context: .
@@ -65,7 +61,8 @@ services:
       - redis
       - placement
       - rabbitmq
-      #- testaccessor
+      - cosmosdb
+      - zipkin
     networks:
       - spinoza-dapr
     environment:
@@ -77,7 +74,7 @@ services:
       restart_policy:
         condition: on-failure
         delay: 5s
-        max_attempts: 3
+        max_attempts: 10
         window: 120s 
     command: ["./daprd",
      "-app-id", "questionaccessor",
@@ -86,20 +83,16 @@ services:
      "-placement-host-address", "placement:50006",
      "-components-path", "/dapr/components",
      "-config", "/dapr/config.yaml"]
-    
     volumes:
         - "./dapr/:/dapr"
     depends_on:
-      - rabbitmq
-      #- signalr
-      - azurite
-      - cosmosdb
-      - spinoza.backend.accessor.questioncatalog
-    network_mode: "service:spinoza.backend.accessor.questioncatalog"
+      - spinoza.backend.accessors.questioncatalog
+    network_mode: "service:spinoza.backend.accessors.questioncatalog"
+
   #############################################
   # Tag Accessor Microservice + Dapr sidecar
   #############################################
-  spinoza.backend.accessor.tagcatalog:
+  spinoza.backend.accessors.tagcatalog:
     image: ${DOCKER_REGISTRY-}spinozabackendaccessortagcatalog
     build:
       context: .
@@ -112,6 +105,8 @@ services:
       - redis
       - placement
       - rabbitmq
+      - cosmosdb
+      - zipkin
     networks:
       - spinoza-dapr
     environment:
@@ -123,7 +118,7 @@ services:
       restart_policy:
         condition: on-failure
         delay: 5s
-        max_attempts: 3
+        max_attempts: 10
         window: 120s 
     command: ["./daprd",
      "-app-id", "tagaccessor",
@@ -132,20 +127,16 @@ services:
      "-placement-host-address", "placement:50006",
      "-components-path", "/dapr/components",
      "-config", "/dapr/config.yaml"]
-    
     volumes:
-        - "./dapr/:/dapr"
+      - "./dapr/:/dapr"
     depends_on:
-      - rabbitmq
-      #- signalr
-      - azurite
-      - cosmosdb
-      - spinoza.backend.accessor.tagcatalog
-    network_mode: "service:spinoza.backend.accessor.tagcatalog"
+      - spinoza.backend.accessors.tagcatalog
+    network_mode: "service:spinoza.backend.accessors.tagcatalog"
+
   #############################################
   # Catalog Manager Microservice + Dapr sidecar
   #############################################
-  catalogmanager:
+  spinoza.backend.managers.catalogmanager:
     image: ${DOCKER_REGISTRY-}catalogmanager
     build:
       context: .
@@ -155,9 +146,10 @@ services:
       - 50000:3500
       - 50001:50001
     depends_on:
-      - redis
-      - placement
-      - rabbitmq
+      - spinoza.backend.accessors.testaccessor
+      - spinoza.backend.accessors.questioncatalog
+      - spinoza.backend.accessors.tagcatalog
+      - signalr-negotiate
     networks:
       - spinoza-dapr
     environment:
@@ -169,7 +161,7 @@ services:
       restart_policy:
         condition: on-failure
         delay: 5s
-        max_attempts: 3
+        max_attempts: 10
         window: 120s
     command: ["./daprd",
      "-app-id", "catalogmanager",
@@ -178,17 +170,11 @@ services:
      "-dapr-http-port", "3500",
      "-components-path", "/dapr/components",
      "-config", "/dapr/config.yaml"]
-    
     volumes:
         - "./dapr/:/dapr"
     depends_on:
-      - rabbitmq
-      #- signalr
-      - azurite
-      - cosmosdb
-      - catalogmanager
-    
-    network_mode: "service:catalogmanager"
+      - spinoza.backend.managers.catalogmanager
+    network_mode: "service:spinoza.backend.managers.catalogmanager"
 
   #############################################
   # SignalR Negotiate function support
@@ -234,7 +220,7 @@ services:
     mem_limit: 4G
     cpu_count: 4
     environment:
-      - AZURE_COSMOS_EMULATOR_PARTITION_COUNT=10
+      - AZURE_COSMOS_EMULATOR_PARTITION_COUNT=20
       - AZURE_COSMOS_EMULATOR_ENABLE_DATA_PERSISTENCE=true
 #      - AZURE_COSMOS_EMULATOR_IP_ADDRESS_OVERRIDE=
     ports:
@@ -319,8 +305,6 @@ services:
 ############################
 # Global settings
 ############################
-  
-
 networks:
   spinoza-dapr:
 
