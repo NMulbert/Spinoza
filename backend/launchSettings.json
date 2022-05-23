@@ -9,18 +9,16 @@
         "placement": "StartWithoutDebugging",
         "redis": "StartWithoutDebugging",
         "testaccessor-dapr": "StartWithoutDebugging",
-        "testaccessor": "StartDebugging",
-        "catalogmanager": "StartDebugging",
+        "spinoza.backend.managers.catalogmanager": "StartDebugging",
+        "spinoza.backend.accessors.testaccessor": "StartDebugging",
         "catalogmanager-dapr": "StartWithoutDebugging",
         "zipkin": "StartWithoutDebugging",
         "rabbitmq": "StartWithoutDebugging",
-        "signalr": "StartWithoutDebugging",
         "signalr-negotiate": "StartWithoutDebugging",
-        "spinozabackendaccessorquestioncatalog": "StartWithoutDebugging",
+        "spinoza.backend.accessors.tagcatalog": "StartDebugging",
         "questionaccessor-dapr": "StartWithoutDebugging",
-        "spinozabackendaccessortagcatalog": "StartWithoutDebugging",
+        "spinoza.backend.accessors.questioncatalog": "StartDebugging",
         "tagaccessor-dapr": "StartWithoutDebugging"
-
       }
     }
   }

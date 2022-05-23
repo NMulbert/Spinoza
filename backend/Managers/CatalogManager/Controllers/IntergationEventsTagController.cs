@@ -38,8 +38,10 @@ public class IntergationEventsTagController : ControllerBase
             }
             catch (Exception ex)
             {
-                _logger.LogError($"error Pubsub receiver: {ex.Message}");
-            }
+                _logger.LogError($"OnTagCreated: Error Pubsub receiver: {ex.Message}");
+                if (ex.InnerException != null)
+                    _logger.LogError($"OnTagCreated: Error Pubsub reciver, inner exception: {ex.InnerException.Message}");
+        }
             return Problem(statusCode: (int)StatusCodes.Status500InternalServerError);
         }
 
