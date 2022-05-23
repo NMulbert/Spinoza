@@ -22,7 +22,7 @@ COPY --from=publish /app/publish .
 ENV AzureWebJobsScriptRoot=/home/site/wwwroot \
     AzureFunctionsJobHost__Logging__Console__IsEnabled=true \
     AzureSignalRConnectionString="Endpoint=http://localhost;Port=8888;AccessKey=ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789ABCDEFGH;Version=1.0;" \
-    #AzureSignalRConnectionString="Endpoint=https://spinozasignalr.service.signalr.net;AccessKey=PX2Iu99frJJAapzcp/qQSco3gF6rjdWrhqMisv4mTeI=;Version=1.0;" \
+    #AzureSignalRConnectionString="Endpoint=https://spinozasignalr.service.signalr.net;AccessKey="" \ // Cloud signalR Endpoint the AccessKey Is in the azure portal
     HOST_CORS="*" \
     HOST_CORSCredentials=true
 
