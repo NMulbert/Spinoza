@@ -22,7 +22,7 @@ services:
     networks:
       - spinoza-dapr
     environment:
-      - ASPNETCORE_URLS=http://testaccessor:80
+      - ASPNETCORE_URLS=http://spinoza.backend.accessors.testaccessor:80
       - ASPNETCORE_ENVIRONMENT=Development
   testaccessor-dapr:
     image: "daprio/daprd:edge"
@@ -154,7 +154,7 @@ services:
       - spinoza-dapr
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
-      - ASPNETCORE_URLS=http://catalogmanager:80
+      - ASPNETCORE_URLS=http://spinoza.backend.managers.catalogmanager:80
   catalogmanager-dapr:
     image: "daprio/daprd:edge"
     deploy:
