@@ -115,7 +115,19 @@ namespace CatalogManager.Controllers
                 using var streamReader = new StreamReader(Request.Body);
                 var body = await streamReader.ReadToEndAsync();
                 var requestTestModel = JsonConvert.DeserializeObject<Models.FrontendRequests.Test>(body);
-
+                TryValidateModel(requestTestModel);
+                if(!ModelState.IsValid)
+                {
+                    string errors = "Errors: ";
+                    foreach (var error in ModelState.Root.Children!)
+                    {
+                       errors+= $"\n{error.Errors[0].ErrorMessage}";
+                    }
+                    //var error = (ModelState.Root.Children![0].Errors[0].ErrorMessage);
+                    _logger.LogError(errors);
+                    return BadRequest(errors);
+                }
+               //else
                 _logger.LogInformation("the message is going to queue");
                 var submitTestModel = _mapper.Map<Models.AccessorSubmits.Test>(requestTestModel);
                 submitTestModel.TestVersion = "1.0";
