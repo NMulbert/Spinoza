@@ -1,0 +1,55 @@
+name: Backend Integration Tests
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - backend/**
+  pull_request:
+    types: [opened, synchronize, reopened, closed]
+    branches:
+      - main
+    paths:
+      - backend/**
+
+jobs:
+  build:
+    runs-on: ubuntu-18.04
+    defaults:
+      run:
+        shell: bash
+        working-directory: backend
+    steps:
+    - uses: actions/checkout@v3
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v2
+      with:
+        dotnet-version: |
+          3.1.x
+          6.0.x
+    - name: Docker Compose Up
+      run: docker compose up -d
+    - name: Restore dependencies
+      run: dotnet restore SpinozaBackEnd.sln
+    - name: Build
+      run: dotnet build --no-restore SpinozaBackEnd.sln
+    - name: Install SignalR Emulator
+      run: dotnet tool install  -g Microsoft.Azure.SignalR.Emulator --version 1.0.0-preview1-10809
+    - name: Init SignalR Emulator
+      run: asrs-emulator upstream init
+      shell: bash
+    - name: Run SignalR Emulator
+      run: asrs-emulator start &
+      shell: bash
+    - name: Docker ps
+      run: docker ps
+    - name: Test
+      run: dotnet test --no-build --verbosity normal --configuration Debug IntegrationTests/Managers/Spinoza.Backend.Managers.TestCatalog.Tests/Spinoza.Backend.Managers.TestCatalog.Tests.csproj
+    - name: Dump docker logs on failure
+      if: failure()
+      uses: jwalton/gh-docker-logs@v1
+    - name: Stop containers
+      if: always()
+      run: docker compose down

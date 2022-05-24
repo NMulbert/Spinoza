@@ -17,19 +17,19 @@ import MDEditor from "@uiw/react-md-editor";
 import MultiChoice from "./MultiChoice";
 import { v4 as uuidv4 } from "uuid";
 import axios from "axios";
-import { ConsoleLogger } from "@microsoft/signalr/dist/esm/Utils";
+import { useSelector } from "react-redux";
+interface TagsState {
+  tags: { tags: [] };
+}
 
-function NewQuestion() {
-  const [dataHash, setHashData] = useState([
-    "React",
-    "C#",
-    "JavaScript",
-    "Python",
-  ]);
+function NewQuestion({ UpdateQuestions, setOpenedNQ }: any) {
+  let tags = useSelector((s: TagsState) => s.tags.tags);
 
+  const [dataHash, setHashData]: any = useState([]);
   const [answerType, setAnswerType] = useState("OpenTextQuestion");
   const [multiArr, setMultiArr] = useState([]);
   const [questionTxt, setQuestionTxt] = useState("");
+  const [validateName, setValidateName] = useState("");
 
   let protoType: any =
     answerType === "OpenTextQuestion"
@@ -44,7 +44,7 @@ function NewQuestion() {
     type: "OpenTextQuestion",
     status: "Draft",
     authorId: "alonf@zion-net.co.il",
-    tags: [{ name: "", status: "" }],
+    tags: [],
     schemaVersion: "1.0",
     testVersion: "1.0",
     previousVersionId: "none",
@@ -66,6 +66,7 @@ function NewQuestion() {
         <div>
           <TextInput
             label="Question Name:"
+            error={validateName}
             style={{ width: "50%", textAlign: "left" }}
             placeholder="Question Name"
             radius="xs"
@@ -75,7 +76,7 @@ function NewQuestion() {
             }}
           />
           <MultiSelect
-            data={dataHash}
+            data={[...tags, ...dataHash]}
             label="Tags:"
             placeholder="Select tags"
             icon={<Hash />}
@@ -84,7 +85,9 @@ function NewQuestion() {
             searchable
             creatable
             getCreateLabel={(query) => `+ Create ${query}`}
-            onCreate={(query) => setHashData((current) => [...current, query])}
+            onCreate={(query) =>
+              setHashData((current: any) => [...current, query])
+            }
             onChange={(e: any) => {
               setQuestionValues({
                 ...questionValues,
@@ -125,7 +128,7 @@ function NewQuestion() {
           <Space h="xs" />
 
           {answerType === "MultipleChoiceQuestion" ? (
-            <MultiChoice setMultiArr={setMultiArr} />
+            <MultiChoice setMultiArr={setMultiArr} answerOptions={multiArr} />
           ) : (
             <></>
           )}
@@ -158,17 +161,23 @@ function NewQuestion() {
               variant="gradient"
               gradient={{ from: "#838685", to: "#cfd0d0" }}
               onClick={async () => {
-                try {
-                  const response = await axios.post(
-                    "http://localhost:50000/v1.0/invoke/catalogmanager/method/question",
-                    JSON.stringify({ ...questionValues })
-                  );
-                  setQuestionValues({
-                    ...questionValues,
-                    id: uuidv4().toUpperCase(),
-                  });
-                } catch (err) {
-                  console.log(err);
+                if (questionValues.name.trim().length !== 0) {
+                  try {
+                    const response = await axios.post(
+                      "http://localhost:50000/v1.0/invoke/catalogmanager/method/question",
+                      JSON.stringify({ ...questionValues })
+                    );
+                    setQuestionValues({
+                      ...questionValues,
+                      id: uuidv4().toUpperCase(),
+                    });
+                    UpdateQuestions([questionValues]);
+                    setOpenedNQ(false);
+                  } catch (err) {
+                    console.log(err);
+                  }
+                } else {
+                  setValidateName("Question name is a required field");
                 }
               }}
             >

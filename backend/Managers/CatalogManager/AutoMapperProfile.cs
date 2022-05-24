@@ -11,7 +11,7 @@ internal class AutoMapperProfile : Profile
         CreateMap<CatalogManager.Models.AccessorResults.TestChangeResult, CatalogManager.Models.FrontendResponses.TestChangeResult>();
 
         CreateMap<CatalogManager.Models.AccessorResults.QuestionChangeResult, CatalogManager.Models.FrontendResponses.QuestionChangeResult>();
-        
+
         CreateMap<CatalogManager.Models.AccessorResults.Test, CatalogManager.Models.FrontendResponses.Test>();
 
         CreateMap<CatalogManager.Models.FrontendRequests.MultipleChoiceQuestion, CatalogManager.Models.AccessorSubmits.MultipleChoiceQuestion>()

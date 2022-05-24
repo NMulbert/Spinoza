@@ -1,0 +1,37 @@
+name: Cosmos Wrapper Integration Tests
+
+on:
+  workflow_dispatch:
+#   push:
+#     branches:
+#       - main
+#     paths:
+#       - backend/**
+#   pull_request:
+#     types: [opened, synchronize, reopened, closed]
+#     branches:
+#       - main
+#     paths:
+#       - backend/**
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+        working-directory: backend
+    steps:
+    - uses: actions/checkout@v3
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v2
+      with:
+        dotnet-version: 6.0.x
+    - name: Restore dependencies
+      run: dotnet restore SpinozaBackEnd.sln
+    - name: Build
+      run: dotnet build --no-restore SpinozaBackEnd.sln
+    - name: install cosmos DB Emulator
+      uses: southpolesteve/cosmos-emulator-github-action@v1
+    - name: Test
+      run: dotnet test --no-build --verbosity normal --configuration Debug IntegrationTests/Accessors/Spinoza.Backend.Accessor.TestCatalog.Tests/Spinoza.Backend.Accessor.TestCatalog.Tests.csproj

@@ -86,13 +86,7 @@ function ChooseQuestion({ UpdateQuestions, setOpenedEQ }: QuestionsState) {
                         setSelectedQuestions={setSelectedQuestions}
                         selectedQuestions={selectedQuestions}
                         key={i.id}
-                        id={i.id}
-                        name={i.name}
-                        content={i.content}
-                        authorId={i.authorId}
-                        difficultyLevel={i.difficultyLevel}
-                        type={i.type}
-                        tags={i.tags}
+                        question={i}
                       />
                     );
                   })

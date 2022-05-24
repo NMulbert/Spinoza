@@ -72,13 +72,13 @@ namespace Spinoza.Backend.Accessor.TestCatalog.Controllers
             {
                 //System.Diagnostics.Debugger.Launch();
 
-                var query = new QueryDefinition("SELECT item.questions FROM ITEMS item WHERE item.id = @id").WithParameter("@id", id.ToString().ToUpper());
+                var query = new QueryDefinition("SELECT item.questionsRefs FROM ITEMS item WHERE item.id = @id").WithParameter("@id", id.ToString().ToUpper());
 
                 JsonArray allTestQuestionsIds = new JsonArray();
 
                 var dbTestQuestionsIds = await _cosmosDBWrapper.GetCosmosElementsAsync<JsonNode>(query);
 
-                allTestQuestionsIds = dbTestQuestionsIds[0]["questions"]!.AsArray();
+                allTestQuestionsIds = dbTestQuestionsIds[0]["questionsRefs"]!.AsArray();
 
                 return new OkObjectResult(allTestQuestionsIds);
             }
@@ -208,7 +208,7 @@ namespace Spinoza.Backend.Accessor.TestCatalog.Controllers
                 dbItem.Status = newItem.Status;
                 dbItem.LastUpdateCreationTimeUTC = newItem.LastUpdateCreationTimeUTC;
                 dbItem.Title = newItem.Title;
-                dbItem.Questions = newItem.Questions;
+                dbItem.QuestionsRefs = newItem.QuestionsRefs;
                 dbItem.Tags = newItem.Tags;
                 return dbItem;
             }

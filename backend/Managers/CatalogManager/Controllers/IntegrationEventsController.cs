@@ -33,14 +33,16 @@ namespace CatalogManager.Controllers
             {
                 
                 var frontendTestChangeResult = _mapper.Map<Models.FrontendResponses.TestChangeResult>(accessorTestChangeResult);
-                _logger?.LogInformation($"Message received: {frontendTestChangeResult.Id}");
+                _logger?.LogInformation($"OnTestCreated: Message received: {frontendTestChangeResult.Id}");
                 await PublishMessageToSignalRAsync(frontendTestChangeResult);
 
                 return Ok();
             }
             catch (Exception ex)
             {
-                _logger.LogError($"error Pubsub reciver: {ex.Message}");
+                _logger.LogError($"OnTestCreated: Error Pubsub reciver: {ex.Message}");
+                if (ex.InnerException != null)
+                    _logger.LogError($"OnTestCreated: Error Pubsub reciver, inner exception: {ex.InnerException.Message}");
             }
             return Problem(statusCode: (int)StatusCodes.Status500InternalServerError);
         }

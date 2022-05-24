@@ -38,7 +38,7 @@ namespace CatalogManager.Controllers
         }
 
         [HttpGet("/allquestions")]
-        public async Task<IActionResult> GetAllQuestions(int? offset, int? limit , string []? tag)
+        public async Task<IActionResult> GetAllQuestions(int? offset, int? limit)
         {
             
             try

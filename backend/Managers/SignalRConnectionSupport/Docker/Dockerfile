@@ -9,7 +9,7 @@ FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
 WORKDIR /src
 COPY ["Managers/SignalRConnectionSupport/SignalRConnectionSupport.csproj", "Managers/SignalRConnectionSupport/"]
 RUN dotnet restore "Managers/SignalRConnectionSupport/SignalRConnectionSupport.csproj"
-COPY .. .
+COPY . .
 WORKDIR "/src/Managers/SignalRConnectionSupport"
 RUN dotnet build "SignalRConnectionSupport.csproj" -c Release -o /app/build
 
@@ -22,7 +22,7 @@ COPY --from=publish /app/publish .
 ENV AzureWebJobsScriptRoot=/home/site/wwwroot \
     AzureFunctionsJobHost__Logging__Console__IsEnabled=true \
     AzureSignalRConnectionString="Endpoint=http://localhost;Port=8888;AccessKey=ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789ABCDEFGH;Version=1.0;" \
-    #AzureSignalRConnectionString="Endpoint=https://spinozasignalr.service.signalr.net;AccessKey=PX2Iu99frJJAapzcp/qQSco3gF6rjdWrhqMisv4mTeI=;Version=1.0;" \
+    #AzureSignalRConnectionString="Endpoint=https://spinozasignalr.service.signalr.net;AccessKey="" \ // Cloud signalR Endpoint the AccessKey Is in the azure portal
     HOST_CORS="*" \
     HOST_CORSCredentials=true
 

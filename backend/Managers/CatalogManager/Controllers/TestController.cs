@@ -64,7 +64,16 @@ namespace CatalogManager.Controllers
             {
                 var allTestQuestionsIds = await _daprClient.InvokeMethodAsync<JsonArray>(HttpMethod.Get, "testaccessor", $"testquestions/{id}");
 
+                if (!allTestQuestionsIds.Any())
+                {
+                    _logger.LogInformation($"Test Id {id} has no questions");
+
+                    return new OkObjectResult(new JsonArray());
+                }
+
                 var allTestQuestions = await _daprClient.InvokeMethodAsync<JsonArray>(HttpMethod.Get, "questionaccessor", $"testquestions?questionsids={allTestQuestionsIds}");
+
+                _logger.LogInformation($"Test Id {id} has {allTestQuestions.Count} questions");
 
                 return new OkObjectResult(allTestQuestions);
             }
@@ -107,7 +116,19 @@ namespace CatalogManager.Controllers
                 using var streamReader = new StreamReader(Request.Body);
                 var body = await streamReader.ReadToEndAsync();
                 var requestTestModel = JsonConvert.DeserializeObject<Models.FrontendRequests.Test>(body);
-
+                TryValidateModel(requestTestModel);
+                if(!ModelState.IsValid)
+                {
+                    string errors = "Errors: ";
+                    foreach (var error in ModelState.Root.Children!)
+                    {
+                       errors+= $"\n{error.Errors[0].ErrorMessage}";
+                    }
+                    //var error = (ModelState.Root.Children![0].Errors[0].ErrorMessage);
+                    _logger.LogError(errors);
+                    return BadRequest(errors);
+                }
+               //else
                 _logger.LogInformation("the message is going to queue");
                 var submitTestModel = _mapper.Map<Models.AccessorSubmits.Test>(requestTestModel);
                 submitTestModel.TestVersion = "1.0";
