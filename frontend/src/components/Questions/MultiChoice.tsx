@@ -12,13 +12,13 @@ import { useEffect, useState } from "react";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import { GripVertical, X } from "tabler-icons-react";
 
-function MultiChoice({ setMultiArr }: any) {
+function MultiChoice({ setMultiArr, answerOptions }: any) {
   const [chooseMode, setChooseMode] = useState(false);
   const [checkboxMode, setCheckboxMode] = useState(false);
 
-  const form = useForm({
+  const form: any = useForm({
     initialValues: {
-      answers: formList([{ description: "", isCorrect: false }]),
+      answers: formList(answerOptions),
     },
   });
 
@@ -26,7 +26,7 @@ function MultiChoice({ setMultiArr }: any) {
     setMultiArr(form.values.answers);
   }, [form.values.answers]);
 
-  const fields = form.values.answers.map((_, index) => (
+  const fields = form.values.answers.map((_: any, index: any) => (
     <Draggable key={index} index={index} draggableId={index.toString()}>
       {(provided) => (
         <Group ref={provided.innerRef} mt="xs" {...provided.draggableProps}>

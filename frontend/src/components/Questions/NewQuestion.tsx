@@ -22,7 +22,7 @@ interface TagsState {
   tags: { tags: [] };
 }
 
-function NewQuestion({ UpdateQuestions}: any) {
+function NewQuestion({ UpdateQuestions, setOpenedNQ }: any) {
   let tags = useSelector((s: TagsState) => s.tags.tags);
 
   const [dataHash, setHashData]: any = useState([]);
@@ -44,7 +44,7 @@ function NewQuestion({ UpdateQuestions}: any) {
     type: "OpenTextQuestion",
     status: "Draft",
     authorId: "alonf@zion-net.co.il",
-    tags: [{ name: "", status: "" }],
+    tags: [],
     schemaVersion: "1.0",
     testVersion: "1.0",
     previousVersionId: "none",
@@ -128,7 +128,7 @@ function NewQuestion({ UpdateQuestions}: any) {
           <Space h="xs" />
 
           {answerType === "MultipleChoiceQuestion" ? (
-            <MultiChoice setMultiArr={setMultiArr} />
+            <MultiChoice setMultiArr={setMultiArr} answerOptions={multiArr} />
           ) : (
             <></>
           )}
@@ -172,6 +172,7 @@ function NewQuestion({ UpdateQuestions}: any) {
                       id: uuidv4().toUpperCase(),
                     });
                     UpdateQuestions([questionValues]);
+                    setOpenedNQ(false);
                   } catch (err) {
                     console.log(err);
                   }

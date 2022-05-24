@@ -24,6 +24,7 @@ type QuestionData = {
   difficultyLevel: string;
   type: string
   tags: any;
+  lastUpdateCreationTimeUTC: string;
   }
 
 
@@ -42,7 +43,7 @@ question
         title={question.name}
         size="100%"
       >
-        {<OpenQuestion/>}
+        {<OpenQuestion />}
       </Modal>
       <Card
         withBorder
@@ -102,7 +103,7 @@ question
         <Group style={{ color: "#444848" }} spacing="xs">
           <CalendarTime size={18} />
           <Text size="xs" weight={700}>
-            Creation Date
+            {question.lastUpdateCreationTimeUTC.slice(0, 19).replace("T", " | ")}
           </Text>
         </Group>
 
@@ -114,33 +115,36 @@ question
         </Group>
 
         <Group position="apart" spacing="xs">
-           <Link to={`/questions/${question.id}`} style={{ textDecoration: "none" }}>
-          <Button
-            radius="lg"
-            variant="light"
-            color="blue"
-            style={{ marginTop: 14, width: 120 }}
+          <Link
+            to={`/questions/${question.id}`}
+            style={{ textDecoration: "none" }}
           >
-            Open
-          </Button>
+            <Button
+              radius="lg"
+              variant="light"
+              color="blue"
+              style={{ marginTop: 14, width: 120 }}
+            >
+              Open
+            </Button>
           </Link>
 
-         <CopyToClipboard
-          text={`http://localhost:3000/questions/${question.id}`}
-          onCopy={() => {
-            setCopied(true);
-            setTimeout(() => setCopied(false), 1000);
-          }}
-        >
-          <Button
-            radius="lg"
-            variant="light"
-            color="gray"
-            style={{ marginTop: 14 }}
+          <CopyToClipboard
+            text={`http://localhost:3000/questions/${question.id}`}
+            onCopy={() => {
+              setCopied(true);
+              setTimeout(() => setCopied(false), 1000);
+            }}
           >
-            {copied ? <Copy color="#40c057" /> : <LinkIcon />}
-          </Button>
-        </CopyToClipboard>
+            <Button
+              radius="lg"
+              variant="light"
+              color="gray"
+              style={{ marginTop: 14 }}
+            >
+              {copied ? <Copy color="#40c057" /> : <LinkIcon />}
+            </Button>
+          </CopyToClipboard>
         </Group>
       </Card>
     </>
