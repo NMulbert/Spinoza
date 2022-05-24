@@ -7,8 +7,10 @@ import {
   Title,
   TextInput,
   MultiSelect,
-  Modal,
-  TypographyStylesProvider,
+  Radio,
+  SegmentedControl,
+  RadioGroup,
+  Modal
 } from "@mantine/core";
 import { CalendarTime, Edit, UserCircle } from "tabler-icons-react";
 import NewQuestion from "../Questions/NewQuestion";
@@ -17,20 +19,34 @@ import MDEditor from "@uiw/react-md-editor";
 import { useParams } from "react-router-dom";
 import axios from "axios";
 import { useSelector } from "react-redux";
+import MultiChoice from "./MultiChoice";
 interface TagsState {
   tags: { tags: [] };
 }
 
 function OpenQuestion() {
   let { id } = useParams();
+  const [answerType, setAnswerType] = useState("");
+  const [questionTxt, setQuestionTxt] = useState("");
+  const [multiArr, setMultiArr] = useState([]);
+  const [checkboxMode, setCheckboxMode] = useState(false);
+    const [correctAnswers, setCorrectAnswers] = useState(false);
+
+
+
+  let protoType: any =
+    answerType === "OpenTextQuestion"
+      ? questionTxt
+      : { questionText: questionTxt, answerOptions: multiArr };
+
   let [question, setQuestion]: any = useState({
     name: "",
-    content: "",
+    content: protoType,
     tags: [],
     type: "",
     authorId: "",
     difficultyLevel: "",
-    creationTimeUTC: "",
+    lastUpdateCreationTimeUTC: "",
   });
 
   useEffect(() => {
@@ -39,24 +55,34 @@ function OpenQuestion() {
       .then((res) => res.json())
       .then((result) => {
         setQuestion(result);
-      })
+        setAnswerType(result.type);
+        setMultiArr(
+          result.type === "MultipleChoiceQuestion" &&
+            result.content.answerOptions
+        );
+        setQuestionTxt(
+          result.type === "MultipleChoiceQuestion"
+            ? result.content.questionText
+            : result.content
+        );
+      });
   }, []);
+
+  useEffect(() => {
+    answerType === "MultipleChoiceQuestion"
+      ? setQuestion({
+          ...question,
+          content: {
+            questionText: questionTxt,
+            answerOptions: multiArr,
+          },
+        })
+      : setQuestion({ ...question, content: questionTxt });
+  }, [questionTxt, multiArr, answerType]);
 
   const [editMode, setEditMode] = useState(false);
   let tags = useSelector((s: TagsState) => s.tags.tags);
   const [dataHash, setHashData]: any = useState([]);
-  const [openedNQ, setOpenedNQ] = useState(false);
-  const [openedEQ, setOpenedEQ] = useState(false);
-
-  let date = new Date(
-    `${question?.creationTimeUTC
-      .toString()
-      .replace(/T/g, " ")
-      .replace(/-/g, "/")} UTC`
-  )
-    .toString()
-    .split(" ");
-  let creationTimeUTC = `${date[2]}/ ${date[1]}/ ${date[3]} | ${date[4]}`;
 
   return (
     <div>
@@ -94,7 +120,11 @@ function OpenQuestion() {
           <br />
           <Group spacing="xs">
             <CalendarTime />
-            <Title order={5}>{creationTimeUTC}</Title>
+            <Title order={5}>
+              {question.lastUpdateCreationTimeUTC
+                .slice(0, 19)
+                .replace("T", " | ")}
+            </Title>
           </Group>
 
           <Group spacing="xs">
@@ -113,15 +143,15 @@ function OpenQuestion() {
           {editMode ? (
             <MDEditor
               style={{ width: "90%" }}
-              value={question.description}
+              value={questionTxt}
               onChange={(e: any) => {
-                setQuestion({ ...question, content: e });
+                setQuestionTxt(e);
               }}
             />
           ) : (
             <MDEditor.Markdown
               style={{ backgroundColor: "#f0f0f0", color: "black" }}
-              source={question.content}
+              source={questionTxt}
             />
           )}
         </Grid.Col>
@@ -134,25 +164,22 @@ function OpenQuestion() {
             Tags:
           </Title>
           {editMode ? (
-            (console.log(tags),
-            (
-              <MultiSelect
-                data={[...tags, ...dataHash]}
-                style={{ width: "90%", textAlign: "left" }}
-                placeholder="#Tags"
-                radius="xs"
-                searchable
-                creatable
-                getCreateLabel={(query) => `+ Create ${query}`}
-                onCreate={(query) =>
-                  setHashData((current: any) => [...current, query])
-                }
-                value={question.tags}
-                onChange={(e: any) => {
-                  setQuestion({ ...question, tags: e });
-                }}
-              />
-            ))
+            <MultiSelect
+              data={[...tags, ...dataHash]}
+              style={{ width: "90%", textAlign: "left" }}
+              placeholder="#Tags"
+              radius="xs"
+              searchable
+              creatable
+              getCreateLabel={(query) => `+ Create ${query}`}
+              onCreate={(query) =>
+                setHashData((current: any) => [...current, query])
+              }
+              value={question.tags}
+              onChange={(e: any) => {
+                setQuestion({ ...question, tags: e });
+              }}
+            />
           ) : (
             <Group spacing="xs">
               {question.tags?.map((i: any) => {
@@ -165,7 +192,104 @@ function OpenQuestion() {
             </Group>
           )}
         </Grid.Col>
-     
+
+        {editMode ? (
+          <Grid.Col span={12}>
+            <SegmentedControl
+              size="xl"
+              radius="sm"
+              color="green"
+              value={answerType}
+              data={[
+                { value: "OpenTextQuestion", label: "Text" },
+                { value: "MultipleChoiceQuestion", label: "Multiple Choice" },
+              ]}
+              onChange={(value: any) => {
+                setAnswerType(value);
+                setQuestion({
+                  ...question,
+                  type: value,
+                });
+              }}
+            />
+          </Grid.Col>
+        ) : (
+          <></>
+        )}
+
+        {editMode ? (
+          answerType === "MultipleChoiceQuestion" ? (
+            <Grid.Col span={12}>
+              <MultiChoice setMultiArr={setMultiArr} answerOptions={multiArr} />
+            </Grid.Col>
+          ) : (
+            <></>
+          )
+        ) : (
+          <></>
+        )}
+
+        {editMode ? (
+          <></>
+        ) : answerType === "MultipleChoiceQuestion" ? (
+          <Grid.Col span={12}>
+            <Title
+              order={5}
+              style={{ textDecoration: "underline", marginBottom: 5 }}
+            >
+              Answers:
+            </Title>
+            {multiArr.map((e: any) => (
+              <Radio
+                disabled
+                key={e.description}
+                checked={e.isCorrect}
+                label={e.description}
+                value={e.description}
+                style={{ padding: 5 }}
+              />
+            ))}
+          </Grid.Col>
+        ) : (
+          <></>
+        )}
+
+        {editMode ? (
+          <Grid.Col span={12}>
+            <RadioGroup
+              value={question.difficultyLevel}
+              onChange={(value: any) => {
+                setQuestion({
+                  ...question,
+                  difficultyLevel: value,
+                });
+              }}
+            >
+              <Radio value="1" label="1" />
+              <Radio value="2" label="2" />
+              <Radio value="3" label="3" />
+              <Radio value="4" label="4" />
+              <Radio value="5" label="5" />
+            </RadioGroup>
+          </Grid.Col>
+        ) : (
+          <Grid.Col span={12}>
+            <Title
+              order={5}
+              style={{ textDecoration: "underline", marginBottom: 5 }}
+            >
+              Difficulty:
+            </Title>
+            <RadioGroup value={question.difficultyLevel}>
+              <Radio disabled value="1" label="1" />
+              <Radio disabled value="2" label="2" />
+              <Radio disabled value="3" label="3" />
+              <Radio disabled value="4" label="4" />
+              <Radio disabled value="5" label="5" />
+            </RadioGroup>
+          </Grid.Col>
+        )}
+
         <Grid.Col span={12}>
           <Group spacing="sm">
             <Button
@@ -175,10 +299,10 @@ function OpenQuestion() {
               onClick={async () => {
                 try {
                   const response = await axios.put(
-                    "http://localhost:50000/v1.0/invoke/catalogmanager/method/test",
+                    "http://localhost:50000/v1.0/invoke/catalogmanager/method/question",
                     JSON.stringify({
-                      messageType: "UpdateTest",
-                      ...test,
+                      messageType: "UpdateQuestion",
+                      ...question,
                     })
                   );
                 } catch (err) {
@@ -193,7 +317,7 @@ function OpenQuestion() {
               variant="gradient"
               gradient={{ from: "#217ad2", to: "#4fbaee" }}
               onClick={() => {
-                console.log({ messageType: "UpdateTest", ...test });
+                console.log({ messageType: "UpdateQuestion", ...question });
               }}
             >
               Publish
