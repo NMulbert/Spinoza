@@ -10,11 +10,13 @@ import {
 } from "@mantine/core";
 import MDEditor from "@uiw/react-md-editor";
 import { useState } from "react";
+import CopyToClipboard from "react-copy-to-clipboard";
 import { Link } from "react-router-dom";
-import { CalendarTime, UserCircle, Link as LinkIcon, Stars } from "tabler-icons-react";
+import { CalendarTime, UserCircle, Link as LinkIcon, Stars, Copy } from "tabler-icons-react";
 import OpenQuestion from "./OpenQuestion";
 
 type QuestionData = {
+  question:{
   id: string;
   name: string;
   content: any;
@@ -22,29 +24,25 @@ type QuestionData = {
   difficultyLevel: string;
   type: string
   tags: any;
+  }
+
 
 };
 
 function QuestionCard({
-  id,
-  name,
-  content,
-  authorId,
-  difficultyLevel,
-  type,
-  tags
+question
 }: QuestionData) {
   const [openedQuestion, setOpenedQuestion] = useState(false);
-
+ const [copied, setCopied] = useState(false);
   return (
     <>
       <Modal
         opened={openedQuestion}
         onClose={() => setOpenedQuestion(false)}
-        title={name}
+        title={question.name}
         size="100%"
       >
-        {<OpenQuestion />}
+        {<OpenQuestion/>}
       </Modal>
       <Card
         withBorder
@@ -60,7 +58,7 @@ function QuestionCard({
         }}
       >
         <Title order={4} style={{ height: 45, textAlign: "center" }}>
-          {name}
+          {question.name}
         </Title>
         <Divider my="sm" color="blue" />
 
@@ -69,10 +67,10 @@ function QuestionCard({
             <MDEditor.Markdown
               style={{ backgroundColor: "white", color: "black" }}
               source={
-                type === "MultipleChoiceQuestion" ? (
-                  content.questionText
-                ) : type === "OpenTextQuestion" ? (
-                  content
+                question.type === "MultipleChoiceQuestion" ? (
+                  question.content.questionText
+                ) : question.type === "OpenTextQuestion" ? (
+                  question.content
                 ) : (
                   <></>
                 )
@@ -85,7 +83,7 @@ function QuestionCard({
           spacing="xs"
           style={{ marginTop: 10, marginBottom: 20, height: 40 }}
         >
-          {tags.map((i: any) => {
+          {question.tags.map((i: any) => {
             return (
               <Badge key={i} color="green" variant="light">
                 {i}
@@ -97,7 +95,7 @@ function QuestionCard({
         <Group style={{ color: "#444848" }} spacing="xs">
           <Stars size={18} />
           <Text size="xs" weight={700}>
-            Difficulty: {difficultyLevel}
+            Difficulty: {question.difficultyLevel}
           </Text>
         </Group>
 
@@ -111,30 +109,38 @@ function QuestionCard({
         <Group style={{ color: "#444848" }} spacing="xs">
           <UserCircle size={18} />
           <Text size="xs" weight={700}>
-            {authorId}
+            {question.authorId}
           </Text>
         </Group>
 
         <Group position="apart" spacing="xs">
+           <Link to={`/questions/${question.id}`} style={{ textDecoration: "none" }}>
           <Button
             radius="lg"
             variant="light"
             color="blue"
             style={{ marginTop: 14, width: 120 }}
-            onClick={() => {
-              setOpenedQuestion(true);
-            }}
           >
             Open
           </Button>
+          </Link>
+
+         <CopyToClipboard
+          text={`http://localhost:3000/questions/${question.id}`}
+          onCopy={() => {
+            setCopied(true);
+            setTimeout(() => setCopied(false), 1000);
+          }}
+        >
           <Button
             radius="lg"
             variant="light"
             color="gray"
             style={{ marginTop: 14 }}
           >
-            <LinkIcon />
+            {copied ? <Copy color="#40c057" /> : <LinkIcon />}
           </Button>
+        </CopyToClipboard>
         </Group>
       </Card>
     </>

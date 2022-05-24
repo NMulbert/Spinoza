@@ -10,6 +10,7 @@ import AllTestsPage from "./components/Tests/AllTestsPage";
 import AllQuestionsPage from "./components/Questions/AllQuestionsPage";
 import CreateTest from "./components/Tests/CreateTest";
 import { loadTags } from "./redux/Reducers/tags/tags-actions";
+import OpenQuestion from "./components/Questions/OpenQuestion";
 
 function App() {
   const dispatch = useDispatch();
@@ -30,6 +31,7 @@ function App() {
           <Route index element={<AllTestsPage />} />
           <Route path="/tests" element={<AllTestsPage />} />
           <Route path={`/tests/:id`} element={<ViewTest />} />
+          <Route path={`/questions/:id`} element={<OpenQuestion />} />
           <Route path="/create-test" element={<CreateTest />} />
           <Route path="/questions" element={<AllQuestionsPage />} />
           <Route path="*" element={<PageNotFound />} />
