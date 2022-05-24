@@ -17,7 +17,6 @@ import MDEditor from "@uiw/react-md-editor";
 import MultiChoice from "./MultiChoice";
 import { v4 as uuidv4 } from "uuid";
 import axios from "axios";
-import { ConsoleLogger } from "@microsoft/signalr/dist/esm/Utils";
 import { useSelector } from "react-redux";
 interface TagsState {
   tags: { tags: [] };

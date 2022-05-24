@@ -100,13 +100,7 @@ function AllQuestionsPage() {
             return (
               <Grid.Col md={6} lg={6} xl={3} key={i.id}>
                 <QuestionCard
-                  id={i.id}
-                  name={i.name}
-                  content={i.content}
-                  authorId={i.authorId}
-                  difficultyLevel={i.difficultyLevel}
-                  type={i.type}
-                  tags={i.tags}
+                    question={i}
                 />
               </Grid.Col>
             );
