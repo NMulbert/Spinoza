@@ -71,7 +71,7 @@ namespace Spinoza.Backend.Accessor.QuestionCatalog.Controllers
         {
             try
             {
-                char[] separators = new char[] { '[', ']', ',' };
+                char[] separators = { '[', ']', ',' };
 
                 string[] ids = allTestQuestionsIds.Split(separators, StringSplitOptions.RemoveEmptyEntries);
 

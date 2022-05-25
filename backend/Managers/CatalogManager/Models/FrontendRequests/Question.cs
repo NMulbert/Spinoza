@@ -8,7 +8,7 @@
          string MessageType { get; set; }
          string QuestionVersion { get; set; }
          
-         public string[] Tags { get; set; }
+          string[] Tags { get; set; }
     }
     public class CommonQuestion : IQuestion
     {

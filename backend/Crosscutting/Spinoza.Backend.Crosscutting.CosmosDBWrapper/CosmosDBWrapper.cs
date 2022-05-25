@@ -175,7 +175,6 @@ public class CosmosDBWrapper : ICosmosDBWrapper
 
     public async Task<IList<TOut>> GetCosmosElementsAsync<TOut>(QueryDefinition queryDefinition)
     {
-
         try
         {
             List<TOut> itemList = new List<TOut>();
@@ -215,12 +214,13 @@ public class CosmosDBWrapper : ICosmosDBWrapper
         }
     }
 
-    public async Task<IList<TOut>> GetAllCosmosElementsAsync<TOut>(int skip = 0, int count = 50)
+    public async Task<IList<TOut>> GetAllCosmosElementsAsync<TOut>(int skip = 0, int count = 50 )
     {
         var query = new QueryDefinition($"SELECT * FROM c OFFSET @skip LIMIT @count").WithParameter("@skip", skip)
             .WithParameter("@count", count);
         return await GetCosmosElementsAsync<TOut>(query);
     }
+    
 
     public async Task<TOut?> GetScalarCosmosQueryResult<TOut>(QueryDefinition queryDefinition)
     {
