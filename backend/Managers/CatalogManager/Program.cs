@@ -1,4 +1,5 @@
 using AutoMapper;
+using CatalogManager;
 
 var builder = WebApplication.CreateBuilder(args);
 var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";

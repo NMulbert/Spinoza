@@ -19,6 +19,7 @@
         public string[] Tags { get; set; }
     }
 
+    // ReSharper disable ClassNeverInstantiated.Global
     public class MultipleChoiceQuestion : IQuestion
     {
         public string MessageType { get; set; }

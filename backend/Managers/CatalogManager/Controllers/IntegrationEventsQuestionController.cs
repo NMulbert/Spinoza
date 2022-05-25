@@ -29,30 +29,28 @@ namespace CatalogManager.Controllers
             try
             {
                 var frontendQuestionChangeResult = _mapper.Map<Models.FrontendResponses.QuestionChangeResult>(accessorQuestionChangeResult);
-                _logger?.LogInformation($"OnQuestionCreated: Message received: {frontendQuestionChangeResult.Id}");
-                await PublishQuestionMessageToSignalRAsync(frontendQuestionChangeResult);
-
-                return Ok();
+                _logger.LogInformation($"OnQuestionCreated: Message received: {frontendQuestionChangeResult.Id}");
+                return await PublishQuestionMessageToSignalRAsync(frontendQuestionChangeResult);
             }
             catch (Exception ex)
             {
-                _logger.LogError($"OnQuestionCreated: Error Pubsub reciver: {ex.Message}");
+                _logger.LogError($"OnQuestionCreated: Error Pubsub receiver: {ex.Message}");
                 if (ex.InnerException != null)
-                    _logger.LogError($"OnQuestionCreated: Error Pubsub reciver, inner exception: {ex.InnerException.Message}");
+                    _logger.LogError($"OnQuestionCreated: Error Pubsub receiver, inner exception: {ex.InnerException.Message}");
             }
-            return Problem(statusCode: (int)StatusCodes.Status500InternalServerError);
+            return Problem(statusCode: StatusCodes.Status500InternalServerError);
         }
-
 
         private async Task<IActionResult> PublishQuestionMessageToSignalRAsync(Models.FrontendResponses.QuestionChangeResult frontendQuestionChangeResult)
         {
             Data data = new();
-            Argument argument = new Argument();
-            argument.Sender = "dapr";
-            argument.Text = frontendQuestionChangeResult;
-            data.Arguments = new Argument[] { argument };
-            //Dictionary<string, string> newmetadata = new Dictionary<string, string>() { { "hub", "spinozahub" } };
-            //var metadata = new Dictionary<string, string>() { { "spinozaHub", "Test" } };
+            Argument argument = new Argument
+            {
+                Sender = "dapr",
+                Text = frontendQuestionChangeResult
+            };
+            data.Arguments = new [] { argument };
+
             await _daprClient.InvokeBindingAsync("azuresignalroutput", "create", data);
             return Ok();
         }

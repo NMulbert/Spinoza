@@ -1,11 +1,7 @@
-﻿using AutoMapper;
-using Dapr.Client;
+﻿using Dapr.Client;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Cosmos;
-using Newtonsoft.Json;
 using Spinoza.Backend.Crosscutting.CosmosDBWrapper;
-using System;
-using System.Text.Json;
 using System.Text.Json.Nodes;
 
 namespace Spinoza.Backend.Accessor.QuestionCatalog.Controllers
@@ -18,14 +14,12 @@ namespace Spinoza.Backend.Accessor.QuestionCatalog.Controllers
 
         private readonly DaprClient _daprClient;
         private readonly ICosmosDBWrapper _cosmosDBWrapper;
-        private readonly IMapper _mapper;
 
-        public QuestionAccessorController(ILogger<QuestionAccessorController> logger, DaprClient daprClient, ICosmosDBWrapper cosmosDBWrapper, IMapper mapper)
+        public QuestionAccessorController(ILogger<QuestionAccessorController> logger, DaprClient daprClient, ICosmosDBWrapper cosmosDBWrapper)
         {
             _logger = logger;
             _daprClient = daprClient;
             _cosmosDBWrapper = cosmosDBWrapper;
-            _mapper = mapper;
         }
 
         [HttpGet("allquestions")]
@@ -98,7 +92,7 @@ namespace Spinoza.Backend.Accessor.QuestionCatalog.Controllers
             {
                 _logger.LogError($"Error while getting test questions: {allTestQuestionsIds} Error: {ex.Message}");
             }
-            return Problem(statusCode: (int)StatusCodes.Status500InternalServerError);
+            return Problem(statusCode: StatusCodes.Status500InternalServerError);
         }
 
         [HttpGet("/question/{id:Guid}")]
@@ -113,7 +107,7 @@ namespace Spinoza.Backend.Accessor.QuestionCatalog.Controllers
 
                 if (dbQuestion == null)
                 {
-                    _logger.LogWarning($"GetQuestionById: accessor returnes null for question: {id}");
+                    _logger.LogWarning($"GetQuestionById: accessor returns null for question: {id}");
                     return new NotFoundObjectResult(id);
                 }
 
@@ -125,7 +119,7 @@ namespace Spinoza.Backend.Accessor.QuestionCatalog.Controllers
             {
                 _logger.LogError($"Error while getting a question: {id} Error: {ex.Message}");
             }
-            return Problem(statusCode: (int)StatusCodes.Status500InternalServerError);
+            return Problem(statusCode: StatusCodes.Status500InternalServerError);
         }
 
         [HttpPost("/questionaccessorrequestqueue")]
@@ -134,7 +128,7 @@ namespace Spinoza.Backend.Accessor.QuestionCatalog.Controllers
         {
             try
             {
-                Models.Responses.QuestionChangeResult? result = null;
+                Models.Responses.QuestionChangeResult? result;
 
                 if ((string)question["messageType"]! == "AddQuestion")
                 {
@@ -149,26 +143,42 @@ namespace Spinoza.Backend.Accessor.QuestionCatalog.Controllers
                     result = CreateQuestionResult((string)question["id"]!, "UnknownRequest", "Understand only CreateQuestion or UpdateQuestion", 1, false);
                 }
 
-                _logger.LogInformation("QuestionChangeResult reason: {0}", result.Reason);
+                _logger.LogInformation("QuestionChangeResult reason: {0}", result?.Reason);
 
-                await PublishQuestionResultAsync(result);
+                if (result != null)
+                {
+                    await PublishQuestionResultAsync(result);
+                }
+                else
+                {
+                    throw new Exception(
+                        "QuestionAccessorController:InputFromQueueBinding result of question creation or update is null");
+                }
                 return Ok();
             }
             catch (Exception ex)
             {
-                _logger.LogError($"Error while creatring or updating a question: {ex.Message}");
-                var result = CreateQuestionResult((string)question["id"] ?? Guid.Empty.ToString(), "Unknown", $"InternalServerError: {ex.Message}", 666, false);
+                string questionId = "Unknown Id";
+                try
+                {
+                    questionId = (string)question["id"]!;
+                }
+                catch (Exception)
+                {
+                    _logger.LogError($"EQuestionAccessorController:InputFromQueueBinding, can't get question id");
+                }
+                _logger.LogError($"Error while creating or updating a question: {ex.Message}");
+                var result = CreateQuestionResult(questionId, "Unknown", $"InternalServerError: {ex.Message}", 666, false);
                 await PublishQuestionResultAsync(result);
-
             }
-            return Problem(statusCode: (int)StatusCodes.Status500InternalServerError);
+            return Problem(statusCode: StatusCodes.Status500InternalServerError);
         }
 
         public async Task<Models.Responses.QuestionChangeResult?> UpdateQuestionsAsync(JsonNode question)
         {
             question["lastUpdateCreationTimeUTC"] = DateTimeOffset.UtcNow;
             question.AsObject().Remove("messageType");
-            var result = await _cosmosDBWrapper.UpdateItemAsync<JsonNode>(question, item => (string?)item["_etag"], item => Guid.Parse(item["id"]!.ToString()), TestMerger);
+            var result = await _cosmosDBWrapper.UpdateItemAsync(question, item => (string?)item["_etag"], item => Guid.Parse(item["id"]!.ToString()), TestMerger);
             if (result != null && result.StatusCode.IsOk())
             {
                 return CreateQuestionResult((string)question["id"]!, "Update", $"Question: {question["name"]} has been updated", 8);
@@ -244,7 +254,7 @@ namespace Spinoza.Backend.Accessor.QuestionCatalog.Controllers
             {
                 _logger.LogError($"Error while getting questions: {ex.Message}");
             }
-            return Problem(statusCode: (int)StatusCodes.Status500InternalServerError);
+            return Problem(statusCode: StatusCodes.Status500InternalServerError);
 
         }
 

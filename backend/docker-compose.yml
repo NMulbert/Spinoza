@@ -10,9 +10,9 @@ services:
       context: .
       dockerfile: ./Accessors/TestCatalogAccessor/Dockerfile
     ports:
-      - 5008:80
-      - 50002:3500
-      - 50010:50001
+      - "5008:80"
+      - "50002:3500"
+      - "50010:50001"
     depends_on:
       - redis
       - placement
@@ -54,9 +54,9 @@ services:
       context: .
       dockerfile: ./Accessors/Spinoza.Backend.Accessor.QuestionCatalog/Dockerfile
     ports:
-      - 5009:80
-      - 50003:3500
-      - 50011:50001
+      - "5009:80"
+      - "50003:3500"
+      - "50011:50001"
     depends_on:
       - redis
       - placement
@@ -98,9 +98,9 @@ services:
       context: .
       dockerfile: Accessors/Spinoza.Backend.Accessor.TagCatalog/Dockerfile
     ports:
-      - 5020:80
-      - 50015:3500
-      - 50012:50001
+      - "5020:80"
+      - "50015:3500"
+      - "50012:50001"
     depends_on:
       - redis
       - placement
@@ -142,9 +142,9 @@ services:
       context: .
       dockerfile: ./Managers/CatalogManager/Dockerfile
     ports:
-      - 5007:80
-      - 50000:3500
-      - 50001:50001
+      - "5007:80"
+      - "50000:3500"
+      - "50001:50001"
     depends_on:
       - spinoza.backend.accessors.testaccessor
       - spinoza.backend.accessors.questioncatalog
@@ -185,8 +185,8 @@ services:
       context: .
       dockerfile: ./Managers/SignalRConnectionSupport/Docker/Dockerfile
     ports:
-      - 80:80
-      - 443:443
+      - "80:80"
+      - "443:443"
     depends_on:
       - azurite
     networks:

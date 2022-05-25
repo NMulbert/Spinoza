@@ -13,9 +13,9 @@ namespace Spinoza.Backend.Accessor.TestCatalog.Tests
             CosmosDbInformationProvider = cosmosDbInformationProvider;
         }
 
-        public IConfiguration Configuration { get; }
-        public ILogger<CosmosDBWrapper> Logger { get; }
-        public ICosmosDbInformationProvider CosmosDbInformationProvider { get; }
+        private IConfiguration Configuration { get; }
+        private ILogger<CosmosDBWrapper> Logger { get; }
+        private ICosmosDbInformationProvider CosmosDbInformationProvider { get; }
 
         public ICosmosDBWrapper CreateCosmosDBWrapper() => new CosmosDBWrapper(Configuration,Logger,CosmosDbInformationProvider);
        
