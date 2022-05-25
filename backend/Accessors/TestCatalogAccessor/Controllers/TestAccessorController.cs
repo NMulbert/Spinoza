@@ -34,30 +34,24 @@ namespace Spinoza.Backend.Accessor.TestCatalog.Controllers
         [HttpGet("tests")]
         public async Task<IActionResult> GetTests(int? offset, int? limit )
         {
-            _logger.LogError($"***************************");
             var tags = Request.Query["tags"].ToString();
-           
-          _logger.LogError($"{tags}");
-            
             try
             {
-                IList<Models.DB.Test>? dbTests ;
+                IList<Models.DB.Test>? dbTests;
                    
                 if (string.IsNullOrEmpty(tags))
                 {
-                    _logger.LogError($"***************************");
                     dbTests = await _cosmosDBWrapper.GetAllCosmosElementsAsync<Models.DB.Test>(offset ?? 0, limit ?? 100);
                 }
                 else
                 {
                     var query =
                         $" SELECT DISTINCT test FROM test JOIN tag IN test.tags WHERE tag IN ({tags}) OFFSET @skip LIMIT @count";
-                    _logger.LogError(query);
-                    dbTests = await _cosmosDBWrapper.GetCosmosElementsAsync<Models.DB.Test>(new QueryDefinition(query).WithParameter("@skip", offset ?? 0)
+                    _logger.LogInformation($"GetTests: The query is: {query}");
+                    var tests = await _cosmosDBWrapper.GetCosmosElementsAsync<JsonNode>(new QueryDefinition(query).WithParameter("@skip", offset ?? 0)
                         .WithParameter("@count", limit ?? 100));
-                    
-                    
-                    
+
+                    dbTests = tests?.Select(j => JsonConvert.DeserializeObject<Models.DB.Test>(j["test"]!.ToJsonString())!).ToList();
                 }
 
                 var resultTests = _mapper.Map<List<Models.Results.Test>>(dbTests);

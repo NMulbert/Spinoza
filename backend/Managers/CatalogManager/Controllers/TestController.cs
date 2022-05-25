@@ -50,9 +50,9 @@ namespace CatalogManager.Controllers
                             sb.Length--;
                             return sb.ToString();
                         }) : string.Empty);
-                                               //   var tags = ( queryTags.Any() ? "&tags=" + string.Join(",", queryTags!) : string.Empty);
-                                               var methodName = $"testaccessor/tests?offset={offset ?? 0}&limit={limit ?? 100}{tags}";
-                  _logger?.LogInformation($"calling method : {methodName}");
+                
+                var methodName = $"testaccessor/tests?offset={offset ?? 0}&limit={limit ?? 100}{tags}";
+                _logger?.LogInformation($"GetAll: calling method : {methodName}");
                 var allAccessorTests = await _daprClient.InvokeMethodAsync<List<Models.AccessorResults.Test>>(HttpMethod.Get, "testaccessor", methodName);
                 var frontendAllTestModelResult = _mapper.Map<List<Models.FrontendResponses.Test>>(allAccessorTests);
                 // ReSharper disable once ConditionalAccessQualifierIsNonNullableAccordingToAPIContract
