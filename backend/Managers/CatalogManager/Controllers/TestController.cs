@@ -3,6 +3,7 @@ using Dapr.Client;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using System;
+using System.Text;
 using System.Text.Json.Nodes;
 
 namespace CatalogManager.Controllers
@@ -37,12 +38,20 @@ namespace CatalogManager.Controllers
 
 
         [HttpGet("/tests")]
-        public async Task<IActionResult> GetAll(int? offset, int? limit, string []? tag)
+        public async Task<IActionResult> GetAll(int? offset, int? limit)
         {
             try
             {
-                  var tags = (tag!.Any() ? "&tags=" + string.Join(",", tag!) : string.Empty);
-                  var methodName = $"testaccessor/tests?offset={offset ?? 0}&limit={limit ?? 100}{tags}";
+                var queryTags = Request.Query["tag"];
+                var tags = (queryTags.Any()
+                    ? "&tags=" + queryTags.Aggregate(new StringBuilder(), (sb, t) => sb.Append($"'{t}',"),
+                        sb =>
+                        {
+                            sb.Length--;
+                            return sb.ToString();
+                        }) : string.Empty);
+                                               //   var tags = ( queryTags.Any() ? "&tags=" + string.Join(",", queryTags!) : string.Empty);
+                                               var methodName = $"testaccessor/tests?offset={offset ?? 0}&limit={limit ?? 100}{tags}";
                   _logger?.LogInformation($"calling method : {methodName}");
                 var allAccessorTests = await _daprClient.InvokeMethodAsync<List<Models.AccessorResults.Test>>(HttpMethod.Get, "testaccessor", methodName);
                 var frontendAllTestModelResult = _mapper.Map<List<Models.FrontendResponses.Test>>(allAccessorTests);

@@ -32,21 +32,31 @@ namespace Spinoza.Backend.Accessor.TestCatalog.Controllers
 
        
         [HttpGet("tests")]
-        public async Task<IActionResult> GetTests(int? offset, int? limit,  string? tags )
+        public async Task<IActionResult> GetTests(int? offset, int? limit )
         {
-          
+            _logger.LogError($"***************************");
+            var tags = Request.Query["tags"].ToString();
+           
+          _logger.LogError($"{tags}");
+            
             try
             {
                 IList<Models.DB.Test>? dbTests ;
                    
-                if (tags == null)
+                if (string.IsNullOrEmpty(tags))
                 {
+                    _logger.LogError($"***************************");
                     dbTests = await _cosmosDBWrapper.GetAllCosmosElementsAsync<Models.DB.Test>(offset ?? 0, limit ?? 100);
                 }
                 else
                 {
-                    dbTests = await _cosmosDBWrapper.GetCosmosElementsAsync<Models.DB.Test>(new QueryDefinition($"SELECT * FROM TESTS test WHERE test.tags IN ({tags})").WithParameter("@skip", offset ?? 0)
+                    var query =
+                        $" SELECT DISTINCT test FROM test JOIN tag IN test.tags WHERE tag IN ({tags}) OFFSET @skip LIMIT @count";
+                    _logger.LogError(query);
+                    dbTests = await _cosmosDBWrapper.GetCosmosElementsAsync<Models.DB.Test>(new QueryDefinition(query).WithParameter("@skip", offset ?? 0)
                         .WithParameter("@count", limit ?? 100));
+                    
+                    
                     
                 }
 
