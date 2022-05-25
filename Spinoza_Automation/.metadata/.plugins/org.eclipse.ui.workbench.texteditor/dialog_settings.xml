@@ -1,13 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <section name="Workbench">
 	<section name="org.eclipse.ui.texteditor.FindReplaceDialog">
-		<item key="selection" value="WebDriverWait wait = new WebDriverWait(driver, 15);"/>
+		<item key="selection" value="&#x09;&#x09;&#x09;&#x09;&#x09;&quot;button[class=&apos;mantine-Button-gradient mantine-Button-root mantine-Group-child mantine-e8vnjr&apos;]&quot;))"/>
 		<item key="wrap" value="true"/>
 		<item key="casesensitive" value="false"/>
 		<item key="wholeword" value="false"/>
 		<item key="incremental" value="false"/>
 		<item key="isRegEx" value="false"/>
 		<list key="findhistory">
+			<item value="&#x09;&#x09;&#x09;&#x09;&#x09;&quot;button[class=&apos;mantine-Button-gradient mantine-Button-root mantine-Group-child mantine-e8vnjr&apos;]&quot;))"/>
+			<item value="&#x09;&#x09;&#x09;&#x09;&#x09;&#x09;System.out.println(&quot;DESCRIPTION = &apos;NEW EDIT DESCRIPTION&apos;&quot;);"/>
+			<item value="&#x09;}"/>
+			<item value="import java.util.concurrent.TimeUnit;"/>
 			<item value="WebDriverWait wait = new WebDriverWait(driver, 15);"/>
 			<item value="tags"/>
 			<item value=""/>
