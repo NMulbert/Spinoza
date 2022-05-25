@@ -121,7 +121,6 @@ namespace CatalogManager.Controllers
         {
             try
             {
-                
                 using var streamReader = new StreamReader(Request.Body);
                 var body = await streamReader.ReadToEndAsync();
                 var requestTestModel = JsonConvert.DeserializeObject<Models.FrontendRequests.Test>(body);
