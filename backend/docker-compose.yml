@@ -22,7 +22,7 @@ services:
     networks:
       - spinoza-dapr
     environment:
-      - ASPNETCORE_URLS=http://testaccessor:80
+      - ASPNETCORE_URLS=http://spinoza.backend.accessors.testaccessor:80
       - ASPNETCORE_ENVIRONMENT=Development
   testaccessor-dapr:
     image: "daprio/daprd:edge"
@@ -154,7 +154,7 @@ services:
       - spinoza-dapr
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
-      - ASPNETCORE_URLS=http://catalogmanager:80
+      - ASPNETCORE_URLS=http://spinoza.backend.managers.catalogmanager:80
   catalogmanager-dapr:
     image: "daprio/daprd:edge"
     deploy:
@@ -217,8 +217,11 @@ services:
     image: "mcr.microsoft.com/cosmosdb/linux/azure-cosmos-emulator"
     tty: true
     restart: always
-    mem_limit: 4G
-    cpu_count: 4
+    deploy:
+      resources:
+        limits:
+          cpus: '4'
+          memory: 4G
     environment:
       - AZURE_COSMOS_EMULATOR_PARTITION_COUNT=20
       - AZURE_COSMOS_EMULATOR_ENABLE_DATA_PERSISTENCE=true

@@ -17,13 +17,12 @@ import MDEditor from "@uiw/react-md-editor";
 import MultiChoice from "./MultiChoice";
 import { v4 as uuidv4 } from "uuid";
 import axios from "axios";
-import { ConsoleLogger } from "@microsoft/signalr/dist/esm/Utils";
 import { useSelector } from "react-redux";
 interface TagsState {
   tags: { tags: [] };
 }
 
-function NewQuestion() {
+function NewQuestion({ UpdateQuestions, setOpenedNQ }: any) {
   let tags = useSelector((s: TagsState) => s.tags.tags);
 
   const [dataHash, setHashData]: any = useState([]);
@@ -45,7 +44,7 @@ function NewQuestion() {
     type: "OpenTextQuestion",
     status: "Draft",
     authorId: "alonf@zion-net.co.il",
-    tags: [{ name: "", status: "" }],
+    tags: [],
     schemaVersion: "1.0",
     testVersion: "1.0",
     previousVersionId: "none",
@@ -129,7 +128,7 @@ function NewQuestion() {
           <Space h="xs" />
 
           {answerType === "MultipleChoiceQuestion" ? (
-            <MultiChoice setMultiArr={setMultiArr} />
+            <MultiChoice setMultiArr={setMultiArr} answerOptions={multiArr} />
           ) : (
             <></>
           )}
@@ -172,6 +171,8 @@ function NewQuestion() {
                       ...questionValues,
                       id: uuidv4().toUpperCase(),
                     });
+                    UpdateQuestions([questionValues]);
+                    setOpenedNQ(false);
                   } catch (err) {
                     console.log(err);
                   }

@@ -24,7 +24,6 @@ interface TagsState {
 
 function ViewTest() {
   let { id } = useParams();
-
   let [questions, setQuestions] = useState([]);
   useEffect(() => {
     let url = `http://localhost:50000/v1.0/invoke/catalogmanager/method/testquestions/${id}`;
@@ -60,16 +59,6 @@ function ViewTest() {
   const [dataHash, setHashData]: any = useState([]);
   const [openedNQ, setOpenedNQ] = useState(false);
   const [openedEQ, setOpenedEQ] = useState(false);
-
-  let date = new Date(
-    `${test?.creationTimeUTC
-      .toString()
-      .replace(/T/g, " ")
-      .replace(/-/g, "/")} UTC`
-  )
-    .toString()
-    .split(" ");
-  let creationTimeUTC = `${date[2]}/ ${date[1]}/ ${date[3]} | ${date[4]}`;
 
   const UpdateQuestions = (updatedQuestions: []) => {
     let resArr: any = [];
@@ -124,7 +113,12 @@ function ViewTest() {
         title="New Question"
         size="100%"
       >
-        {<NewQuestion />}
+        {
+          <NewQuestion
+            UpdateQuestions={UpdateQuestions}
+            setOpenedNQ={setOpenedNQ}
+          />
+        }
       </Modal>
       <Modal
         opened={openedEQ}
@@ -174,7 +168,9 @@ function ViewTest() {
           <br />
           <Group spacing="xs">
             <CalendarTime />
-            <Title order={5}>{creationTimeUTC}</Title>
+            <Title order={5}>
+              {test.creationTimeUTC.slice(0, 19).replace("T", " | ")}
+            </Title>
           </Group>
 
           <Group spacing="xs">

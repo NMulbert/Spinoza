@@ -52,7 +52,7 @@ namespace Spinoza.Backend.Managers.TestCatalog.Tests
 
         }
 
-        private async Task<bool> WaitForSignalREventAsync(int timeoutInSeconds = 20)
+        private async Task<bool> WaitForSignalREventAsync(int timeoutInSeconds = 30)
         {
             var isSucceeded = await _signalRMessageReceived.WaitAsync(timeoutInSeconds * 1000);
             return isSucceeded;
@@ -120,6 +120,162 @@ namespace Spinoza.Backend.Managers.TestCatalog.Tests
 
         }
 
+        [Fact]
+        public async Task TesTitleTooLong()
+        {
+            var test = new Test
+            {
+                AuthorId = "test@test.com",
+                Description = "This is the description",
+                Id = Guid.NewGuid().ToString().ToUpper(),
+                QuestionsRefs = new[] { Guid.NewGuid().ToString().ToUpper(), Guid.NewGuid().ToString().ToUpper() },
+                SchemaVersion = "1.0",
+                Tags = new[] { "tag1", "tag2", "tag3" },
+                TestVersion = "1.0",
+                Title = $"Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean m1"
+            };
+
+            var serializeOptions = new JsonSerializerOptions
+            {
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                WriteIndented = true
+            };
+
+            var json = JsonSerializer.Serialize(test, serializeOptions);
+            var data = new StringContent(json, Encoding.UTF8, "application/json");
+
+            await StartSinglaR();
+            var response = await _httpClient.PostAsync("/v1.0/invoke/catalogmanager/method/test", data);
+            Assert.NotNull(response);
+            Assert.Equal(400, (int)response.StatusCode);
+            string result = await response.Content.ReadAsStringAsync();
+            Assert.Equal("Errors: \nThe title is  bigger than 100 charecters", result);
+        }
+        [Fact]
+        public async Task TesTitleTooShort()
+        {
+            var test = new Test
+            {
+                AuthorId = "test@test.com",
+                Description = "This is the description",
+                Id = Guid.NewGuid().ToString().ToUpper(),
+                QuestionsRefs = new[] { Guid.NewGuid().ToString().ToUpper(), Guid.NewGuid().ToString().ToUpper() },
+                SchemaVersion = "1.0",
+                Tags = new[] { "tag1", "tag2", "tag3" },
+                TestVersion = "1.0",
+                Title = $"ab"
+            };
+
+            var serializeOptions = new JsonSerializerOptions
+            {
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                WriteIndented = true
+            };
+
+            var json = JsonSerializer.Serialize(test, serializeOptions);
+            var data = new StringContent(json, Encoding.UTF8, "application/json");
+
+            await StartSinglaR();
+            var response = await _httpClient.PostAsync("/v1.0/invoke/catalogmanager/method/test", data);
+            Assert.NotNull(response);
+            Assert.Equal(400, (int)response.StatusCode);
+            string result = await response.Content.ReadAsStringAsync();
+            Assert.Equal("Errors: \nThe title is less than 3 charecters", result);
+        }
+        [Fact]
+        public async Task TestMissingTestTitle()
+        {
+            var test = new Test
+            {
+                AuthorId = "test@test.com",
+                Description = "This is the description",
+                Id = Guid.NewGuid().ToString().ToUpper(),
+                QuestionsRefs = new[] { Guid.NewGuid().ToString().ToUpper(), Guid.NewGuid().ToString().ToUpper() },
+                SchemaVersion = "1.0",
+                Tags = new[] { "tag1", "tag2", "tag3" },
+                TestVersion = "1.0",
+                
+            };
+
+            var serializeOptions = new JsonSerializerOptions
+            {
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                WriteIndented = true
+            };
+
+            var json = JsonSerializer.Serialize(test, serializeOptions);
+            var data = new StringContent(json, Encoding.UTF8, "application/json");
+
+            await StartSinglaR();
+            var response = await _httpClient.PostAsync("/v1.0/invoke/catalogmanager/method/test", data);
+            Assert.NotNull(response);
+            Assert.Equal(400, (int)response.StatusCode);
+            string result = await response.Content.ReadAsStringAsync();
+            Assert.Equal("Errors: \nThe Title is missing", result);
+        }
+
+
+        [Fact]
+        public async Task TestMissingAuthorId()
+        {
+            var test = new Test
+            {
+                Description = "This is the description",
+                Id = Guid.NewGuid().ToString().ToUpper(),
+                QuestionsRefs = new[] { Guid.NewGuid().ToString().ToUpper(), Guid.NewGuid().ToString().ToUpper() },
+                SchemaVersion = "1.0",
+                Tags = new[] { "tag1", "tag2", "tag3" },
+                TestVersion = "1.0",
+                Title = $"abc"
+            };
+
+            var serializeOptions = new JsonSerializerOptions
+            {
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                WriteIndented = true
+            };
+
+            var json = JsonSerializer.Serialize(test, serializeOptions);
+            var data = new StringContent(json, Encoding.UTF8, "application/json");
+
+            await StartSinglaR();
+            var response = await _httpClient.PostAsync("/v1.0/invoke/catalogmanager/method/test", data);
+            Assert.NotNull(response);
+            Assert.Equal(400, (int)response.StatusCode);
+            string result = await response.Content.ReadAsStringAsync();
+            Assert.Equal("Errors: \nThe Author Id is missing", result);
+        }
+
+        [Fact]
+        public async Task TestMissingTestId()
+        {
+            var test = new Test
+            {
+                AuthorId = "test@test.com",
+                Description = "This is the description",
+                QuestionsRefs = new[] { Guid.NewGuid().ToString().ToUpper(), Guid.NewGuid().ToString().ToUpper() },
+                SchemaVersion = "1.0",
+                Tags = new[] { "tag1", "tag2", "tag3" },
+                TestVersion = "1.0",
+                Title = $"abc"
+            };
+
+            var serializeOptions = new JsonSerializerOptions
+            {
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                WriteIndented = true
+            };
+
+            var json = JsonSerializer.Serialize(test, serializeOptions);
+            var data = new StringContent(json, Encoding.UTF8, "application/json");
+
+            await StartSinglaR();
+            var response = await _httpClient.PostAsync("/v1.0/invoke/catalogmanager/method/test", data);
+            Assert.NotNull(response);
+            Assert.Equal(400, (int)response.StatusCode);
+            string result = await response.Content.ReadAsStringAsync();
+            Assert.Equal("Errors: \nthe Id is missing", result);
+        }
         [Fact]
         public async Task TestCreateOpenTextQuestion()
         {

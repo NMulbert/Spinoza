@@ -60,7 +60,7 @@ function AllQuestionsPage() {
         title="New Question"
         size="100%"
       >
-        {<NewQuestion />}
+        {<NewQuestion UpdateQuestions={null} setOpenedNQ={setOpenedNQ} />}
       </Modal>
       <Grid>
         <Grid.Col md={6} lg={6} xl={3}>
@@ -99,15 +99,7 @@ function AllQuestionsPage() {
           questions.map((i: any) => {
             return (
               <Grid.Col md={6} lg={6} xl={3} key={i.id}>
-                <QuestionCard
-                  id={i.id}
-                  name={i.name}
-                  content={i.content}
-                  authorId={i.authorId}
-                  difficultyLevel={i.difficultyLevel}
-                  type={i.type}
-                  tags={i.tags}
-                />
+                <QuestionCard question={i} />
               </Grid.Col>
             );
           })
