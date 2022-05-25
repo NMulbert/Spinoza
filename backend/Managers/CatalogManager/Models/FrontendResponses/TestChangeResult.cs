@@ -1,6 +1,4 @@
-﻿using Newtonsoft.Json;
-
-namespace CatalogManager.Models.FrontendResponses
+﻿namespace CatalogManager.Models.FrontendResponses
 {
 
     public class TestChangeResult

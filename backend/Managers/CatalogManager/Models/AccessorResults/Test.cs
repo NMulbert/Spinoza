@@ -1,8 +1,7 @@
-﻿using Newtonsoft.Json;
-
-namespace CatalogManager.Models.AccessorResults
+﻿namespace CatalogManager.Models.AccessorResults
 {
 
+    // ReSharper disable once ClassNeverInstantiated.Global
     public class Test
     {
 #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.

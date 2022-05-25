@@ -1,5 +1,7 @@
 ﻿using AutoMapper;
 
+namespace Spinoza.Backend.Accessor.QuestionCatalog;
+
 internal class AutoMapperProfile : Profile
 {
     public AutoMapperProfile()
@@ -31,4 +33,3 @@ internal class AutoMapperProfile : Profile
         CreateMap<Spinoza.Backend.Accessor.QuestionCatalog.Models.Requests.AnswerOption, Spinoza.Backend.Accessor.QuestionCatalog.Models.DB.AnswerOption>();
     }
 }
-

@@ -17,13 +17,17 @@ namespace Spinoza.Backend.Accessor.TestCatalog.Tests
         public string Title { get; set; }
 
         [JsonPropertyName("ttl")]
+        // ReSharper disable once InconsistentNaming
         public int TTL { get; set; } = int.MaxValue;
 
-        public List<Guid> Questions { get; set; } = new List<Guid>();
+        public List<Guid> Questions { get; set; } = new ();
 
+        // ReSharper disable once PropertyCanBeMadeInitOnly.Global
         public string Id { get; set; }
 
-        public string Descrition { get; set; }
+        public string Description { get; set; }
+        // ReSharper disable once UnusedAutoPropertyAccessor.Global
+        // ReSharper disable once PropertyCanBeMadeInitOnly.Global
         public string TestVersion { get; set; } = "1.0";
 
 
@@ -36,17 +40,8 @@ namespace Spinoza.Backend.Accessor.TestCatalog.Tests
 
         public CosmosWrapperTests(ICosmosDbWrapperFactory cosmosDbWrapperFactory)
         {
-            
-            try
-            {
-                cosmosDbWrapperFactory.CreateCosmosDBWrapper().Database.DeleteAsync().Wait();
-            }
-            catch(Exception)
-            {
-
-            }
-            _cosmosDBWrapper = cosmosDbWrapperFactory.CreateCosmosDBWrapper();
-           
+           cosmosDbWrapperFactory.CreateCosmosDBWrapper().Database.DeleteAsync().Wait();
+           _cosmosDBWrapper = cosmosDbWrapperFactory.CreateCosmosDBWrapper();
         }
 
 
@@ -104,20 +99,18 @@ namespace Spinoza.Backend.Accessor.TestCatalog.Tests
            // await Task.Delay(2000);
             for (int i = 0; i < 100; i++)
             {
-                
                 TestItem item = new TestItem()
                 {
                     Id = i.ToString(),
                     Title = $"New Test:{i}"
 
                 };
-                var result = await _cosmosDBWrapper.CreateItemAsync(item);
+                await _cosmosDBWrapper.CreateItemAsync(item);
             }
             var allItems = await _cosmosDBWrapper.GetAllCosmosElementsAsync<TestItem>(0, 100);
             Assert.NotNull(allItems);
             Assert.Equal("50", allItems[50].Id);
             Assert.Equal(100, allItems.Count);
-
         }
 
         [Fact]
@@ -126,14 +119,13 @@ namespace Spinoza.Backend.Accessor.TestCatalog.Tests
             //await Task.Delay(2000);
             for (int i = 0; i < 100; i++)
             {
-                
                 TestItem item = new TestItem()
                 {
                     Id = i.ToString(),
                     Title = $"New Test:{i}"
 
                 };
-                var result = await _cosmosDBWrapper.CreateItemAsync(item);
+                await _cosmosDBWrapper.CreateItemAsync(item);
             }
             var allItems = await _cosmosDBWrapper.GetAllCosmosElementsAsync<TestItem>(30, 10);
             Assert.NotNull(allItems);
@@ -149,14 +141,13 @@ namespace Spinoza.Backend.Accessor.TestCatalog.Tests
             //await Task.Delay(2000);
             for (int i = 0; i < 10; i++)
             {
-
                 TestItem item = new TestItem()
                 {
                     Id = i.ToString(),
                     Title = $"New Test:{i}"
 
                 };
-                var result = await _cosmosDBWrapper.CreateItemAsync(item);
+                await _cosmosDBWrapper.CreateItemAsync(item);
             }
             var allItems = await _cosmosDBWrapper.GetCosmosElementsAsync<TestItem>(query);
             Assert.NotNull(allItems);
@@ -179,15 +170,15 @@ namespace Spinoza.Backend.Accessor.TestCatalog.Tests
                     Title = $"New Test: {i}"
 
                 };
-                id = item.Id.ToString();
-                var result = await _cosmosDBWrapper.CreateItemAsync(item);
+                id = item.Id;
+                await _cosmosDBWrapper.CreateItemAsync(item);
                 
             }
             var query = new QueryDefinition($"SELECT * FROM ITEMS item  WHERE item.id = @id").WithParameter("@id", id);
             
             var newItem = (await _cosmosDBWrapper.GetCosmosElementsAsync<TestItem>(query)).First();
             newItem.Title = "updatedItem";
-            newItem.Descrition = "Hello its a test";
+            newItem.Description = "Hello its a test";
             newItem.Questions.Add(new Guid());
             await _cosmosDBWrapper.UpdateItemAsync(newItem, item => item.ETag, item => Guid.Parse((item.Id)), TestMerger);
             var updatedItem = (await _cosmosDBWrapper.GetCosmosElementsAsync<TestItem>(query)).First();
@@ -195,11 +186,11 @@ namespace Spinoza.Backend.Accessor.TestCatalog.Tests
             Assert.Equal(newItem.Id, updatedItem.Id);
             Assert.Equal("updatedItem", updatedItem.Title);
             Assert.Single(updatedItem.Questions);
-            Assert.Equal("Hello its a test", updatedItem.Descrition);
+            Assert.Equal("Hello its a test", updatedItem.Description);
         }
         private TestItem TestMerger(TestItem dbItem, TestItem newItem)
         {
-            dbItem.Descrition = newItem.Descrition;
+            dbItem.Description = newItem.Description;
             dbItem.Questions = dbItem.Questions.Union(newItem.Questions).ToList();
             dbItem.Title = newItem.Title;
             return dbItem;
@@ -219,8 +210,8 @@ namespace Spinoza.Backend.Accessor.TestCatalog.Tests
                     Title = $"New Test: {i}"
 
                 };
-                id = item.Id.ToString();
-                var result = await _cosmosDBWrapper.CreateItemAsync(item);
+                id = item.Id;
+                await _cosmosDBWrapper.CreateItemAsync(item);
 
             }
             
@@ -228,11 +219,11 @@ namespace Spinoza.Backend.Accessor.TestCatalog.Tests
 
             var newItem = (await _cosmosDBWrapper.GetCosmosElementsAsync<TestItem>(query)).First();
             newItem.Title = "updatedItem";
-            newItem.Descrition = "Hello its a test";
+            newItem.Description = "Hello its a test";
             newItem.Questions.Add(new Guid());
             int counter = 0;
             var etag = newItem.ETag;
-            await _cosmosDBWrapper.UpdateItemAsync(newItem, item => item.ETag, item => Guid.Parse((item.Id)), TestMerger);
+            await _cosmosDBWrapper.UpdateItemAsync(newItem, item => item.ETag, item => Guid.Parse((item.Id)), LocalTestMerger);
             var updatedItem = (await _cosmosDBWrapper.GetCosmosElementsAsync<TestItem>(query)).First();
             newItem.Title = "updatedItem2";
             await _cosmosDBWrapper.UpdateItemAsync(newItem, item => item.ETag, item => Guid.Parse((item.Id)), TestMergerRetry);
@@ -242,26 +233,26 @@ namespace Spinoza.Backend.Accessor.TestCatalog.Tests
             Assert.Equal("updatedItem", updatedItem.Title);
             Assert.Equal(2, counter);
             Assert.Equal("updatedItem2", updatedItem2.Title);
-            Assert.Equal("2", updatedItem2.Descrition);
+            Assert.Equal("2", updatedItem2.Description);
 
 
-            TestItem TestMerger(TestItem dbItem, TestItem newItem)
+            TestItem LocalTestMerger(TestItem dbItem, TestItem theNewItem)
             {
-                dbItem.Descrition = newItem.Descrition;
-                dbItem.Questions = dbItem.Questions.Union(newItem.Questions).ToList();
-                dbItem.Title = newItem.Title;
+                dbItem.Description = theNewItem.Description;
+                dbItem.Questions = dbItem.Questions.Union(theNewItem.Questions).ToList();
+                dbItem.Title = theNewItem.Title;
                 return dbItem;
             }
-            TestItem TestMergerRetry(TestItem dbItem, TestItem newItem)
+            TestItem TestMergerRetry(TestItem dbItem, TestItem theNewItem)
             {
                 counter++;
                 if(counter == 1)//first time
                 {
                     dbItem.ETag = etag;
                 }
-                dbItem.Descrition = counter.ToString();
-                dbItem.Questions = dbItem.Questions.Union(newItem.Questions).ToList();
-                dbItem.Title = newItem.Title;
+                dbItem.Description = counter.ToString();
+                dbItem.Questions = dbItem.Questions.Union(theNewItem.Questions).ToList();
+                dbItem.Title = theNewItem.Title;
                 return dbItem;
             }
         }

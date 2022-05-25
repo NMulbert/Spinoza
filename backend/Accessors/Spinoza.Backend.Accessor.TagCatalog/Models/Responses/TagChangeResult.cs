@@ -3,6 +3,7 @@ namespace Spinoza.Backend.Accessor.TagCatalog.Models.Responses;
 public class TagChangeResult
 {
 #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
+    // ReSharper disable UnusedAutoPropertyAccessor.Global
     public string Id { get; set; }
     
     public string MessageType { get; set; }

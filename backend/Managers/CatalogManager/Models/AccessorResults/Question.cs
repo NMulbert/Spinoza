@@ -7,6 +7,7 @@
         string Type { get; set; }
         
     }
+    // ReSharper disable ClassNeverInstantiated.Global
     public class CommonQuestion : IQuestion
     {
         public string Type { get; set; }

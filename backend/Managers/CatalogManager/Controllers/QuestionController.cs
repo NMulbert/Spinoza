@@ -3,7 +3,6 @@ using Dapr.Client;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using System.Text.Json.Nodes;
-using CatalogManager.Models.FrontendRequests;
 
 namespace CatalogManager.Controllers
 {
@@ -32,7 +31,7 @@ namespace CatalogManager.Controllers
 
 
         [HttpPut("/question")]
-        public async Task<IActionResult> PutNewQuestiontToQueue()
+        public async Task<IActionResult> PutNewQuestionToQueue()
         {
             return await PostNewOrUpdateQuestionToQueue(true);
         }
@@ -45,7 +44,7 @@ namespace CatalogManager.Controllers
             {
                 var allAccessorQuestions = await _daprClient.InvokeMethodAsync<JsonArray>(HttpMethod.Get, "questionaccessor", $"questionaccessor/allquestions?offset={offset ?? 0 }&limit={limit ?? 100}");
 
-                _logger?.LogInformation($"returned {allAccessorQuestions.Count} questions");
+                _logger.LogInformation($"returned {allAccessorQuestions.Count} questions");
 
                 return new OkObjectResult(allAccessorQuestions);
             }
@@ -53,7 +52,7 @@ namespace CatalogManager.Controllers
             {
                 _logger.LogError($"Error while getting all questions: {ex.Message}");
             }
-            return Problem(statusCode: (int)StatusCodes.Status500InternalServerError);
+            return Problem(statusCode: StatusCodes.Status500InternalServerError);
         }
 
         [HttpGet("/question/{id:Guid}")]
@@ -66,7 +65,7 @@ namespace CatalogManager.Controllers
 
                 if (accessorQuestionType == null)
                 {
-                    _logger.LogWarning($"GetQuestionById: accessor returnes null for question: {id}");
+                    _logger.LogWarning($"GetQuestionById: accessor returns null for question: {id}");
                     return new NotFoundObjectResult(id);
                 }
 
@@ -82,7 +81,7 @@ namespace CatalogManager.Controllers
 
                     default:
 
-                        _logger?.LogInformation($"Question type: {accessorQuestionType.Type} is incompatible");
+                        _logger.LogInformation($"Question type: {accessorQuestionType.Type} is incompatible");
 
                         return new BadRequestObjectResult(id);
                 }
@@ -94,7 +93,7 @@ namespace CatalogManager.Controllers
 
                     var questionResult = _mapper.Map<TQuestion>(questionModel);
 
-                    _logger?.LogInformation($"returned question id: {id}");
+                    _logger.LogInformation($"returned question id: {id}");
 
                     return new OkObjectResult(questionResult);
                 }
@@ -104,7 +103,7 @@ namespace CatalogManager.Controllers
             {
                 _logger.LogError($"Error while getting a question: {id} Error: {ex.Message}");
             }
-            return Problem(statusCode: (int)StatusCodes.Status500InternalServerError);
+            return Problem(statusCode: StatusCodes.Status500InternalServerError);
         }
 
 
@@ -131,9 +130,6 @@ namespace CatalogManager.Controllers
                     case "OpenTextQuestion":
 
                         return await PostQueue<Models.FrontendRequests.OpenTextQuestion>();
-
-                    default:
-                        break;
                 }
 
                 async Task<IActionResult> PostQueue<TQuestion>() where TQuestion : Models.FrontendRequests.IQuestion
@@ -169,7 +165,7 @@ namespace CatalogManager.Controllers
             {
                 _logger.LogError("Error when {0} ending addquestion post: {1}", isUpdate ? "updating" : "creating", ex.Message);
             }
-            return Problem(statusCode: (int)StatusCodes.Status500InternalServerError);
+            return Problem(statusCode: StatusCodes.Status500InternalServerError);
         }
 
         
@@ -186,7 +182,7 @@ namespace CatalogManager.Controllers
             {
                 _logger.LogError($"Error while getting total questions number. Error: {ex.Message}");
             }
-            return Problem(statusCode: (int)StatusCodes.Status500InternalServerError);
+            return Problem(statusCode: StatusCodes.Status500InternalServerError);
         }
 
     }

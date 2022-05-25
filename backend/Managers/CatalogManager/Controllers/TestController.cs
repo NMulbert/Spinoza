@@ -2,7 +2,6 @@
 using Dapr.Client;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
-using System;
 using System.Text;
 using System.Text.Json.Nodes;
 
@@ -52,7 +51,7 @@ namespace CatalogManager.Controllers
                         }) : string.Empty);
                 
                 var methodName = $"testaccessor/tests?offset={offset ?? 0}&limit={limit ?? 100}{tags}";
-                _logger?.LogInformation($"GetAll: calling method : {methodName}");
+                _logger.LogInformation($"GetAll: calling method : {methodName}");
                 var allAccessorTests = await _daprClient.InvokeMethodAsync<List<Models.AccessorResults.Test>>(HttpMethod.Get, "testaccessor", methodName);
                 var frontendAllTestModelResult = _mapper.Map<List<Models.FrontendResponses.Test>>(allAccessorTests);
                 // ReSharper disable once ConditionalAccessQualifierIsNonNullableAccordingToAPIContract
@@ -90,7 +89,7 @@ namespace CatalogManager.Controllers
             {
                 _logger.LogError($"Error while getting all test questions: {ex.Message}");
             }
-            return Problem(statusCode: (int)StatusCodes.Status500InternalServerError);
+            return Problem(statusCode: StatusCodes.Status500InternalServerError);
         }
 
 
@@ -124,6 +123,12 @@ namespace CatalogManager.Controllers
                 using var streamReader = new StreamReader(Request.Body);
                 var body = await streamReader.ReadToEndAsync();
                 var requestTestModel = JsonConvert.DeserializeObject<Models.FrontendRequests.Test>(body);
+                if (requestTestModel == null)
+                {
+                    var error = "Incorrect Test data";
+                    _logger.LogError(error);
+                    return BadRequest(error);
+                }
                 TryValidateModel(requestTestModel);
                 if(!ModelState.IsValid)
                 {
@@ -136,7 +141,7 @@ namespace CatalogManager.Controllers
                     _logger.LogError(errors);
                     return BadRequest(errors);
                 }
-               //else
+                //else
                 _logger.LogInformation("the message is going to queue");
                 var submitTestModel = _mapper.Map<Models.AccessorSubmits.Test>(requestTestModel);
                 submitTestModel.TestVersion = "1.0";

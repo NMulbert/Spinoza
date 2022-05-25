@@ -36,7 +36,7 @@ public class CosmosDBWrapper : ICosmosDBWrapper
                  {
                      HttpMessageHandler httpMessageHandler = new HttpClientHandler()
                      {
-                         ServerCertificateCustomValidationCallback = (req, cert, chain, errors) => true
+                         ServerCertificateCustomValidationCallback = (_, _, _, _) => true
                      };
                      return new HttpClient(httpMessageHandler);
                  },
@@ -55,7 +55,7 @@ public class CosmosDBWrapper : ICosmosDBWrapper
             //todo: move this to compose environment variable
             CosmosClient = new CosmosClient(configuration["ConnectionStrings:CosmosDB"], cosmosClientOptions);
             Database = CreateDataBase(CosmosClient, logger, cosmosDbInformationProvider);
-            Container = CreateDataBaseContainer(CosmosClient, logger, Database, cosmosDbInformationProvider);
+            Container = CreateDataBaseContainer(logger, Database, cosmosDbInformationProvider);
         }
         catch (Exception ex)
         {
@@ -68,17 +68,17 @@ public class CosmosDBWrapper : ICosmosDBWrapper
     private static Database CreateDataBase(CosmosClient cosmosClient, ILogger<CosmosDBWrapper> logger, ICosmosDbInformationProvider cosmosDbInformationProvider)
     {
 
-        return (CreateCosmosElementAsync<Database, DatabaseProperties>(cosmosClient, logger,
+        return (CreateCosmosElementAsync<Database, DatabaseProperties>(logger,
                 async () => await cosmosClient.CreateDatabaseIfNotExistsAsync(cosmosDbInformationProvider.DataBaseName),
                 () => cosmosClient.GetDatabase(cosmosDbInformationProvider.DataBaseName))).Result;
     }
 
-    private static Container CreateDataBaseContainer(CosmosClient cosmosClient, ILogger<CosmosDBWrapper> logger, Database database, ICosmosDbInformationProvider cosmosDbInformationProvider)
+    private static Container CreateDataBaseContainer(ILogger<CosmosDBWrapper> logger, Database database, ICosmosDbInformationProvider cosmosDbInformationProvider)
     {
 
         if (cosmosDbInformationProvider.UniqueKeys.Any())
         {
-            return (CreateCosmosElementAsync<Container, ContainerProperties>(cosmosClient, logger,
+            return (CreateCosmosElementAsync<Container, ContainerProperties>(logger,
                 async () => await database
                 .DefineContainer(name: cosmosDbInformationProvider.ContainerName, partitionKeyPath: $"/{cosmosDbInformationProvider.PartitionKey}")
                 .WithUniqueKey()
@@ -88,14 +88,14 @@ public class CosmosDBWrapper : ICosmosDBWrapper
                 () => database.GetContainer(cosmosDbInformationProvider.ContainerName))).Result;
         }
         //else
-        return (CreateCosmosElementAsync<Container, ContainerProperties>(cosmosClient, logger,
+        return (CreateCosmosElementAsync<Container, ContainerProperties>(logger,
                 async () => await database
                 .DefineContainer(name: cosmosDbInformationProvider.ContainerName, partitionKeyPath: $"/{cosmosDbInformationProvider.PartitionKey}")
                 .CreateIfNotExistsAsync(),
                 () => database.GetContainer(cosmosDbInformationProvider.ContainerName))).Result;
     }
 
-    private static async Task<TOut> CreateCosmosElementAsync<TOut, TProperties>(CosmosClient cosmosClient, ILogger<CosmosDBWrapper> logger, Func<Task<Response<TProperties>?>> createFuncAsync, Func<TOut> returnFunc)
+    private static async Task<TOut> CreateCosmosElementAsync<TOut, TProperties>(ILogger<CosmosDBWrapper> logger, Func<Task<Response<TProperties>?>> createFuncAsync, Func<TOut> returnFunc)
     {
         var polly = Policy
          .Handle<CosmosException>(ex => ex.StatusCode != System.Net.HttpStatusCode.Conflict)
@@ -133,7 +133,7 @@ public class CosmosDBWrapper : ICosmosDBWrapper
     public async Task<ItemResponse<T>> CreateItemAsync<T>(T item, PartitionKey? partitionKey = null, ItemRequestOptions? requestOptions = null, CancellationToken cancellationToken = default(CancellationToken))
     {
         ItemResponse<T>? response = null;
-        return await CreateCosmosElementAsync<ItemResponse<T>, T>(CosmosClient, _logger,
+        return await CreateCosmosElementAsync<ItemResponse<T>, T>(_logger,
                 async () => response = await Container.CreateItemAsync(item, partitionKey, requestOptions, cancellationToken),
                 () => response!);
     }
@@ -254,6 +254,7 @@ public class CosmosDBWrapper : ICosmosDBWrapper
                 {
                     IfMatchEtag = eTagSelector(mergedItem)
                 };
+                // ReSharper disable once MethodSupportsCancellation
                 var result = await Container.ReplaceItemAsync(mergedItem, idSelector(mergedItem).ToString().ToUpper(), partitionKey, requestOption);
                 _logger.LogInformation($"create cosmosDB element returns: {result?.StatusCode}, cost: {result?.RequestCharge} RU/S");
                 return result;
@@ -263,6 +264,7 @@ public class CosmosDBWrapper : ICosmosDBWrapper
                 if (cosmosException.StatusCode == System.Net.HttpStatusCode.TooManyRequests)
                 {
                     _logger.LogWarning($"Too many requests when accessing cosmosDB, waiting: {cosmosException.RetryAfter}");
+                    // ReSharper disable once MethodSupportsCancellation
                     await Task.Delay(cosmosException.RetryAfter ?? TimeSpan.FromSeconds(1));
                     //Todo: move 1 to configuration
                     throw;

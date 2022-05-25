@@ -9,7 +9,6 @@ namespace SignalRConnectionSupport
 {
     public static class SignalR
 	{
-		static string value = Environment.GetEnvironmentVariable("SignalRHubVariable")!;
 		[FunctionName("negotiate")]
 		public static IActionResult Negotiate(
 			[HttpTrigger(AuthorizationLevel.Anonymous)] HttpRequest req,
@@ -19,7 +18,7 @@ namespace SignalRConnectionSupport
 		{
 			try
 			{
-				log.LogInformation("the Negotiate beggins");
+				log.LogInformation("the Negotiate begins");
 				if (!req.HttpContext.Response.Headers.ContainsKey("Access-Control-Allow-Credentials"))
 				{
 					req.HttpContext.Response.Headers.Add("Access-Control-Allow-Credentials", "true");
@@ -33,15 +32,11 @@ namespace SignalRConnectionSupport
 					req.HttpContext.Response.Headers.Add("Access-Control-Allow-Headers", req.Headers["access-control-request-headers"][0]);
 				}
 				log.LogInformation("negotiate API succeeded.");
-				if (connectionInfo == null)
-				{
-					log.LogError("No cooncetion info");
-					return new NotFoundObjectResult("Azure SignalR not found.");
-				}
 				return new OkObjectResult(connectionInfo);
 			}
-			catch
+			catch(Exception ex)
 			{
+				log.LogInformation($"Negotiate error: {ex.Message}");
 				return new BadRequestResult();
 			}
 		}

@@ -1,6 +1,4 @@
-﻿using Newtonsoft.Json;
-
-namespace Spinoza.Backend.Accessor.QuestionCatalog.Models.DB
+﻿namespace Spinoza.Backend.Accessor.QuestionCatalog.Models.DB
 {
 #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
     interface IQuestion
@@ -8,6 +6,7 @@ namespace Spinoza.Backend.Accessor.QuestionCatalog.Models.DB
         string Id { get; set; }
         string Type { get; set; }
         string Name { get; set; }
+        // ReSharper disable once InconsistentNaming
         string _etag { get; set; }
     }
 

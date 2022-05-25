@@ -4,13 +4,14 @@
 
     public class QuestionChangeResult
     {
+        // ReSharper disable UnusedAutoPropertyAccessor.Global
         public string Id { get; set; }
 
         public string SchemaVersion { get; set; } = "1.0";
         public string MessageType { get; set; }
         public string ResourceType { get; set; }
         public string ActionResult { get; set; }
-        public string Reason { get; set; }
+        public string Reason { get; init; }
         public int ReasonId { get; set; }
         public string Sender { get; set; }
     }

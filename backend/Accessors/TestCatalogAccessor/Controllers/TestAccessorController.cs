@@ -2,11 +2,8 @@
 using Dapr.Client;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Cosmos;
-using Microsoft.Azure.Cosmos.Linq;
 using Newtonsoft.Json;
-using Spinoza.Backend.Accessor.TestCatalog.Models;
 using Spinoza.Backend.Crosscutting.CosmosDBWrapper;
-using System;
 using System.Text.Json.Nodes;
 
 namespace Spinoza.Backend.Accessor.TestCatalog.Controllers
@@ -51,7 +48,7 @@ namespace Spinoza.Backend.Accessor.TestCatalog.Controllers
                     var tests = await _cosmosDBWrapper.GetCosmosElementsAsync<JsonNode>(new QueryDefinition(query).WithParameter("@skip", offset ?? 0)
                         .WithParameter("@count", limit ?? 100));
 
-                    dbTests = tests?.Select(j => JsonConvert.DeserializeObject<Models.DB.Test>(j["test"]!.ToJsonString())!).ToList();
+                    dbTests = tests.Select(j => JsonConvert.DeserializeObject<Models.DB.Test>(j["test"]!.ToJsonString())!).ToList();
                 }
 
                 var resultTests = _mapper.Map<List<Models.Results.Test>>(dbTests);
@@ -63,7 +60,7 @@ namespace Spinoza.Backend.Accessor.TestCatalog.Controllers
                 _logger.LogError($"Error while getting tests: {ex.Message}");
 
             }
-            return Problem(statusCode: (int)StatusCodes.Status500InternalServerError);
+            return Problem(statusCode: StatusCodes.Status500InternalServerError);
             
             
         }
@@ -78,11 +75,9 @@ namespace Spinoza.Backend.Accessor.TestCatalog.Controllers
 
                 var query = new QueryDefinition("SELECT item.questionsRefs FROM ITEMS item WHERE item.id = @id").WithParameter("@id", id.ToString().ToUpper());
 
-                JsonArray allTestQuestionsIds = new JsonArray();
-
                 var dbTestQuestionsIds = await _cosmosDBWrapper.GetCosmosElementsAsync<JsonNode>(query);
 
-                allTestQuestionsIds = dbTestQuestionsIds[0]["questionsRefs"]!.AsArray();
+                var allTestQuestionsIds = dbTestQuestionsIds[0]["questionsRefs"]!.AsArray();
 
                 return new OkObjectResult(allTestQuestionsIds);
             }
@@ -90,7 +85,7 @@ namespace Spinoza.Backend.Accessor.TestCatalog.Controllers
             {
                 _logger.LogError($"Error while getting test questions: {ex.Message}");
             }
-            return Problem(statusCode: (int)StatusCodes.Status500InternalServerError);
+            return Problem(statusCode: StatusCodes.Status500InternalServerError);
         }
 
         [HttpGet("/test/{id:Guid}")]
@@ -115,7 +110,7 @@ namespace Spinoza.Backend.Accessor.TestCatalog.Controllers
                 _logger.LogError($"Error while getting tests: {ex.Message}");
 
             }
-            return Problem(statusCode: (int)StatusCodes.Status500InternalServerError);
+            return Problem(statusCode: StatusCodes.Status500InternalServerError);
         }
         
 
@@ -126,7 +121,7 @@ namespace Spinoza.Backend.Accessor.TestCatalog.Controllers
             try
             {
                 testRequest = await GetMessageFromBodyAsync();
-                Models.Responses.TestChangeResult? result = null;
+                Models.Responses.TestChangeResult? result;
                 if (testRequest.MessageType == "CreateTest")
                 {
                     result = await CreateTestAsync(testRequest);
@@ -144,11 +139,11 @@ namespace Spinoza.Backend.Accessor.TestCatalog.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError($"Error while creatring or updating a test: {ex.Message}");
+                _logger.LogError($"Error while creating or updating a test: {ex.Message}");
                 var result = CreateTestResult(testRequest?.Id ?? Guid.Empty.ToString(), "Unknown", $"InternalServerError: {ex.Message}", 666, false);
                 await PublishTestResultAsync(result);
             }
-            return Problem(statusCode: (int)StatusCodes.Status500InternalServerError);
+            return Problem(statusCode: StatusCodes.Status500InternalServerError);
         }
         
         private Models.Responses.TestChangeResult CreateTestResult(string testId, string messageType, string reason, int reasonId, bool isSuccess=true )
@@ -222,7 +217,7 @@ namespace Spinoza.Backend.Accessor.TestCatalog.Controllers
         {
             var streamReader = new StreamReader(Request.Body);
             var body = await streamReader.ReadToEndAsync();
-            _logger?.LogInformation($"Here is the test that goona try to enter the database {body}");
+            _logger.LogInformation($"Here is the test that going to try to enter the database {body}");
             var newTest = JsonConvert.DeserializeObject<Models.Requests.Test>(body);
             return newTest ?? throw new Exception("Error when deserialize message body");
         }
@@ -247,7 +242,7 @@ namespace Spinoza.Backend.Accessor.TestCatalog.Controllers
 
             }
 
-            return Problem(statusCode: (int)StatusCodes.Status500InternalServerError);
+            return Problem(statusCode: StatusCodes.Status500InternalServerError);
         }
     }
 }

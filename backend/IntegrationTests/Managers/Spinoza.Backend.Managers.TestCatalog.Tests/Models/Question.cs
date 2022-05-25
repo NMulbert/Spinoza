@@ -1,6 +1,7 @@
 ﻿namespace Spinoza.Backend.Managers.TestCatalog.Tests.Models
 {
 #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
+// ReSharper disable  PropertyCanBeMadeInitOnly.Global
 
     public interface IQuestion
     {
@@ -36,12 +37,14 @@
 
     public class Content
     {
+        
         public string QuestionText { get; set; }
         public AnswerOption[] AnswerOptions { get; set; }
     }
 
     public class AnswerOption
     {
+        // ReSharper disable once UnusedAutoPropertyAccessor.Global
         public string Description { get; set; }
         public bool IsCorrect { get; set; }
     }
