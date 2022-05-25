@@ -3,7 +3,6 @@ using AutoMapper;
 using CatalogManager.Helpers;
 using Dapr;
 using Dapr.Client;
-using Microsoft.AspNetCore.Mvc;
 
 namespace CatalogManager.Controllers;
 
