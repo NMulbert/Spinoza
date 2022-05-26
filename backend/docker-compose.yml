@@ -193,7 +193,7 @@ services:
       - spinoza-dapr
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
-      - AzureSignalRConnectionString="Endpoint=http://localhost;Port=8888;AccessKey=ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789ABCDEFGH;Version=1.0;"
+      - AzureSignalRConnectionString=Endpoint=http://localhost;Port=8888;AccessKey=ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789ABCDEFGH;Version=1.0;
     
   ############################
   # Azurite
