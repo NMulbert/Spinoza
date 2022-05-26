@@ -1,0 +1,25 @@
+name: Deploy Azure Container Apps Environment
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+    - name: Azure Login
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+    - name: Azure CLI script
+      uses: azure/CLI@v1
+      with:
+        azcliversion: 2.30.0
+        inlineScript: |
+          az account show
+          az group create --name spinoza-cont-app-rg --location westeurope
+          az deployment group create --resource-group spinoza-cont-app-rg --template-file infra/main.bicep --parameters branchName='main' containerRegistryPassword="${{secrets.ACR_PASSWORD}}" cosmosDBConnectionString="${{secrets.COSMOSDB_CONNECTION_STRING}}"
+          

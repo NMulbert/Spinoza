@@ -1,48 +1,49 @@
 param branchName string
-param spinozaBackendAccessorsTestAccessorImage string
-param spinozaBackendAccessorsTestAccessorPort int
-param spinozaBackendAccessorsTestAccessorIsExternalIngress bool
-
-param spinozaBackendAccessorsQuestionAccessorImage string
-param spinozaBackendAccessorsQuestionAccessorPort int
-param spinozaBackendAccessorsQuestionAccessorIsExternalIngress bool
-
-param spinozaBackendAccessorsTagAccessorImage string
-param spinozaBackendAccessorsTagAccessorPort int
-param spinozaBackendAccessorsTagAccessorIsExternalIngress bool
-
-param spinozaBackendManagersCatalogManagerImage string
-param spinozaBackendManagersCatalogManagerPort int
-param spinozaBackendManagersCatalogManagerIsExternalIngress bool
-
-param containerRegistry string
-param containerRegistryUsername string
 @secure()
 param containerRegistryPassword string
 
-param signalRName string
+@secure()
+param cosmosDBConnectionString string
 
-param tags object
+param tags object = {}
 
 param location string = resourceGroup().location
+
+var spinozaBackendAccessorsTestAccessorImage = 'spinoza.backend.accessors.testaccessor:main'
+var spinozaBackendAccessorsTestAccessorPort = 80
+var spinozaBackendAccessorsTestAccessorIsExternalIngress = false
+
+var spinozaBackendAccessorsQuestionAccessorImage = 'spinoza.backend.accessors.qustionaccessor:main'
+var spinozaBackendAccessorsQuestionAccessorPort = 80
+var spinozaBackendAccessorsQuestionAccessorIsExternalIngress = false
+
+var spinozaBackendAccessorsTagAccessorImage  = 'spinoza.backend.accessors.tagaccessor:main'
+var spinozaBackendAccessorsTagAccessorPort = 80
+var spinozaBackendAccessorsTagAccessorIsExternalIngress = false
+
+var spinozaBackendManagersCatalogManagerImage = 'spinoza.backend.managers.catalogmanager:main'
+var spinozaBackendManagersCatalogManagerPort = 80
+var spinozaBackendManagersCatalogManagerIsExternalIngress = true
+
+var containerRegistry  = 'spinozaacr.azurecr.io'
+var containerRegistryUsername = 'spinozaacr'
 
 var minReplicas = 0
 var maxReplicas = 1
 
 var branch = toLower(last(split(branchName, '/')))
 
+var signalRName = '${branch}-spinoza-signalr'
+
 var environmentName = 'shared-env'
 var workspaceName = '${branch}-log-analytics'
 var appInsightsName = '${branch}-app-insights'
-var spinozaBackendAccessorsTestAccessorServiceContainerAppName = '${branch}-spinozaBackendAccessorsTestAccessor'
-var spinozaBackendAccessorsQuestionAccessorServiceContainerAppName = '${branch}-spinozaBackendAccessorsQuestionAccessor'
-var spinozaBackendAccessorsTagAccessorServiceContainerAppName = '${branch}-spinozaBackendAccessorsTagAccessor'
-var spinozaBackendManagersCatalogManagerServiceContainerAppName = '${branch}-spinozaBackendManagersCatalogManager'
-var serviceBusConnectionStringKey = '${branch}-serviceBusConnectionStringKey'
-var signalRConnectionStringKey = '${branch}-signalRConnectionStringKey'
-var containerRegistryPasswordRef = 'container-registry-password'
+var spinozaBackendAccessorsTestAccessorServiceContainerAppName = 'testaccessor' //'${branch}-accessors-test'
+var spinozaBackendAccessorsQuestionAccessorServiceContainerAppName = 'questionaccessor'//'${branch}-accessors-question'
+var spinozaBackendAccessorsTagAccessorServiceContainerAppName = 'tagaccessor' //'${branch}-accessors-tag'
+var spinozaBackendManagersCatalogManagerServiceContainerAppName = 'catalogmanager' //'${branch}-managers-catalog'
 
-
+/*
 @description('Cosmos DB account name')
 param accountName string = 'cosmos-${uniqueString(resourceGroup().id)}'
 
@@ -66,22 +67,22 @@ resource cosmosAccount 'Microsoft.DocumentDB/databaseAccounts@2021-04-15' = {
     ]
   }
 }
-
+*/
 //todo: ComosDB connection string should go to environement variable
-resource cosmosDB 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases@2021-04-15' = {
-  name: '${cosmosAccount.name}/${toLower(databaseName)}'
-  properties: {
-    resource: {
-      id: databaseName
-    }
-    options: {
-      throughput: 1000
-    }
-  }
-}
+//resource cosmosDB 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases@2021-04-15' = {
+//  name: '${cosmosAccount.name}/${toLower(databaseName)}'
+//  properties: {
+//    resource: {
+//      id: databaseName
+//    }
+//    options: {
+//      throughput: 1000
+//    }
+//  }
+//}
 
-param serviceBusNamespaceName string = 'myapp${uniqueString(resourceGroup().id)}'
-param skuName string = 'Basic'
+param serviceBusNamespaceName string = 'spinoza-sb-${uniqueString(resourceGroup().id)}'
+param skuName string = 'Standard'
 
 param queueNames array = [
   'testaccessor'
@@ -91,15 +92,16 @@ param queueNames array = [
 
 var deadLetterFirehoseQueueName = 'deadletterfirehose'
 
-resource serviceBusNamespace 'Microsoft.ServiceBus/namespaces@2018-01-01-preview' = {
+resource serviceBusNamespace 'Microsoft.ServiceBus/namespaces@2021-11-01' = {
   name: serviceBusNamespaceName
   location: location
   sku: {
     name: skuName
+    tier: skuName
   }
 }
 
-resource deadLetterFirehoseQueue 'Microsoft.ServiceBus/namespaces/queues@2018-01-01-preview' = {
+resource deadLetterFirehoseQueue 'Microsoft.ServiceBus/namespaces/queues@2021-11-01' = {
   name: deadLetterFirehoseQueueName
   parent: serviceBusNamespace
   properties: {
@@ -109,7 +111,7 @@ resource deadLetterFirehoseQueue 'Microsoft.ServiceBus/namespaces/queues@2018-01
   }
 }
 
-resource queues 'Microsoft.ServiceBus/namespaces/queues@2018-01-01-preview' = [for queueName in queueNames: {
+resource queues 'Microsoft.ServiceBus/namespaces/queues@2021-11-01' = [for queueName in queueNames: {
   parent: serviceBusNamespace
   name: queueName
   dependsOn: [
@@ -124,23 +126,29 @@ resource pubsub 'Microsoft.ServiceBus/namespaces/topics@2021-11-01' = {
   parent: serviceBusNamespace
   name: 'pubsub'
   properties: {
-    defaultMessageTimeToLive:'60'
+    defaultMessageTimeToLive:'PT1M' //1 minute
   }
 }
 
 var serviceBusEndpoint = '${serviceBusNamespace.id}/AuthorizationRules/RootManageSharedAccessKey'
 var serviceBusConnectionString = listKeys(serviceBusEndpoint, serviceBusNamespace.apiVersion).primaryConnectionString
 
+
 resource signalR 'Microsoft.SignalRService/signalR@2022-02-01' = {
   name: signalRName
   location: location
-  kind: 'SignalR'
   sku: {
-    name: 'Free_F1'
-    tier: 'Free'
+    name: 'Standard_S1'
     capacity: 1
   }
+  kind: 'SignalR'
+  identity: {
+    type: 'SystemAssigned'
+  }
   properties: {
+    tls: {
+      clientCertEnabled: false
+    }
     features: [
       {
         flag: 'ServiceMode'
@@ -159,41 +167,39 @@ resource signalR 'Microsoft.SignalRService/signalR@2022-02-01' = {
         value: 'true'
       }
     ]
-    liveTraceConfiguration: {
-      enabled: 'true'
-      categories: [
-        {
-          name: 'ConnectivityLogs'
-          enabled: 'true'
-        }
-        {
-          name: 'MessagingLogs'
-          enabled: 'true'
-        }
-        {
-          name: 'HttpRequestLogs'
-          enabled: 'true'
-        }
-      ]
-    }
     cors: {
-      allowedOrigins: [
-        '*'
+        allowedOrigins: [
+          '*'
+        ]
+    }
+    
+    networkACLs: {
+      defaultAction: 'Deny'
+      publicNetwork: {
+        allow: [
+          'ClientConnection'
+        ]
+      }
+      privateEndpoints: [
+        {
+          name: 'mySignalRService.1fa229cd-bf3f-47f0-8c49-afb36723997e'
+          allow: [
+            'ServerConnection'
+          ]
+        }
       ]
     }
+    /*
     upstream: {
       templates: [
         {
-          hubPattern: '*'
-          eventPattern: '*'
           categoryPattern: '*'
-          auth: {
-            type: 'None'
-          }
-          urlTemplate: 'https://${signalRName}.azurewebsites.net/runtime/webhooks/signalr?code=TBD'
+          eventPattern: 'connect,disconnect'
+          hubPattern: '*'
+          urlTemplate: 'https://spinoza.com/spinozahub/api/connect'
         }
       ]
-    }
+    }*/
   }
 }
 
@@ -221,7 +227,7 @@ resource appInsights 'Microsoft.Insights/components@2020-02-02' = {
   }
 }
 
-resource environment 'Microsoft.App/managedEnvironments@2022-01-01-preview' = {
+resource environment 'Microsoft.App/managedEnvironments@2022-03-01' = {
   name: environmentName
   location: location
   tags: tags
@@ -238,36 +244,49 @@ resource environment 'Microsoft.App/managedEnvironments@2022-01-01-preview' = {
 }
 
 resource daprComponentPubSub 'Microsoft.App/managedEnvironments/daprComponents@2022-03-01' = {
-  name: 'pubsub'
+  name: '${environmentName}/pubsub'
   properties: {
     componentType: 'pubsub.azure.servicebus'
     version: 'v1'
+    secrets: [
+      {
+        name: 'servicebuskeyref'
+        value: serviceBusConnectionString
+      }
+    ]
     metadata: [
       {
         name: 'connectionString'
-        value: serviceBusConnectionString
+        secretRef: 'servicebuskeyref'
       }
     ]
     // Application scopes
     scopes: [
-      'SpinozaBackendAccessorsTestAccessorContainerApp'
-      'SpinozaBackendAccessorsQuestionAccessorContainerApp'
-      'SpinozaBackendAccessorsTagAccessorContainerApp'
-      'SpinozaBackendManagersCatalogManagerContainerApp'
+      '${spinozaBackendAccessorsTestAccessorServiceContainerAppName}'
+      '${spinozaBackendAccessorsQuestionAccessorServiceContainerAppName}'
+      '${spinozaBackendAccessorsTagAccessorServiceContainerAppName}'
+      '${spinozaBackendManagersCatalogManagerServiceContainerAppName}'
     ]
   }
 }
 
+var signalrKey = signalR.listKeys().primaryConnectionString
 
 resource daprComponentSignalR 'Microsoft.App/managedEnvironments/daprComponents@2022-03-01' = {
-  name: 'azuresignalroutput'
+  name: '${environmentName}/azuresignalroutput'
   properties: {
     componentType: 'bindings.azure.signalr'
     version: 'v1'
+    secrets: [
+      {
+        name: 'signalrkeyref'
+        value:  signalrKey
+      }
+    ]
     metadata: [
       {
         name: 'connectionString'
-        value: listkeys(resourceId('Microsoft.SignalRService/SignalR', 'resourceName'), '2022-02-01' )
+        secretRef: 'signalrkeyref'
       }
       {
         name: 'hub'
@@ -276,21 +295,27 @@ resource daprComponentSignalR 'Microsoft.App/managedEnvironments/daprComponents@
     ]
     // Application scopes
     scopes: [
-      'SpinozaBackendManagersCatalogManagerContainerApp'
+      '${spinozaBackendManagersCatalogManagerServiceContainerAppName}'
     ]
   }
 }
 
 
 resource daprComponentTestAccessorRequestQueue 'Microsoft.App/managedEnvironments/daprComponents@2022-03-01' = {
-  name: 'testaccessorrequestqueue'
+  name: '${environmentName}/testaccessorrequestqueue'
   properties: {
     componentType: 'bindings.azure.servicebusqueues'
     version: 'v1'
+    secrets: [
+      {
+        name: 'servicebuskeyref'
+        value: serviceBusConnectionString
+      }
+    ]
     metadata: [
       {
         name: 'connectionString'
-        value: serviceBusConnectionString
+        secretRef: 'servicebuskeyref'
       }
       {
         name: 'queueName'
@@ -303,21 +328,27 @@ resource daprComponentTestAccessorRequestQueue 'Microsoft.App/managedEnvironment
     ]
     // Application scopes
     scopes: [
-      'SpinozaBackendAccessorsTestAccessorContainerApp'
-      'SpinozaBackendManagersCatalogManagerContainerApp'
+      '${spinozaBackendAccessorsTestAccessorServiceContainerAppName}'
+      '${spinozaBackendManagersCatalogManagerServiceContainerAppName}'
     ]
   }
 }
 
 resource daprComponentQuestionAccessorRequestQueue 'Microsoft.App/managedEnvironments/daprComponents@2022-03-01' = {
-  name: 'questionaccessorrequestqueue'
+  name: '${environmentName}/questionaccessorrequestqueue'
   properties: {
     componentType: 'bindings.azure.servicebusqueues'
     version: 'v1'
+    secrets: [
+      {
+        name: 'servicebuskeyref'
+        value: serviceBusConnectionString
+      }
+    ]
     metadata: [
       {
         name: 'connectionString'
-        value: serviceBusConnectionString
+        secretRef: 'servicebuskeyref'
       }
       {
         name: 'queueName'
@@ -330,22 +361,28 @@ resource daprComponentQuestionAccessorRequestQueue 'Microsoft.App/managedEnviron
     ]
     // Application scopes
     scopes: [
-      'SpinozaBackendAccessorsQuestionAccessorContainerApp'
-      'SpinozaBackendManagersCatalogManagerContainerApp'
+      '${spinozaBackendAccessorsQuestionAccessorServiceContainerAppName}'
+      '${spinozaBackendManagersCatalogManagerServiceContainerAppName}'
     ]
   }
 }
 
 
 resource daprComponentTagAccessorRequestQueue 'Microsoft.App/managedEnvironments/daprComponents@2022-03-01' = {
-  name: 'tagaccessorrequestqueue'
+  name: '${environmentName}/tagaccessorrequestqueue'
   properties: {
     componentType: 'bindings.azure.servicebusqueues'
     version: 'v1'
+    secrets: [
+      {
+        name: 'servicebuskeyref'
+        value: serviceBusConnectionString
+      }
+    ]
     metadata: [
       {
         name: 'connectionString'
-        value: serviceBusConnectionString
+        secretRef: 'servicebuskeyref'
       }
       {
         name: 'queueName'
@@ -358,13 +395,13 @@ resource daprComponentTagAccessorRequestQueue 'Microsoft.App/managedEnvironments
     ]
     // Application scopes
     scopes: [
-      'SpinozaBackendAccessorsTagAccessorContainerApp'
-      'SpinozaBackendManagersCatalogManagerContainerApp'
+      '${spinozaBackendAccessorsTagAccessorServiceContainerAppName}'
+      '${spinozaBackendManagersCatalogManagerServiceContainerAppName}'
     ]
   }
 }
 
-resource SpinozaBackendAccessorsTestAccessorContainerApp 'Microsoft.App/containerApps@2022-01-01-preview' = {
+resource SpinozaBackendAccessorsTestAccessorContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
   name: spinozaBackendAccessorsTestAccessorServiceContainerAppName
   tags: tags
   location: location
@@ -378,15 +415,19 @@ resource SpinozaBackendAccessorsTestAccessorContainerApp 'Microsoft.App/containe
       }
       secrets: [
         {
-          name: containerRegistryPasswordRef
+          name: 'container-registry-password-ref'
           value: containerRegistryPassword
+        }
+        {
+          name: 'servicebuskeyref'
+          value: serviceBusConnectionString
         }
       ]
       registries: [
         {
           server: containerRegistry
           username: containerRegistryUsername
-          passwordSecretRef: containerRegistryPasswordRef
+          passwordSecretRef: 'container-registry-password-ref'
         }
       ]
       ingress: {
@@ -397,16 +438,20 @@ resource SpinozaBackendAccessorsTestAccessorContainerApp 'Microsoft.App/containe
     template: {
       containers: [
         {
-          image: spinozaBackendAccessorsTestAccessorImage
+          image: '${containerRegistry}/${spinozaBackendAccessorsTestAccessorImage}'
           name: spinozaBackendAccessorsTestAccessorServiceContainerAppName
           resources: {
             cpu: 1
-            memory: '1.0Gi'
+            memory: '2.0Gi'
           }
           env: [
             {
               name: 'ASPNETCORE_URLS'
-              value: 'spinoza.backend.accessors.testaccessor'
+              value: 'testaccessor'
+            }
+            {
+              name: 'ConnectionStrings__CosmosDB'
+              value: cosmosDBConnectionString
             }
           ]
         }
@@ -414,12 +459,30 @@ resource SpinozaBackendAccessorsTestAccessorContainerApp 'Microsoft.App/containe
       scale: {
         minReplicas: minReplicas
         maxReplicas: maxReplicas
-      }
+        rules: [
+          {
+            name: 'queue-based-scaling'
+            custom: {
+              type: 'azure-servicebus'
+              metadata: {
+                queueName: 'testaccessor'
+                messageCount: '1'
+              }
+              auth: [
+                 {
+                    secretRef: 'servicebuskeyref'
+                    triggerParameter: 'connection'
+                 }
+                ]
+            }
+          }
+          ]
+       }
     }
   }
 }
 
-resource SpinozaBackendAccessorsQuestionAccessorContainerApp 'Microsoft.App/containerApps@2022-01-01-preview' = {
+resource SpinozaBackendAccessorsQuestionAccessorContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
   name: spinozaBackendAccessorsQuestionAccessorServiceContainerAppName
   tags: tags
   location: location
@@ -434,15 +497,19 @@ resource SpinozaBackendAccessorsQuestionAccessorContainerApp 'Microsoft.App/cont
       }
       secrets: [
         {
-          name: containerRegistryPasswordRef
+          name: 'container-registry-password-ref'
           value: containerRegistryPassword
+        }
+        {
+          name: 'servicebuskeyref'
+          value: serviceBusConnectionString
         }
       ]
       registries: [
         {
           server: containerRegistry
           username: containerRegistryUsername
-          passwordSecretRef: containerRegistryPasswordRef
+          passwordSecretRef: 'container-registry-password-ref'
         }
       ]
       ingress: {
@@ -453,16 +520,20 @@ resource SpinozaBackendAccessorsQuestionAccessorContainerApp 'Microsoft.App/cont
     template: {
       containers: [
         {
-          image: spinozaBackendAccessorsQuestionAccessorImage
+          image: '${containerRegistry}/${spinozaBackendAccessorsQuestionAccessorImage}'
           name: spinozaBackendAccessorsQuestionAccessorServiceContainerAppName
           resources: {
             cpu: 1
-            memory: '1.0Gi'
+            memory: '2.0Gi'
           }
           env: [
             {
               name: 'ASPNETCORE_URLS'
-              value: 'spinoza.backend.accessors.questionaccessor'
+              value: 'questionaccessor'
+            }
+            {
+              name: 'ConnectionStrings__CosmosDB'
+              value: cosmosDBConnectionString
             }
           ]
         }
@@ -470,13 +541,31 @@ resource SpinozaBackendAccessorsQuestionAccessorContainerApp 'Microsoft.App/cont
       scale: {
         minReplicas: minReplicas
         maxReplicas: maxReplicas
-      }
+        rules: [
+          {
+            name: 'queue-based-scaling'
+            custom: {
+              type: 'azure-servicebus'
+              metadata: {
+                queueName: 'questionaccessor'
+                messageCount: '1'
+              }
+              auth: [
+                 {
+                    secretRef: 'servicebuskeyref'
+                    triggerParameter: 'connection'
+                 }
+                ]
+            }
+          }
+          ]
+       }
     }
   }
 }
 
 
-resource SpinozaBackendAccessorsTagAccessorContainerApp 'Microsoft.App/containerApps@2022-01-01-preview' = {
+resource SpinozaBackendAccessorsTagAccessorContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
   name: spinozaBackendAccessorsTagAccessorServiceContainerAppName
   tags: tags
   location: location
@@ -491,15 +580,19 @@ resource SpinozaBackendAccessorsTagAccessorContainerApp 'Microsoft.App/container
       }
       secrets: [
         {
-          name: containerRegistryPasswordRef
+          name: 'container-registry-password-ref'
           value: containerRegistryPassword
+        }
+        {
+          name: 'servicebuskeyref'
+          value: serviceBusConnectionString
         }
       ]
       registries: [
         {
           server: containerRegistry
           username: containerRegistryUsername
-          passwordSecretRef: containerRegistryPasswordRef
+          passwordSecretRef: 'container-registry-password-ref'
         }
       ]
       ingress: {
@@ -510,16 +603,20 @@ resource SpinozaBackendAccessorsTagAccessorContainerApp 'Microsoft.App/container
     template: {
       containers: [
         {
-          image: spinozaBackendAccessorsTagAccessorImage
+          image: '${containerRegistry}/${spinozaBackendAccessorsTagAccessorImage}'
           name: spinozaBackendAccessorsTagAccessorServiceContainerAppName
           resources: {
             cpu: 1
-            memory: '1.0Gi'
+            memory: '2.0Gi'
           }
           env: [
             {
               name: 'ASPNETCORE_URLS'
-              value: 'spinoza.backend.accessors.tagaccessor'
+              value: 'tagaccessor'
+            }
+            {
+              name: 'ConnectionStrings__CosmosDB'
+              value: cosmosDBConnectionString
             }
           ]
         }
@@ -527,13 +624,31 @@ resource SpinozaBackendAccessorsTagAccessorContainerApp 'Microsoft.App/container
       scale: {
         minReplicas: minReplicas
         maxReplicas: maxReplicas
-      }
+        rules: [
+          {
+            name: 'queue-based-scaling'
+            custom: {
+              type: 'azure-servicebus'
+              metadata: {
+                queueName: 'tagaccessor'
+                messageCount: '1'
+              }
+              auth: [
+                 {
+                    secretRef: 'servicebuskeyref'
+                    triggerParameter: 'connection'
+                 }
+                ]
+            }
+          }
+          ]
+       }
     }
   }
 }
 
 
-resource SpinozaBackendManagersCatalogManagerContainerApp 'Microsoft.App/containerApps@2022-01-01-preview' = {
+resource SpinozaBackendManagersCatalogManagerContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
   name: spinozaBackendManagersCatalogManagerServiceContainerAppName
   tags: tags
   location: location
@@ -548,7 +663,7 @@ resource SpinozaBackendManagersCatalogManagerContainerApp 'Microsoft.App/contain
       }
       secrets: [
         {
-          name: containerRegistryPasswordRef
+          name: 'container-registry-password-ref'
           value: containerRegistryPassword
         }
       ]
@@ -556,7 +671,7 @@ resource SpinozaBackendManagersCatalogManagerContainerApp 'Microsoft.App/contain
         {
           server: containerRegistry
           username: containerRegistryUsername
-          passwordSecretRef: containerRegistryPasswordRef
+          passwordSecretRef: 'container-registry-password-ref'
         }
       ]
       ingress: {
@@ -567,16 +682,16 @@ resource SpinozaBackendManagersCatalogManagerContainerApp 'Microsoft.App/contain
     template: {
       containers: [
         {
-          image: spinozaBackendManagersCatalogManagerImage
-          name: spinozaBackendAccessorsTagAccessorServiceContainerAppName
+          image: '${containerRegistry}/${spinozaBackendManagersCatalogManagerImage}'
+          name: spinozaBackendManagersCatalogManagerServiceContainerAppName
           resources: {
             cpu: 1
-            memory: '1.0Gi'
+            memory: '2.0Gi'
           }
           env: [
             {
               name: 'ASPNETCORE_URLS'
-              value: 'spinoza.backend.managers.catalogmanager'
+              value: 'catalogmanager'
             }
           ]
         }
