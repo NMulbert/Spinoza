@@ -9,21 +9,25 @@ param tags object = {}
 
 param location string = resourceGroup().location
 
-var spinozaBackendAccessorsTestAccessorImage = 'spinoza.backend.accessors.testaccessor:main'
+var spinozaBackendAccessorsTestAccessorImage = 'spinoza.backend.accessors.testaccessor:${branchName}}'
 var spinozaBackendAccessorsTestAccessorPort = 80
 var spinozaBackendAccessorsTestAccessorIsExternalIngress = false
 
-var spinozaBackendAccessorsQuestionAccessorImage = 'spinoza.backend.accessors.qustionaccessor:main'
+var spinozaBackendAccessorsQuestionAccessorImage = 'spinoza.backend.accessors.qustionaccessor:${branchName}'
 var spinozaBackendAccessorsQuestionAccessorPort = 80
 var spinozaBackendAccessorsQuestionAccessorIsExternalIngress = false
 
-var spinozaBackendAccessorsTagAccessorImage  = 'spinoza.backend.accessors.tagaccessor:main'
+var spinozaBackendAccessorsTagAccessorImage  = 'spinoza.backend.accessors.tagaccessor:${branchName}'
 var spinozaBackendAccessorsTagAccessorPort = 80
 var spinozaBackendAccessorsTagAccessorIsExternalIngress = false
 
-var spinozaBackendManagersCatalogManagerImage = 'spinoza.backend.managers.catalogmanager:main'
+var spinozaBackendManagersCatalogManagerImage = 'spinoza.backend.managers.catalogmanager:${branchName}'
 var spinozaBackendManagersCatalogManagerPort = 80
 var spinozaBackendManagersCatalogManagerIsExternalIngress = true
+
+var spinozaBackendSignalrNegotiateImage = 'spinoza.backend.signalr.negotiate:${branchName}'
+var spinozaBackendSignalrNegotiatePort = 80
+var spinozaBackendSignalrNegotiateIsExternalIngress = true
 
 var containerRegistry  = 'spinozaacr.azurecr.io'
 var containerRegistryUsername = 'spinozaacr'
@@ -38,375 +42,196 @@ var signalRName = '${branch}-spinoza-signalr'
 var environmentName = 'shared-env'
 var workspaceName = '${branch}-log-analytics'
 var appInsightsName = '${branch}-app-insights'
+var spinozaBackendSignalrNegotiateServiceContainerAppName = 'signalrnegotiate'
 var spinozaBackendAccessorsTestAccessorServiceContainerAppName = 'testaccessor' //'${branch}-accessors-test'
 var spinozaBackendAccessorsQuestionAccessorServiceContainerAppName = 'questionaccessor'//'${branch}-accessors-question'
 var spinozaBackendAccessorsTagAccessorServiceContainerAppName = 'tagaccessor' //'${branch}-accessors-tag'
 var spinozaBackendManagersCatalogManagerServiceContainerAppName = 'catalogmanager' //'${branch}-managers-catalog'
 
-/*
-@description('Cosmos DB account name')
-param accountName string = 'cosmos-${uniqueString(resourceGroup().id)}'
+module signalr 'modules/signalr.bicep' = {
+  name: 'signalrDeployment'
+  params: {
+    signalRName: signalRName
+    location: location
+  }
+}
+var signalrKey = signalr.outputs.signalrKey
 
 
-@description('The name for the Core (SQL) database')
-param databaseName string
+module servicebus 'modules/servicebus.bicep' = {
+  name: 'servicebusQueuesAndPubSubDeployment'
+  params: {
+    location: location
+  }
+}
+var serviceBusConnectionString = servicebus.outputs.serviceBusConnectionString
 
-resource cosmosAccount 'Microsoft.DocumentDB/databaseAccounts@2021-04-15' = {
-  name: toLower(accountName)
-  location: location
-  properties: {
-    enableFreeTier: true
-    databaseAccountOfferType: 'Standard'
-    consistencyPolicy: {
-      defaultConsistencyLevel: 'Strong'
-    }
-    locations: [
-      {
-        locationName: location
-      }
+module containersAppInfra 'modules/containers-app-infra.bicep' = {
+  name: 'containersAppInfraDeployment'
+  params: {
+    location: location
+    appInsightsName: appInsightsName
+    environmentName: environmentName
+    workspaceName: workspaceName
+    tags: tags
+  }
+}
+var environmentId = containersAppInfra.outputs.environmentId
+
+module daprComponentPubSub 'modules/dapr-component-pubsub.bicep' = {
+  name: 'daprComponentPubSubDeployment'
+  params: {
+    environmentName: environmentName
+    serviceBusConnectionString: serviceBusConnectionString
+    appScope: [
+      spinozaBackendAccessorsTestAccessorServiceContainerAppName
+      spinozaBackendAccessorsQuestionAccessorServiceContainerAppName
+      spinozaBackendAccessorsTagAccessorServiceContainerAppName
+      spinozaBackendManagersCatalogManagerServiceContainerAppName
     ]
   }
-}
-*/
-//todo: ComosDB connection string should go to environement variable
-//resource cosmosDB 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases@2021-04-15' = {
-//  name: '${cosmosAccount.name}/${toLower(databaseName)}'
-//  properties: {
-//    resource: {
-//      id: databaseName
-//    }
-//    options: {
-//      throughput: 1000
-//    }
-//  }
-//}
-
-param serviceBusNamespaceName string = 'spinoza-sb-${uniqueString(resourceGroup().id)}'
-param skuName string = 'Standard'
-
-param queueNames array = [
-  'testaccessor'
-  'questionaccessor'
-  'tagaccessor'
-]
-
-var deadLetterFirehoseQueueName = 'deadletterfirehose'
-
-resource serviceBusNamespace 'Microsoft.ServiceBus/namespaces@2021-11-01' = {
-  name: serviceBusNamespaceName
-  location: location
-  sku: {
-    name: skuName
-    tier: skuName
-  }
-}
-
-resource deadLetterFirehoseQueue 'Microsoft.ServiceBus/namespaces/queues@2021-11-01' = {
-  name: deadLetterFirehoseQueueName
-  parent: serviceBusNamespace
-  properties: {
-    requiresDuplicateDetection: false
-    requiresSession: false
-    enablePartitioning: false
-  }
-}
-
-resource queues 'Microsoft.ServiceBus/namespaces/queues@2021-11-01' = [for queueName in queueNames: {
-  parent: serviceBusNamespace
-  name: queueName
-  dependsOn: [
-    deadLetterFirehoseQueue
+  dependsOn:  [
+    containersAppInfra
+    servicebus
   ]
-  properties: {
-    forwardDeadLetteredMessagesTo: deadLetterFirehoseQueueName
-  }
-}]
-
-resource pubsub 'Microsoft.ServiceBus/namespaces/topics@2021-11-01' = {
-  parent: serviceBusNamespace
-  name: 'pubsub'
-  properties: {
-    defaultMessageTimeToLive:'PT1M' //1 minute
-  }
 }
 
-var serviceBusEndpoint = '${serviceBusNamespace.id}/AuthorizationRules/RootManageSharedAccessKey'
-var serviceBusConnectionString = listKeys(serviceBusEndpoint, serviceBusNamespace.apiVersion).primaryConnectionString
-
-
-resource signalR 'Microsoft.SignalRService/signalR@2022-02-01' = {
-  name: signalRName
-  location: location
-  sku: {
-    name: 'Standard_S1'
-    capacity: 1
-  }
-  kind: 'SignalR'
-  identity: {
-    type: 'SystemAssigned'
-  }
-  properties: {
-    tls: {
-      clientCertEnabled: false
-    }
-    features: [
-      {
-        flag: 'ServiceMode'
-        value: 'Serverless'
-      }
-      {
-        flag: 'EnableConnectivityLogs'
-        value: 'true'
-      }
-      {
-        flag: 'EnableMessagingLogs'
-        value: 'true'
-      }
-      {
-        flag: 'EnableLiveTrace'
-        value: 'true'
-      }
+module daprComponentSignalr 'modules/dapr-component-signalr.bicep' = {
+  name: 'daprComponentSignalRDeployment'
+  params: {
+    environmentName: environmentName
+    signalrKey: signalrKey
+    appScope: [
+      spinozaBackendManagersCatalogManagerServiceContainerAppName
     ]
-    cors: {
-        allowedOrigins: [
-          '*'
-        ]
-    }
-    
-    networkACLs: {
-      defaultAction: 'Deny'
-      publicNetwork: {
-        allow: [
-          'ClientConnection'
-        ]
+  }
+  dependsOn:  [
+    containersAppInfra
+    signalr
+  ]
+}
+
+module daprComponentTestAccessorRequestQueue 'modules/dapr-component-queue.bicep' = {
+  name: 'daprComponentTestAccessorRequestQueueDeployment'
+  params: {
+    queueName:'testaccessor'
+    environmentName: environmentName
+    serviceBusConnectionString: serviceBusConnectionString
+    appScope: [
+      '${spinozaBackendAccessorsTestAccessorServiceContainerAppName}'
+      '${spinozaBackendManagersCatalogManagerServiceContainerAppName}'
+    ]
+  }
+  dependsOn:  [
+    containersAppInfra
+    servicebus
+  ]
+}
+
+
+module daprComponentQuestionAccessorRequestQueue 'modules/dapr-component-queue.bicep' = {
+  name: 'daprComponentQuestionAccessorRequestQueueDeployment'
+  params: {
+    queueName:'questionaccessor'
+    environmentName: environmentName
+    serviceBusConnectionString: serviceBusConnectionString
+    appScope: [
+      '${spinozaBackendAccessorsQuestionAccessorServiceContainerAppName}'
+      '${spinozaBackendManagersCatalogManagerServiceContainerAppName}'
+    ]
+  }
+  dependsOn:  [
+    containersAppInfra
+    servicebus
+  ]
+}
+
+
+module daprComponentTagAccessorRequestQueue 'modules/dapr-component-queue.bicep' = {
+  name: 'daprComponentTagAccessorRequestQueueDeployment'
+  params: {
+    queueName:'tagaccessor'
+    environmentName: environmentName
+    serviceBusConnectionString: serviceBusConnectionString
+    appScope: [
+      '${spinozaBackendAccessorsTagAccessorServiceContainerAppName}'
+      '${spinozaBackendManagersCatalogManagerServiceContainerAppName}'
+    ]
+  }
+  dependsOn:  [
+    containersAppInfra
+    servicebus
+  ]
+}
+
+
+resource SignalrNegotiateContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
+  name: spinozaBackendSignalrNegotiateServiceContainerAppName
+  tags: tags
+  location: location
+  properties: {
+    managedEnvironmentId: environmentId
+    configuration: {
+      dapr: {
+        enabled: true
+        appPort: spinozaBackendSignalrNegotiatePort
+        appId: spinozaBackendSignalrNegotiateServiceContainerAppName
+        appProtocol: 'http'
       }
-      privateEndpoints: [
+      secrets: [
         {
-          name: 'mySignalRService.1fa229cd-bf3f-47f0-8c49-afb36723997e'
-          allow: [
-            'ServerConnection'
+          name: 'container-registry-password-ref'
+          value: containerRegistryPassword
+        }
+      ]
+      registries: [
+        {
+          server: containerRegistry
+          username: containerRegistryUsername
+          passwordSecretRef: 'container-registry-password-ref'
+        }
+      ]
+      ingress: {
+        external: spinozaBackendSignalrNegotiateIsExternalIngress
+        targetPort: spinozaBackendSignalrNegotiatePort
+      }
+    }
+    template: {
+      containers: [
+        {
+          image: '${containerRegistry}/${spinozaBackendSignalrNegotiateImage}'
+          name: spinozaBackendSignalrNegotiateServiceContainerAppName
+          resources: {
+            cpu: 1
+            memory: '2.0Gi'
+          }
+          env: [
+            {
+              name: 'AzureSignalRConnectionString'
+              value: signalrKey
+            }
           ]
         }
       ]
-    }
-    /*
-    upstream: {
-      templates: [
-        {
-          categoryPattern: '*'
-          eventPattern: 'connect,disconnect'
-          hubPattern: '*'
-          urlTemplate: 'https://spinoza.com/spinozahub/api/connect'
-        }
-      ]
-    }*/
-  }
-}
-
-resource workspace 'Microsoft.OperationalInsights/workspaces@2021-12-01-preview' = {
-  name: workspaceName
-  location: location
-  tags: tags
-  properties: {
-    sku: {
-      name: 'PerGB2018'
-    }
-    retentionInDays: 30
-    workspaceCapping: {}
-  }
-}
-
-resource appInsights 'Microsoft.Insights/components@2020-02-02' = {
-  name: appInsightsName
-  location: location
-  tags: tags
-  kind: 'web'
-  properties: {
-    Application_Type: 'web'
-    Flow_Type: 'Bluefield'
-  }
-}
-
-resource environment 'Microsoft.App/managedEnvironments@2022-03-01' = {
-  name: environmentName
-  location: location
-  tags: tags
-  properties: {
-    daprAIInstrumentationKey: appInsights.properties.InstrumentationKey
-    appLogsConfiguration: {
-      destination: 'log-analytics'
-      logAnalyticsConfiguration: {
-        customerId: workspace.properties.customerId
-        sharedKey: listKeys(workspace.id, workspace.apiVersion).primarySharedKey
+      scale: {
+        minReplicas: minReplicas
+        maxReplicas: maxReplicas
       }
     }
   }
+  dependsOn:  [
+    containersAppInfra
+    signalr
+  ]
 }
 
-resource daprComponentPubSub 'Microsoft.App/managedEnvironments/daprComponents@2022-03-01' = {
-  name: '${environmentName}/pubsub'
-  properties: {
-    componentType: 'pubsub.azure.servicebus'
-    version: 'v1'
-    secrets: [
-      {
-        name: 'servicebuskeyref'
-        value: serviceBusConnectionString
-      }
-    ]
-    metadata: [
-      {
-        name: 'connectionString'
-        secretRef: 'servicebuskeyref'
-      }
-    ]
-    // Application scopes
-    scopes: [
-      '${spinozaBackendAccessorsTestAccessorServiceContainerAppName}'
-      '${spinozaBackendAccessorsQuestionAccessorServiceContainerAppName}'
-      '${spinozaBackendAccessorsTagAccessorServiceContainerAppName}'
-      '${spinozaBackendManagersCatalogManagerServiceContainerAppName}'
-    ]
-  }
-}
-
-var signalrKey = signalR.listKeys().primaryConnectionString
-
-resource daprComponentSignalR 'Microsoft.App/managedEnvironments/daprComponents@2022-03-01' = {
-  name: '${environmentName}/azuresignalroutput'
-  properties: {
-    componentType: 'bindings.azure.signalr'
-    version: 'v1'
-    secrets: [
-      {
-        name: 'signalrkeyref'
-        value:  signalrKey
-      }
-    ]
-    metadata: [
-      {
-        name: 'connectionString'
-        secretRef: 'signalrkeyref'
-      }
-      {
-        name: 'hub'
-        value: 'spinozahub'
-      }
-    ]
-    // Application scopes
-    scopes: [
-      '${spinozaBackendManagersCatalogManagerServiceContainerAppName}'
-    ]
-  }
-}
-
-
-resource daprComponentTestAccessorRequestQueue 'Microsoft.App/managedEnvironments/daprComponents@2022-03-01' = {
-  name: '${environmentName}/testaccessorrequestqueue'
-  properties: {
-    componentType: 'bindings.azure.servicebusqueues'
-    version: 'v1'
-    secrets: [
-      {
-        name: 'servicebuskeyref'
-        value: serviceBusConnectionString
-      }
-    ]
-    metadata: [
-      {
-        name: 'connectionString'
-        secretRef: 'servicebuskeyref'
-      }
-      {
-        name: 'queueName'
-        value: 'testaccessor'
-      }
-      {
-        name: 'ttlInSeconds'
-        value: '60'
-      }
-    ]
-    // Application scopes
-    scopes: [
-      '${spinozaBackendAccessorsTestAccessorServiceContainerAppName}'
-      '${spinozaBackendManagersCatalogManagerServiceContainerAppName}'
-    ]
-  }
-}
-
-resource daprComponentQuestionAccessorRequestQueue 'Microsoft.App/managedEnvironments/daprComponents@2022-03-01' = {
-  name: '${environmentName}/questionaccessorrequestqueue'
-  properties: {
-    componentType: 'bindings.azure.servicebusqueues'
-    version: 'v1'
-    secrets: [
-      {
-        name: 'servicebuskeyref'
-        value: serviceBusConnectionString
-      }
-    ]
-    metadata: [
-      {
-        name: 'connectionString'
-        secretRef: 'servicebuskeyref'
-      }
-      {
-        name: 'queueName'
-        value: 'questionaccessor'
-      }
-      {
-        name: 'ttlInSeconds'
-        value: '60'
-      }
-    ]
-    // Application scopes
-    scopes: [
-      '${spinozaBackendAccessorsQuestionAccessorServiceContainerAppName}'
-      '${spinozaBackendManagersCatalogManagerServiceContainerAppName}'
-    ]
-  }
-}
-
-
-resource daprComponentTagAccessorRequestQueue 'Microsoft.App/managedEnvironments/daprComponents@2022-03-01' = {
-  name: '${environmentName}/tagaccessorrequestqueue'
-  properties: {
-    componentType: 'bindings.azure.servicebusqueues'
-    version: 'v1'
-    secrets: [
-      {
-        name: 'servicebuskeyref'
-        value: serviceBusConnectionString
-      }
-    ]
-    metadata: [
-      {
-        name: 'connectionString'
-        secretRef: 'servicebuskeyref'
-      }
-      {
-        name: 'queueName'
-        value: 'tagaccessor'
-      }
-      {
-        name: 'ttlInSeconds'
-        value: '60'
-      }
-    ]
-    // Application scopes
-    scopes: [
-      '${spinozaBackendAccessorsTagAccessorServiceContainerAppName}'
-      '${spinozaBackendManagersCatalogManagerServiceContainerAppName}'
-    ]
-  }
-}
 
 resource SpinozaBackendAccessorsTestAccessorContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
   name: spinozaBackendAccessorsTestAccessorServiceContainerAppName
   tags: tags
   location: location
   properties: {
-    managedEnvironmentId: environment.id
+    managedEnvironmentId: environmentId
     configuration: {
       dapr: {
         enabled: true
@@ -480,6 +305,10 @@ resource SpinozaBackendAccessorsTestAccessorContainerApp 'Microsoft.App/containe
        }
     }
   }
+  dependsOn:  [
+    containersAppInfra
+    servicebus
+  ]
 }
 
 resource SpinozaBackendAccessorsQuestionAccessorContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
@@ -487,7 +316,7 @@ resource SpinozaBackendAccessorsQuestionAccessorContainerApp 'Microsoft.App/cont
   tags: tags
   location: location
   properties: {
-    managedEnvironmentId: environment.id
+    managedEnvironmentId: environmentId
     configuration: {
       dapr: {
         enabled: true
@@ -562,6 +391,10 @@ resource SpinozaBackendAccessorsQuestionAccessorContainerApp 'Microsoft.App/cont
        }
     }
   }
+  dependsOn:  [
+    containersAppInfra
+    servicebus
+  ]
 }
 
 
@@ -570,7 +403,7 @@ resource SpinozaBackendAccessorsTagAccessorContainerApp 'Microsoft.App/container
   tags: tags
   location: location
   properties: {
-    managedEnvironmentId: environment.id
+    managedEnvironmentId: environmentId
     configuration: {
       dapr: {
         enabled: true
@@ -645,6 +478,10 @@ resource SpinozaBackendAccessorsTagAccessorContainerApp 'Microsoft.App/container
        }
     }
   }
+  dependsOn:  [
+    containersAppInfra
+    servicebus
+  ]
 }
 
 
@@ -653,7 +490,7 @@ resource SpinozaBackendManagersCatalogManagerContainerApp 'Microsoft.App/contain
   tags: tags
   location: location
   properties: {
-    managedEnvironmentId: environment.id
+    managedEnvironmentId: environmentId
     configuration: {
       dapr: {
         enabled: true
@@ -706,6 +543,9 @@ resource SpinozaBackendManagersCatalogManagerContainerApp 'Microsoft.App/contain
     SpinozaBackendAccessorsTestAccessorContainerApp
     SpinozaBackendAccessorsQuestionAccessorContainerApp
     SpinozaBackendAccessorsTagAccessorContainerApp
+    containersAppInfra
+    servicebus
+    signalr
   ]
 }
 
