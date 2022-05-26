@@ -9,23 +9,23 @@ param tags object = {}
 
 param location string = resourceGroup().location
 
-var spinozaBackendAccessorsTestAccessorImage = 'spinoza.backend.accessors.testaccessor:main'
+var spinozaBackendAccessorsTestAccessorImage = 'spinoza.backend.accessors.testaccessor:${branchName}}'
 var spinozaBackendAccessorsTestAccessorPort = 80
 var spinozaBackendAccessorsTestAccessorIsExternalIngress = false
 
-var spinozaBackendAccessorsQuestionAccessorImage = 'spinoza.backend.accessors.qustionaccessor:main'
+var spinozaBackendAccessorsQuestionAccessorImage = 'spinoza.backend.accessors.qustionaccessor:${branchName}'
 var spinozaBackendAccessorsQuestionAccessorPort = 80
 var spinozaBackendAccessorsQuestionAccessorIsExternalIngress = false
 
-var spinozaBackendAccessorsTagAccessorImage  = 'spinoza.backend.accessors.tagaccessor:main'
+var spinozaBackendAccessorsTagAccessorImage  = 'spinoza.backend.accessors.tagaccessor:${branchName}'
 var spinozaBackendAccessorsTagAccessorPort = 80
 var spinozaBackendAccessorsTagAccessorIsExternalIngress = false
 
-var spinozaBackendManagersCatalogManagerImage = 'spinoza.backend.managers.catalogmanager:main'
+var spinozaBackendManagersCatalogManagerImage = 'spinoza.backend.managers.catalogmanager:${branchName}'
 var spinozaBackendManagersCatalogManagerPort = 80
 var spinozaBackendManagersCatalogManagerIsExternalIngress = true
 
-var spinozaBackendSignalrNegotiateImage = 'spinoza.backend.signalr.negotiate:main'
+var spinozaBackendSignalrNegotiateImage = 'spinoza.backend.signalr.negotiate:${branchName}'
 var spinozaBackendSignalrNegotiatePort = 80
 var spinozaBackendSignalrNegotiateIsExternalIngress = true
 
