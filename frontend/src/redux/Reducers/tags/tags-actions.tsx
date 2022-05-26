@@ -6,3 +6,10 @@ export const loadTags = (tags: any) => {
     tags: tags,
   };
 };
+
+export const addTags = (tags: any) => {
+  return {
+    type: tagsTypes.ADD_TAGS,
+    tags: tags,
+  };
+};
