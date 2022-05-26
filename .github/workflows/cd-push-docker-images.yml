@@ -19,6 +19,9 @@ jobs:
             image: spinozaacr.azurecr.io/spinoza.backend.accessors.qustionaccessor
           - dockerfile: ./backend/Accessors/Spinoza.Backend.Accessor.TagCatalog/Dockerfile
             image: spinozaacr.azurecr.io/spinoza.backend.accessors.tagaccessor
+          - dockerfile: ./backend/Managers/SignalRConnectionSupport/Docker/Dockerfile
+            image: spinozaacr.azurecr.io/spinoza.backend.signalr.negotiate
+
     permissions:
       contents: read
       packages: write
