@@ -25,30 +25,75 @@ namespace Spinoza.Backend.Accessor.QuestionCatalog.Controllers
         [HttpGet("allquestions")]
         public async Task<IActionResult> QueryAllQuestionsAsync(int? offset, int? limit)
         {
-
-            var sqlQueryText = new QueryDefinition("SELECT * FROM c OFFSET @offset LIMIT @limit").WithParameter("@offset", offset).WithParameter("@limit", limit);
-
-            JsonArray allQuestions = new JsonArray();
-
-
-            await foreach (JsonNode? item in _cosmosDBWrapper.EnumerateItemsAsJsonAsync(sqlQueryText))
+            var tags = Request.Query["tags"].ToString();
+            _logger.LogInformation(tags);
+            try
             {
-                if (item == null)
+                JsonArray allQuestions = new JsonArray();
+
+                if (string.IsNullOrEmpty(tags))
                 {
-                    _logger.LogWarning("QueryAllQuestionsAsync: Skipping null item.");
-                    continue;
+                    _logger.LogInformation("tags are null");
+
+                    var sqlQueryDefinition = new QueryDefinition("SELECT * FROM c OFFSET @offset LIMIT @limit")
+                        .WithParameter("@offset", offset).WithParameter("@limit", limit);
+
+                    return await GetAllQuestionsFromDBAsync(sqlQueryDefinition, item => item);
+
+                }
+                //else
+                _logger.LogInformation("tags are not null");
+
+                var sqlQueryDefinitionTags = new QueryDefinition(
+                    $" SELECT DISTINCT question FROM question JOIN tag IN question.tags WHERE tag IN ({tags}) OFFSET @offset LIMIT @limit")
+                    .WithParameter("@offset", offset).WithParameter("@limit", limit);
+
+                return await GetAllQuestionsFromDBAsync(sqlQueryDefinitionTags, item =>
+                {
+                    var root = item.AsObject();
+                    var question = item["question"];
+                    root.Remove("question");
+
+                    return question;
+                });
+
+                async Task<IActionResult> GetAllQuestionsFromDBAsync(QueryDefinition query, Func<JsonNode, JsonNode?> extractor)
+                {
+                    _logger.LogInformation($"GetAllQuestions query: {query.QueryText}");
+
+                    await foreach (JsonNode? item in _cosmosDBWrapper.EnumerateItemsAsJsonAsync(query))
+                    {
+                        if (item == null)
+                        {
+                            _logger.LogWarning("QueryAllQuestionsAsync: Skipping null item.");
+                            continue;
+                        }
+
+                        var question = extractor(item);
+
+                        if (question == null)
+                        {
+                            _logger.LogWarning("GetAllQuestionsFromDBAsync: null question detected.");
+                            continue;
+                        }
+
+                        RemoveDBRelatedProperties(question);
+
+                        _logger.LogInformation("Question with id: {0} has been added to the array.", question["id"]);
+
+                        allQuestions.Add(question);
+
+                    }
+
+                    return new OkObjectResult(allQuestions);
                 }
 
-                RemoveDBRelatedProperties(item);
-
-                _logger.LogInformation("Question with id: {0} has been added to the array.", item["id"]);
-
-
-                allQuestions.Add(item);
-
             }
-
-            return new OkObjectResult(allQuestions);
+            catch (Exception ex)
+            {
+                _logger.LogError($"Error while getting questions: {ex.Message}");
+            }
+            return Problem(statusCode: StatusCodes.Status500InternalServerError);
         }
 
         private static void RemoveDBRelatedProperties(JsonNode item)
