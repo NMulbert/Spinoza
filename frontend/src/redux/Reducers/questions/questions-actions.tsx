@@ -6,3 +6,24 @@ export const loadQuestions = (questions: any) => {
     questions: questions,
   };
 };
+
+export const loadQuestion = (question: any) => {
+  return {
+    type: questionsTypes,
+    question: question,
+  };
+};
+
+export const addQuestion = (questions: any) => {
+  return {
+    type: questionsTypes.ADD_QUESTION,
+    questions: questions,
+  };
+};
+
+export const updateQuestion = (question: any) => {
+  return {
+    type: questionsTypes.UPDATE_QUESTION,
+    question: question,
+  };
+};
