@@ -53,10 +53,10 @@ namespace CatalogManager.Controllers
                 
                 var methodName = $"questionaccessor/allquestions?offset={offset ?? 0}&limit={limit ?? 100}{tags}";
                 _logger.LogInformation($"GetAll: calling method : {methodName}");
-                var allAccessorQuestions = await _daprClient.InvokeMethodAsync<List<Models.AccessorResults.Test>>(HttpMethod.Get, "questionaccessor", methodName);
+                var allAccessorQuestions = await _daprClient.InvokeMethodAsync<JsonArray>(HttpMethod.Get, "questionaccessor", methodName);
                
                 // ReSharper disable once ConditionalAccessQualifierIsNonNullableAccordingToAPIContract
-                _logger?.LogInformation($"returned {allAccessorQuestions.Count} tests");
+                _logger?.LogInformation($"returned {allAccessorQuestions.Count} questions");
                 return new OkObjectResult(allAccessorQuestions);
             }
             catch (Exception ex)

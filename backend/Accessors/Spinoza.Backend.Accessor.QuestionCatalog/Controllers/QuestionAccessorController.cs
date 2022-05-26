@@ -4,6 +4,7 @@ using Microsoft.Azure.Cosmos;
 using Spinoza.Backend.Crosscutting.CosmosDBWrapper;
 using System.Text.Json.Nodes;
 using Newtonsoft.Json;
+using System;
 
 namespace Spinoza.Backend.Accessor.QuestionCatalog.Controllers
 {
@@ -35,69 +36,62 @@ namespace Spinoza.Backend.Accessor.QuestionCatalog.Controllers
                 if (string.IsNullOrEmpty(tags))
                 {
                     _logger.LogInformation("tags are null");
-                    
-                    var sqlQueryText = new QueryDefinition("SELECT * FROM c OFFSET @offset LIMIT @limit")
+
+                    var sqlQueryDefinition = new QueryDefinition("SELECT * FROM c OFFSET @offset LIMIT @limit")
                         .WithParameter("@offset", offset).WithParameter("@limit", limit);
 
-                    await foreach (JsonNode? item in _cosmosDBWrapper.EnumerateItemsAsJsonAsync(sqlQueryText))
-                    {
-                        if (item == null)
-                        {
-                            _logger.LogWarning("QueryAllQuestionsAsync: Skipping null item.");
-                            continue;
-                        }
+                    return await GetAllQuestionsFromDBAsync(sqlQueryDefinition, item => item);
 
-                        RemoveDBRelatedProperties(item);
-
-                        _logger.LogInformation("Question with id: {0} has been added to the array.", item["id"]);
-
-                        allQuestions.Add(item);
-
-                    }
-
-                    return new OkObjectResult(allQuestions);
                 }
-                else
+                //else
+                _logger.LogInformation("tags are not null");
+
+                var sqlQueryDefinitionTags = new QueryDefinition(
+                    $" SELECT DISTINCT question FROM question JOIN tag IN question.tags WHERE tag IN ({tags}) OFFSET @offset LIMIT @limit")
+                    .WithParameter("@offset", offset).WithParameter("@limit", limit);
+
+                return await GetAllQuestionsFromDBAsync(sqlQueryDefinitionTags, item =>
                 {
-                    _logger.LogInformation("tags are not null");
-                    
-                    var query =new QueryDefinition(
-                        $" SELECT DISTINCT question FROM question JOIN tag IN question.tags WHERE tag IN ({tags}) OFFSET @offset LIMIT @limit")
-                        .WithParameter("@offset", offset ).WithParameter("@limit", limit );
+                    var root = item.AsObject();
+                    var question = item["question"];
+                    root.Remove("question");
 
-                    _logger.LogInformation(query.QueryText);
+                    return question;
+                });
 
-                    
+                async Task<IActionResult> GetAllQuestionsFromDBAsync(QueryDefinition query, Func<JsonNode, JsonNode?> extractor)
+                {
+                    _logger.LogInformation($"GetAllQuestions query: {query.QueryText}");
+
                     await foreach (JsonNode? item in _cosmosDBWrapper.EnumerateItemsAsJsonAsync(query))
                     {
-                        _logger.LogInformation("************************");
                         if (item == null)
                         {
                             _logger.LogWarning("QueryAllQuestionsAsync: Skipping null item.");
                             continue;
                         }
 
-                        //RemoveDBRelatedProperties(item);
+                        var question = extractor(item);
 
-                        _logger.LogInformation("Question with id: {0} has been added to the array.", item["id"]);
-                        _logger.LogInformation(item.ToJsonString());
-                        var doc = item.AsArray();
-                        var a = doc[0];
-                        doc.Remove(a);
-                          _logger.LogInformation(doc.ToJsonString());
-                        
-                        allQuestions.Add(doc);
-                        
+                        if (question == null)
+                        {
+                            _logger.LogWarning("GetAllQuestionsFromDBAsync: null question detected.");
+                            continue;
+                        }
+
+                        RemoveDBRelatedProperties(question);
+
+                        _logger.LogInformation("Question with id: {0} has been added to the array.", question["id"]);
+
+                        allQuestions.Add(question);
+
                     }
-                    _logger.LogInformation("#####################");
-
-                        //var results = allQuestions.Select(j => JsonConvert.DeserializeObject<JsonArray>(j["question"]!.ToJsonString())!).ToList();
-                   // _logger.LogInformation(results.ToString());
 
                     return new OkObjectResult(allQuestions);
                 }
+
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 _logger.LogError($"Error while getting questions: {ex.Message}");
             }
