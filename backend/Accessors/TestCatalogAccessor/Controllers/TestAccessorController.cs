@@ -61,8 +61,6 @@ namespace Spinoza.Backend.Accessor.TestCatalog.Controllers
 
             }
             return Problem(statusCode: StatusCodes.Status500InternalServerError);
-            
-            
         }
 
         

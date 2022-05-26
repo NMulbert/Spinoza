@@ -1,4 +1,5 @@
-﻿using AutoMapper;
+﻿using System.Text;
+using AutoMapper;
 using Dapr.Client;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
@@ -39,13 +40,23 @@ namespace CatalogManager.Controllers
         [HttpGet("/allquestions")]
         public async Task<IActionResult> GetAllQuestions(int? offset, int? limit)
         {
-            
             try
             {
-                var allAccessorQuestions = await _daprClient.InvokeMethodAsync<JsonArray>(HttpMethod.Get, "questionaccessor", $"questionaccessor/allquestions?offset={offset ?? 0 }&limit={limit ?? 100}");
-
-                _logger.LogInformation($"returned {allAccessorQuestions.Count} questions");
-
+                var queryTags = Request.Query["tag"];
+                var tags = (queryTags.Any()
+                    ? "&tags=" + queryTags.Aggregate(new StringBuilder(), (sb, t) => sb.Append($"'{t}',"),
+                        sb =>
+                        {
+                            sb.Length--;
+                            return sb.ToString();
+                        }) : string.Empty);
+                
+                var methodName = $"questionaccessor/allquestions?offset={offset ?? 0}&limit={limit ?? 100}{tags}";
+                _logger.LogInformation($"GetAll: calling method : {methodName}");
+                var allAccessorQuestions = await _daprClient.InvokeMethodAsync<List<Models.AccessorResults.Test>>(HttpMethod.Get, "questionaccessor", methodName);
+               
+                // ReSharper disable once ConditionalAccessQualifierIsNonNullableAccordingToAPIContract
+                _logger?.LogInformation($"returned {allAccessorQuestions.Count} tests");
                 return new OkObjectResult(allAccessorQuestions);
             }
             catch (Exception ex)
@@ -53,6 +64,7 @@ namespace CatalogManager.Controllers
                 _logger.LogError($"Error while getting all questions: {ex.Message}");
             }
             return Problem(statusCode: StatusCodes.Status500InternalServerError);
+            
         }
 
         [HttpGet("/question/{id:Guid}")]

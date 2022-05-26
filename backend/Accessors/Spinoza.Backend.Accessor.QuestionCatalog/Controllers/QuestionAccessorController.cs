@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Cosmos;
 using Spinoza.Backend.Crosscutting.CosmosDBWrapper;
 using System.Text.Json.Nodes;
+using Newtonsoft.Json;
 
 namespace Spinoza.Backend.Accessor.QuestionCatalog.Controllers
 {
@@ -25,30 +26,82 @@ namespace Spinoza.Backend.Accessor.QuestionCatalog.Controllers
         [HttpGet("allquestions")]
         public async Task<IActionResult> QueryAllQuestionsAsync(int? offset, int? limit)
         {
-
-            var sqlQueryText = new QueryDefinition("SELECT * FROM c OFFSET @offset LIMIT @limit").WithParameter("@offset", offset).WithParameter("@limit", limit);
-
-            JsonArray allQuestions = new JsonArray();
-
-
-            await foreach (JsonNode? item in _cosmosDBWrapper.EnumerateItemsAsJsonAsync(sqlQueryText))
+            var tags = Request.Query["tags"].ToString();
+            _logger.LogInformation(tags);
+            try
             {
-                if (item == null)
+                JsonArray allQuestions = new JsonArray();
+
+                if (string.IsNullOrEmpty(tags))
                 {
-                    _logger.LogWarning("QueryAllQuestionsAsync: Skipping null item.");
-                    continue;
+                    _logger.LogInformation("tags are null");
+                    
+                    var sqlQueryText = new QueryDefinition("SELECT * FROM c OFFSET @offset LIMIT @limit")
+                        .WithParameter("@offset", offset).WithParameter("@limit", limit);
+
+                    await foreach (JsonNode? item in _cosmosDBWrapper.EnumerateItemsAsJsonAsync(sqlQueryText))
+                    {
+                        if (item == null)
+                        {
+                            _logger.LogWarning("QueryAllQuestionsAsync: Skipping null item.");
+                            continue;
+                        }
+
+                        RemoveDBRelatedProperties(item);
+
+                        _logger.LogInformation("Question with id: {0} has been added to the array.", item["id"]);
+
+                        allQuestions.Add(item);
+
+                    }
+
+                    return new OkObjectResult(allQuestions);
                 }
+                else
+                {
+                    _logger.LogInformation("tags are not null");
+                    
+                    var query =new QueryDefinition(
+                        $" SELECT DISTINCT question FROM question JOIN tag IN question.tags WHERE tag IN ({tags}) OFFSET @offset LIMIT @limit")
+                        .WithParameter("@offset", offset ).WithParameter("@limit", limit );
 
-                RemoveDBRelatedProperties(item);
+                    _logger.LogInformation(query.QueryText);
 
-                _logger.LogInformation("Question with id: {0} has been added to the array.", item["id"]);
+                    
+                    await foreach (JsonNode? item in _cosmosDBWrapper.EnumerateItemsAsJsonAsync(query))
+                    {
+                        _logger.LogInformation("************************");
+                        if (item == null)
+                        {
+                            _logger.LogWarning("QueryAllQuestionsAsync: Skipping null item.");
+                            continue;
+                        }
 
+                        //RemoveDBRelatedProperties(item);
 
-                allQuestions.Add(item);
+                        _logger.LogInformation("Question with id: {0} has been added to the array.", item["id"]);
+                        _logger.LogInformation(item.ToJsonString());
+                        var doc = item.AsArray();
+                        var a = doc[0];
+                        doc.Remove(a);
+                          _logger.LogInformation(doc.ToJsonString());
+                        
+                        allQuestions.Add(doc);
+                        
+                    }
+                    _logger.LogInformation("#####################");
 
+                        //var results = allQuestions.Select(j => JsonConvert.DeserializeObject<JsonArray>(j["question"]!.ToJsonString())!).ToList();
+                   // _logger.LogInformation(results.ToString());
+
+                    return new OkObjectResult(allQuestions);
+                }
             }
-
-            return new OkObjectResult(allQuestions);
+            catch(Exception ex)
+            {
+                _logger.LogError($"Error while getting questions: {ex.Message}");
+            }
+            return Problem(statusCode: StatusCodes.Status500InternalServerError);
         }
 
         private static void RemoveDBRelatedProperties(JsonNode item)
