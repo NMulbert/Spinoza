@@ -61,7 +61,7 @@ namespace CatalogManager.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError($"Error while getting all questions: {ex.Message}");
+                _logger?.LogError($"Error while getting all questions: {ex.Message}");
             }
             return Problem(statusCode: StatusCodes.Status500InternalServerError);
             

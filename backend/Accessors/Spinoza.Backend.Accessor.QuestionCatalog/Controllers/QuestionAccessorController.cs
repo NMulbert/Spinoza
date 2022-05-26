@@ -3,8 +3,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Cosmos;
 using Spinoza.Backend.Crosscutting.CosmosDBWrapper;
 using System.Text.Json.Nodes;
-using Newtonsoft.Json;
-using System;
 
 namespace Spinoza.Backend.Accessor.QuestionCatalog.Controllers
 {
