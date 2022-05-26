@@ -1,38 +1,39 @@
 ﻿using AutoMapper;
 
+namespace CatalogManager;
 
 internal class AutoMapperProfile : Profile
 {
     public AutoMapperProfile()
     {
-        CreateMap<CatalogManager.Models.FrontendRequests.Test, CatalogManager.Models.AccessorSubmits.Test>()
+        CreateMap<Models.FrontendRequests.Test, Models.AccessorSubmits.Test>()
             .ForMember(dest => dest.MessageType, opt => opt.Ignore());
 
-        CreateMap<CatalogManager.Models.AccessorResults.TestChangeResult, CatalogManager.Models.FrontendResponses.TestChangeResult>();
+        CreateMap<Models.AccessorResults.TestChangeResult, Models.FrontendResponses.TestChangeResult>();
 
-        CreateMap<CatalogManager.Models.AccessorResults.QuestionChangeResult, CatalogManager.Models.FrontendResponses.QuestionChangeResult>();
+        CreateMap<Models.AccessorResults.QuestionChangeResult, Models.FrontendResponses.QuestionChangeResult>();
 
-        CreateMap<CatalogManager.Models.AccessorResults.Test, CatalogManager.Models.FrontendResponses.Test>();
+        CreateMap<Models.AccessorResults.Test, Models.FrontendResponses.Test>();
 
-        CreateMap<CatalogManager.Models.FrontendRequests.MultipleChoiceQuestion, CatalogManager.Models.AccessorSubmits.MultipleChoiceQuestion>()
+        CreateMap<Models.FrontendRequests.MultipleChoiceQuestion, Models.AccessorSubmits.MultipleChoiceQuestion>()
             .ForMember(dest => dest.MessageType, opt => opt.Ignore());
 
-        CreateMap<CatalogManager.Models.FrontendRequests.OpenTextQuestion, CatalogManager.Models.AccessorSubmits.OpenTextQuestion>()
+        CreateMap<Models.FrontendRequests.OpenTextQuestion, Models.AccessorSubmits.OpenTextQuestion>()
             .ForMember(dest => dest.MessageType, opt => opt.Ignore());
 
-        CreateMap<CatalogManager.Models.AccessorResults.MultipleChoiceQuestion, CatalogManager.Models.FrontendResponses.MultipleChoiceQuestion>();
+        CreateMap<Models.AccessorResults.MultipleChoiceQuestion, Models.FrontendResponses.MultipleChoiceQuestion>();
 
-        CreateMap<CatalogManager.Models.AccessorResults.OpenTextQuestion, CatalogManager.Models.FrontendResponses.OpenTextQuestion>();
+        CreateMap<Models.AccessorResults.OpenTextQuestion, Models.FrontendResponses.OpenTextQuestion>();
 
-        CreateMap<CatalogManager.Models.AccessorResults.Content, CatalogManager.Models.FrontendResponses.Content>();
+        CreateMap<Models.AccessorResults.Content, Models.FrontendResponses.Content>();
 
-        CreateMap<CatalogManager.Models.AccessorResults.AnswerOption, CatalogManager.Models.FrontendResponses.AnswerOption>();
+        CreateMap<Models.AccessorResults.AnswerOption, Models.FrontendResponses.AnswerOption>();
 
-        CreateMap<CatalogManager.Models.FrontendRequests.Content, CatalogManager.Models.AccessorSubmits.Content>();
+        CreateMap<Models.FrontendRequests.Content, Models.AccessorSubmits.Content>();
 
-        CreateMap<CatalogManager.Models.FrontendRequests.AnswerOption, CatalogManager.Models.AccessorSubmits.AnswerOption>();
+        CreateMap<Models.FrontendRequests.AnswerOption, Models.AccessorSubmits.AnswerOption>();
         
-        CreateMap<CatalogManager.Models.AccessorResults.TagChangeResult, CatalogManager.Models.FrontendResponses.TagChangeResult>();
+        CreateMap<Models.AccessorResults.TagChangeResult, Models.FrontendResponses.TagChangeResult>();
 
     }
 }

@@ -19,10 +19,10 @@ namespace Spinoza.Backend.Managers.TestCatalog.Tests
     public class TestTests
     {
         private readonly HttpClient _httpClient;
-        private HubConnection _signalRHubConnection;
+        private readonly HubConnection _signalRHubConnection;
         private readonly List<TestChangeResult?> _signalRMessagesReceived = new List<TestChangeResult?>();
-        private SemaphoreSlim _signalRMessageReceived = new SemaphoreSlim(0);
-        private ITestOutputHelper _testOutputHelper;
+        private readonly SemaphoreSlim _signalRMessageReceived = new SemaphoreSlim(0);
+        private readonly ITestOutputHelper _testOutputHelper;
 
         public TestTests(IHttpClientFactory httpClientFactory, ITestOutputHelper testOutputHelper)
         {
@@ -39,7 +39,7 @@ namespace Spinoza.Backend.Managers.TestCatalog.Tests
                  .Build();
         }
 
-        private async Task StartSinglaR()
+        private async Task StartSignalR()
         {
             if (_signalRHubConnection.State != HubConnectionState.Connected)
                 await _signalRHubConnection.StartAsync();
@@ -57,7 +57,6 @@ namespace Spinoza.Backend.Managers.TestCatalog.Tests
             var isSucceeded = await _signalRMessageReceived.WaitAsync(timeoutInSeconds * 1000);
             return isSucceeded;
         }
-
 
         [Fact]
         public async Task TestCreateTest()
@@ -83,7 +82,7 @@ namespace Spinoza.Backend.Managers.TestCatalog.Tests
             var json = JsonSerializer.Serialize(test, serializeOptions);
             var data = new StringContent(json, Encoding.UTF8, "application/json");
 
-            await StartSinglaR();
+            await StartSignalR();
             var response = await _httpClient.PostAsync("/v1.0/invoke/catalogmanager/method/test", data);
             Assert.NotNull(response);
             Assert.Equal(200, (int)response.StatusCode);
@@ -112,11 +111,11 @@ namespace Spinoza.Backend.Managers.TestCatalog.Tests
             Assert.NotNull(savedTest);
 
             Assert.Equal(test.AuthorId, savedTest!.AuthorId);
-            Assert.Equal(test.Description, savedTest!.Description);
-            Assert.Equal(test.Id, savedTest!.Id);
-            Assert.Equal(test.Title, savedTest!.Title);
-            Assert.Equal(test.Tags.Length, savedTest!.Tags.Length);
-            Assert.Equal(test.QuestionsRefs.Length, savedTest!.QuestionsRefs.Length);
+            Assert.Equal(test.Description, savedTest.Description);
+            Assert.Equal(test.Id, savedTest.Id);
+            Assert.Equal(test.Title, savedTest.Title);
+            Assert.Equal(test.Tags.Length, savedTest.Tags.Length);
+            Assert.Equal(test.QuestionsRefs.Length, savedTest.QuestionsRefs.Length);
 
         }
 
@@ -144,12 +143,12 @@ namespace Spinoza.Backend.Managers.TestCatalog.Tests
             var json = JsonSerializer.Serialize(test, serializeOptions);
             var data = new StringContent(json, Encoding.UTF8, "application/json");
 
-            await StartSinglaR();
+            await StartSignalR();
             var response = await _httpClient.PostAsync("/v1.0/invoke/catalogmanager/method/test", data);
             Assert.NotNull(response);
             Assert.Equal(400, (int)response.StatusCode);
             string result = await response.Content.ReadAsStringAsync();
-            Assert.Equal("Errors: \nThe title is  bigger than 100 charecters", result);
+            Assert.Equal("Errors: \nThe title is  bigger than 100 characters", result);
         }
         [Fact]
         public async Task TesTitleTooShort()
@@ -175,12 +174,12 @@ namespace Spinoza.Backend.Managers.TestCatalog.Tests
             var json = JsonSerializer.Serialize(test, serializeOptions);
             var data = new StringContent(json, Encoding.UTF8, "application/json");
 
-            await StartSinglaR();
+            await StartSignalR();
             var response = await _httpClient.PostAsync("/v1.0/invoke/catalogmanager/method/test", data);
             Assert.NotNull(response);
             Assert.Equal(400, (int)response.StatusCode);
             string result = await response.Content.ReadAsStringAsync();
-            Assert.Equal("Errors: \nThe title is less than 3 charecters", result);
+            Assert.Equal("Errors: \nThe title is less than 3 characters", result);
         }
         [Fact]
         public async Task TestMissingTestTitle()
@@ -206,7 +205,7 @@ namespace Spinoza.Backend.Managers.TestCatalog.Tests
             var json = JsonSerializer.Serialize(test, serializeOptions);
             var data = new StringContent(json, Encoding.UTF8, "application/json");
 
-            await StartSinglaR();
+            await StartSignalR();
             var response = await _httpClient.PostAsync("/v1.0/invoke/catalogmanager/method/test", data);
             Assert.NotNull(response);
             Assert.Equal(400, (int)response.StatusCode);
@@ -238,7 +237,7 @@ namespace Spinoza.Backend.Managers.TestCatalog.Tests
             var json = JsonSerializer.Serialize(test, serializeOptions);
             var data = new StringContent(json, Encoding.UTF8, "application/json");
 
-            await StartSinglaR();
+            await StartSignalR();
             var response = await _httpClient.PostAsync("/v1.0/invoke/catalogmanager/method/test", data);
             Assert.NotNull(response);
             Assert.Equal(400, (int)response.StatusCode);
@@ -269,7 +268,7 @@ namespace Spinoza.Backend.Managers.TestCatalog.Tests
             var json = JsonSerializer.Serialize(test, serializeOptions);
             var data = new StringContent(json, Encoding.UTF8, "application/json");
 
-            await StartSinglaR();
+            await StartSignalR();
             var response = await _httpClient.PostAsync("/v1.0/invoke/catalogmanager/method/test", data);
             Assert.NotNull(response);
             Assert.Equal(400, (int)response.StatusCode);
@@ -302,7 +301,7 @@ namespace Spinoza.Backend.Managers.TestCatalog.Tests
             var json = JsonSerializer.Serialize(openTextQuestion, serializeOptions);
             var data = new StringContent(json, Encoding.UTF8, "application/json");
 
-            await StartSinglaR();
+            await StartSignalR();
             var response = await _httpClient.PostAsync("/v1.0/invoke/catalogmanager/method/question", data);
             Assert.NotNull(response);
             Assert.Equal(200, (int)response.StatusCode);
@@ -330,12 +329,12 @@ namespace Spinoza.Backend.Managers.TestCatalog.Tests
             Assert.NotNull(savedQuestion);
 
             Assert.Equal(openTextQuestion.Name, savedQuestion!.Name);
-            Assert.Equal(openTextQuestion.DifficultyLevel, savedQuestion!.DifficultyLevel);
-            Assert.Equal(openTextQuestion.Id, savedQuestion!.Id);
+            Assert.Equal(openTextQuestion.DifficultyLevel, savedQuestion.DifficultyLevel);
+            Assert.Equal(openTextQuestion.Id, savedQuestion.Id);
             Assert.Equal(openTextQuestion.Type, savedQuestion.Type);
-            Assert.Equal(openTextQuestion.Tags.Length, savedQuestion!.Tags.Length);
-            Assert.Equal(openTextQuestion.AuthorId, savedQuestion!.AuthorId);
-            Assert.Equal(openTextQuestion.Content, savedQuestion!.Content);
+            Assert.Equal(openTextQuestion.Tags.Length, savedQuestion.Tags.Length);
+            Assert.Equal(openTextQuestion.AuthorId, savedQuestion.AuthorId);
+            Assert.Equal(openTextQuestion.Content, savedQuestion.Content);
         }
 
 
@@ -356,7 +355,7 @@ namespace Spinoza.Backend.Managers.TestCatalog.Tests
                 Content = new Content
                 {
                     QuestionText = "This is a question",
-                    AnswerOptions = new AnswerOption []
+                    AnswerOptions = new []
                     {
                         new AnswerOption
                         {
@@ -386,7 +385,7 @@ namespace Spinoza.Backend.Managers.TestCatalog.Tests
             var json = JsonSerializer.Serialize(openTextQuestion, serializeOptions);
             var data = new StringContent(json, Encoding.UTF8, "application/json");
 
-            await StartSinglaR();
+            await StartSignalR();
             var response = await _httpClient.PostAsync("/v1.0/invoke/catalogmanager/method/question", data);
             Assert.NotNull(response);
             Assert.Equal(200, (int)response.StatusCode);
@@ -413,12 +412,12 @@ namespace Spinoza.Backend.Managers.TestCatalog.Tests
             Assert.NotNull(savedQuestion);
 
             Assert.Equal(openTextQuestion.Name, savedQuestion!.Name);
-            Assert.Equal(openTextQuestion.DifficultyLevel, savedQuestion!.DifficultyLevel);
-            Assert.Equal(openTextQuestion.Id, savedQuestion!.Id);
+            Assert.Equal(openTextQuestion.DifficultyLevel, savedQuestion.DifficultyLevel);
+            Assert.Equal(openTextQuestion.Id, savedQuestion.Id);
             Assert.Equal(openTextQuestion.Type, savedQuestion.Type);
-            Assert.Equal(openTextQuestion.Tags.Length, savedQuestion!.Tags.Length);
-            Assert.Equal(openTextQuestion.AuthorId, savedQuestion!.AuthorId);
-            Assert.Equal(openTextQuestion.Content.QuestionText, savedQuestion!.Content.QuestionText);
+            Assert.Equal(openTextQuestion.Tags.Length, savedQuestion.Tags.Length);
+            Assert.Equal(openTextQuestion.AuthorId, savedQuestion.AuthorId);
+            Assert.Equal(openTextQuestion.Content.QuestionText, savedQuestion.Content.QuestionText);
             Assert.True(savedQuestion.Content.AnswerOptions[1].IsCorrect);
             Assert.Equal(3, savedQuestion.Content.AnswerOptions.Length);
         }

@@ -5,7 +5,6 @@ using Newtonsoft.Json.Serialization;
 using Spinoza.Backend.Crosscutting.CosmosDBWrapper;
 using System;
 using System.IO;
-using System.Text.Json;
 
 namespace Spinoza.Backend.Accessor.TestCatalog.Tests
 {

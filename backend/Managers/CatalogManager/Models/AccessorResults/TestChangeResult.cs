@@ -1,6 +1,4 @@
-﻿using Newtonsoft.Json;
-
-namespace CatalogManager.Models.AccessorResults
+﻿namespace CatalogManager.Models.AccessorResults
 {
     public class TestChangeResult
     {

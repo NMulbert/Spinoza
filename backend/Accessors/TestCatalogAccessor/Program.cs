@@ -1,6 +1,7 @@
 using AutoMapper;
 using Spinoza.Backend.Crosscutting.CosmosDBWrapper;
 using System.Text.Json;
+using Spinoza.Backend.Accessor.TestCatalog;
 
 var builder = WebApplication.CreateBuilder(args);
 var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";

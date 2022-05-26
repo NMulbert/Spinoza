@@ -1,8 +1,6 @@
 using Spinoza.Backend.Crosscutting.CosmosDBWrapper;
 using System.Text.Json;
 
-
-
 var builder = WebApplication.CreateBuilder(args);
 var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
 // Add services to the container.

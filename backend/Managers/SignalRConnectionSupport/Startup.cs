@@ -14,16 +14,15 @@ namespace SignalRConnectionSupport
 
             builder.Services.AddCors(options =>
             {
-                options.AddPolicy(defaultCorsPolicyName, builder =>
+                options.AddPolicy(defaultCorsPolicyName, b =>
                 {
-                    //App:CorsOrigins in appsettings.json can contain more than one address with splitted by comma.
-                    builder
-                        .SetIsOriginAllowed((host) => true)
-                        .SetIsOriginAllowedToAllowWildcardSubdomains()
-                        .AllowAnyHeader()
-                        .AllowAnyMethod()
-                        .AllowCredentials()
-                        .WithHeaders("Access-Control-Allow-Origin", "*");
+                    //App:CorsOrigins in appsettings.json can contain more than one address with split by comma.
+                    b.SetIsOriginAllowed((_) => true)
+                     .SetIsOriginAllowedToAllowWildcardSubdomains()
+                     .AllowAnyHeader()
+                     .AllowAnyMethod()
+                     .AllowCredentials()
+                     .WithHeaders("Access-Control-Allow-Origin", "*");
                 });
             });
         }
