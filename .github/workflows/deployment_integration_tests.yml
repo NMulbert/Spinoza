@@ -4,7 +4,13 @@ name: Deployment Integration Tests
 
 on:
   workflow_dispatch:
-
+    inputs:
+      signalr_url:
+        description: 'The SignalR Client Negotiate Url'
+        required: true
+      test_catalog_url:
+        description: 'The Test Catalog Url'
+        required: true
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -25,6 +31,6 @@ jobs:
       run: dotnet build --no-restore SpinozaBackEnd.sln
     - name: Test
       env: 
-        SPINOZA_SIGNALR_URL: url
-        SPINOZA_TEST_CATALOG_URL : url
+        SPINOZA_SIGNALR_URL: signalr_url
+        SPINOZA_TEST_CATALOG_URL: test_catalog_url
       run: dotnet test --no-build --verbosity normal --configuration Debug IntegrationTests/Managers/Spinoza.Backend.Managers.TestCatalog.Tests/Spinoza.Backend.Managers.TestCatalog.Tests.csproj
