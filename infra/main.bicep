@@ -282,7 +282,7 @@ resource SpinozaBackendAccessorsTestAccessorContainerApp 'Microsoft.App/containe
           env: [
             {
               name: 'ASPNETCORE_URLS'
-              value: 'testaccessor'
+              value: 'http://localhost:80'
             }
             {
               name: 'ConnectionStrings__CosmosDB'
@@ -376,7 +376,7 @@ resource SpinozaBackendAccessorsQuestionAccessorContainerApp 'Microsoft.App/cont
           env: [
             {
               name: 'ASPNETCORE_URLS'
-              value: 'questionaccessor'
+              value: 'http://localhost:80'
             }
             {
               name: 'ConnectionStrings__CosmosDB'
@@ -471,7 +471,7 @@ resource SpinozaBackendAccessorsTagAccessorContainerApp 'Microsoft.App/container
           env: [
             {
               name: 'ASPNETCORE_URLS'
-              value: 'tagaccessor'
+              value: 'http://localhost:80'
             }
             {
               name: 'ConnectionStrings__CosmosDB'
@@ -562,7 +562,7 @@ resource SpinozaBackendManagersCatalogManagerContainerApp 'Microsoft.App/contain
           env: [
             {
               name: 'ASPNETCORE_URLS'
-              value: 'catalogmanager'
+              value: 'http://localhost:80'
             }
           ]
         }
