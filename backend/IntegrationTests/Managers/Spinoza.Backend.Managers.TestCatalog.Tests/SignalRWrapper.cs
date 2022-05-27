@@ -20,7 +20,9 @@ namespace Spinoza.Backend.Managers.TestCatalog.Tests
 
         public SignalRWrapper(ITestOutputHelper testOutputHelper)
         {
-            var signalRUrl = Environment.GetEnvironmentVariable("SPINOZA_SIGNALR_URL") ?? "http://localhost:80/api";
+            var signalRUrl = Environment.GetEnvironmentVariable("SPINOZA_SIGNALR_URL");
+            if (string.IsNullOrEmpty(signalRUrl))
+                signalRUrl = "http://localhost:80/api";
 
             _signalRHubConnection = new HubConnectionBuilder()
                 .WithUrl(signalRUrl)
