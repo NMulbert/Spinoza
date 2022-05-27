@@ -216,6 +216,16 @@ resource SignalrNegotiateContainerApp 'Microsoft.App/containerApps@2022-03-01' =
       scale: {
         minReplicas: minReplicas
         maxReplicas: maxReplicas
+        rules: [
+          {
+            name: 'http-rule'
+            http: {
+              metadata: {
+                concurrentRequests: '20'
+              }
+            }
+          }
+        ]
       }
     }
   }
@@ -299,6 +309,14 @@ resource SpinozaBackendAccessorsTestAccessorContainerApp 'Microsoft.App/containe
                     triggerParameter: 'connection'
                  }
                 ]
+            }
+          }
+          {
+            name: 'http-rule'
+            http: {
+              metadata: {
+                concurrentRequests: '20'
+              }
             }
           }
           ]
@@ -385,6 +403,14 @@ resource SpinozaBackendAccessorsQuestionAccessorContainerApp 'Microsoft.App/cont
                     triggerParameter: 'connection'
                  }
                 ]
+            }
+          }
+          {
+            name: 'http-rule'
+            http: {
+              metadata: {
+                concurrentRequests: '20'
+              }
             }
           }
           ]
@@ -474,6 +500,14 @@ resource SpinozaBackendAccessorsTagAccessorContainerApp 'Microsoft.App/container
                 ]
             }
           }
+          {
+            name: 'http-rule'
+            http: {
+              metadata: {
+                concurrentRequests: '20'
+              }
+            }
+          }
           ]
        }
     }
@@ -536,6 +570,16 @@ resource SpinozaBackendManagersCatalogManagerContainerApp 'Microsoft.App/contain
       scale: {
         minReplicas: minReplicas
         maxReplicas: maxReplicas
+        rules: [
+          {
+            name: 'http-rule'
+            http: {
+              metadata: {
+                concurrentRequests: '20'
+              }
+            }
+          }
+        ]
       }
     }
   }
