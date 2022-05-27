@@ -57,8 +57,8 @@ resource signalR 'Microsoft.SignalRService/signalR@2022-02-01' = {
             'ServerConnection'
           ]
         }
-      ]
-    }*/
+      ]*/
+    }
     /*
     upstream: {
       templates: [
