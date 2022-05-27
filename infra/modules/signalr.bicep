@@ -45,9 +45,12 @@ resource signalR 'Microsoft.SignalRService/signalR@2022-02-01' = {
       publicNetwork: {
         allow: [
           'ClientConnection'
+          'ServerConnection'
+          'RESTAPI'
+          'Trace'
         ]
       }
-      privateEndpoints: [
+      /*privateEndpoints: [
         {
           name: 'mySignalRService.1fa229cd-bf3f-47f0-8c49-afb36723997e'
           allow: [
@@ -55,7 +58,7 @@ resource signalR 'Microsoft.SignalRService/signalR@2022-02-01' = {
           ]
         }
       ]
-    }
+    }*/
     /*
     upstream: {
       templates: [
