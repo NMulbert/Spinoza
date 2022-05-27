@@ -9,7 +9,7 @@ param tags object = {}
 
 param location string = resourceGroup().location
 
-var spinozaBackendAccessorsTestAccessorImage = 'spinoza.backend.accessors.testaccessor:${branchName}}'
+var spinozaBackendAccessorsTestAccessorImage = 'spinoza.backend.accessors.testaccessor:${branchName}'
 var spinozaBackendAccessorsTestAccessorPort = 80
 var spinozaBackendAccessorsTestAccessorIsExternalIngress = false
 
