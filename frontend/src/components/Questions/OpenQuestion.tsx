@@ -47,7 +47,7 @@ function OpenQuestion() {
   });
 
   useEffect(() => {
-    let url = `http://localhost:50000/v1.0/invoke/catalogmanager/method/question/${id}`;
+    let url = `${process.env.REACT_APP_BACKEND_URI}/question/${id}`;
     fetch(url)
       .then((res) => res.json())
       .then((result) => {
@@ -297,8 +297,9 @@ function OpenQuestion() {
               onClick={async () => {
                 if (question.name.trim().length !== 0) {
                   try {
+                    let url = `${process.env.REACT_APP_BACKEND_URI}/question`;
                     const response = await axios.put(
-                      "http://localhost:50000/v1.0/invoke/catalogmanager/method/question",
+                      url,
                       JSON.stringify({
                         messageType: "UpdateQuestion",
                         ...question,

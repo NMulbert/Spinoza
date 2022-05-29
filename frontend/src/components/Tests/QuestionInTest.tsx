@@ -34,7 +34,6 @@ type QuestionData = {
 };
 
 function Preview({ question, removeQuestion, editMode }: QuestionData) {
-
   return (
     <div>
       <Card
@@ -51,7 +50,6 @@ function Preview({ question, removeQuestion, editMode }: QuestionData) {
           display: "inline-block",
         }}
       >
-        {console.log("hi")}
         {editMode ? (
           <ActionIcon
             color="red"
@@ -98,42 +96,6 @@ function Preview({ question, removeQuestion, editMode }: QuestionData) {
         ) : (
           <></>
         )}
-
-        {/* {questionTest.type === "MultipleChoiceQuestion" ? (
-        (questionTest.content.answerOptions.map(
-          (i: any) => (
-            i.isCorrect
-              ? setCorrectAnswers(correctAnswers + 1)
-              : console.log(""),
-            setAnswers([...answers, i])
-          )
-        ),
-        correctAnswers > 1
-          ? answers.map((e: any) => (
-              <Checkbox
-                key={e.description}
-                disabled
-                checked={e.isCorrect}
-                label={e.description}
-                value={e.description}
-                style={{ padding: 5 }}
-              />
-            ))
-          : answers.map((e: any) => (
-              <Radio
-                key={e.description}
-                disabled
-                checked={e.isCorrect}
-                label={e.description}
-                value={e.description}
-                style={{ padding: 5 }}
-              />
-            )))
-      ) : questionTest.type === "OpenTextQuestion" ? (
-        <></>
-      ) : (
-        <></>
-      )} */}
 
         <Button
           size="xs"

@@ -37,13 +37,13 @@ function AllQuestionsPage() {
 
   // Get limited quantity of tests
   useEffect(() => {
-    let url2 = `http://localhost:50000/v1.0/invoke/catalogmanager/method/allquestions?offset=${offset}&limit=${limit}`;
+    let url = `${process.env.REACT_APP_BACKEND_URI}/allquestions?offset=${offset}&limit=${limit}`;
     if (questionsTags.length > 0) {
       for (let tag of questionsTags) {
-        url2 = url2 + `&tag=${tag}`;
+        url = url + `&tag=${tag}`;
       }
     }
-    fetch(url2)
+    fetch(url)
       .then((res) => res.json())
       .then((result) => {
         dispatch(loadQuestions(result));
@@ -51,8 +51,7 @@ function AllQuestionsPage() {
   }, [offset, questionsTags]);
 
   useEffect(() => {
-    let url =
-      "http://localhost:50000/v1.0/invoke/catalogmanager/method/questions/count";
+    let url = `${process.env.REACT_APP_BACKEND_URI}/questions/count`;
     fetch(url)
       .then((res) => res.json())
       .then((result) => {

@@ -16,8 +16,7 @@ export const Notify = () => {
   var tags = useSelector((s: any) => s.tags.tags);
   const dispatch = useDispatch();
   const hubConnection = new signalR.HubConnectionBuilder()
-    // .withUrl("https://signalr-management.azurewebsites.net/api")
-    .withUrl("http://localhost:80/api")
+    .withUrl(`${process.env.REACT_APP_SIGNALR_NEGOTIATE_URI}`)
     .configureLogging(signalR.LogLevel.Information)
     .build();
 
@@ -40,9 +39,9 @@ export const Notify = () => {
     };
 
     const fetchTestById = async (id: string) => {
-      console.log(id, "im id");
+
       try {
-        let url = `http://localhost:50000/v1.0/invoke/catalogmanager/method/test/${id}`;
+        let url = `${process.env.REACT_APP_BACKEND_URI}/test/${id}`;
         let res = await fetch(url);
         return res.json();
       } catch (exception) {
@@ -52,9 +51,9 @@ export const Notify = () => {
     };
 
     const fetchQuestionById = async (id: string) => {
-      console.log(id, "im id");
+
       try {
-        let url = `http://localhost:50000/v1.0/invoke/catalogmanager/method/question/${id}`;
+        let url = `${process.env.REACT_APP_BACKEND_URI}/question/${id}`;
         let res = await fetch(url);
         return res.json();
       } catch (exception) {

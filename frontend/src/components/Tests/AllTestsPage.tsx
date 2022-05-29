@@ -38,13 +38,13 @@ function AllTestsPage() {
 
   // Get limited quantity of tests with option to get by specific tag.
   useEffect(() => {
-    let url2 = `http://localhost:50000/v1.0/invoke/catalogmanager/method/tests?offset=${offset}&limit=${limit}`;
+    let url = `${process.env.REACT_APP_BACKEND_URI}/tests?offset=${offset}&limit=${limit}`;
     if (testTags.length > 0) {
       for (let tag of testTags) {
-        url2 = url2 + `&tag=${tag}`;
+        url = url + `&tag=${tag}`;
       }
     }
-    fetch(url2)
+    fetch(url)
       .then((res) => res.json())
       .then((result) => {
         dispatch(loadTests(result));
@@ -52,8 +52,7 @@ function AllTestsPage() {
   }, [offset, testTags]);
 
   useEffect(() => {
-    let url =
-      "http://localhost:50000/v1.0/invoke/catalogmanager/method/tests/count";
+    let url = `${process.env.REACT_APP_BACKEND_URI}/tests/count`;
     fetch(url)
       .then((res) => res.json())
       .then((result) => {

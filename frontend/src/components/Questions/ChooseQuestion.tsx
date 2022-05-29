@@ -31,8 +31,7 @@ function ChooseQuestion({ UpdateQuestions, setOpenedEQ }: QuestionsState) {
   const [selectedQuestions, setSelectedQuestions] = useState([]);
   const [questions, setQuestions] = useState([]);
   useEffect(() => {
-    let url =
-      "http://localhost:50000/v1.0/invoke/catalogmanager/method/allquestions?";
+    let url = `${process.env.REACT_APP_BACKEND_URI}/allquestions`;
     if (questionsTags.length > 0) {
       for (let tag of questionsTags) {
         url = url + `tag=${tag}`;
