@@ -49,10 +49,6 @@ function ExistingQuestion({
           <Text size="xs" weight={700}>
             {question.authorId}
           </Text>
-          {/* <CalendarTime size={18} />
-          <Text size="xs" weight={700}>
-            Creation Date
-          </Text> */}
           <Stars size={18} />
           <Text size="xs" weight={700}>
             Difficulty: {question.difficultyLevel}

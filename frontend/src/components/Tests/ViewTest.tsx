@@ -24,6 +24,7 @@ interface TagsState {
 
 function ViewTest() {
   let { id } = useParams();
+  const [validateTitle, setValidateTitle] = useState("");
   let [questions, setQuestions] = useState([]);
   useEffect(() => {
     let url = `http://localhost:50000/v1.0/invoke/catalogmanager/method/testquestions/${id}`;
@@ -153,6 +154,7 @@ function ViewTest() {
 
           {editMode ? (
             <TextInput
+              error={validateTitle}
               style={{ width: "90%" }}
               value={test.title}
               onChange={(e) => {
@@ -297,16 +299,20 @@ function ViewTest() {
               variant="gradient"
               gradient={{ from: "#838685", to: "#cfd0d0" }}
               onClick={async () => {
-                try {
-                  const response = await axios.put(
-                    "http://localhost:50000/v1.0/invoke/catalogmanager/method/test",
-                    JSON.stringify({
-                      messageType: "UpdateTest",
-                      ...test,
-                    })
-                  );
-                } catch (err) {
-                  alert(err);
+                if (test.title.trim().length !== 0) {
+                  try {
+                    const response = await axios.put(
+                      "http://localhost:50000/v1.0/invoke/catalogmanager/method/test",
+                      JSON.stringify({
+                        messageType: "UpdateTest",
+                        ...test,
+                      })
+                    );
+                  } catch (err) {
+                    console.log(err);
+                  }
+                } else {
+                  setValidateTitle("Title is a required field");
                 }
               }}
             >
