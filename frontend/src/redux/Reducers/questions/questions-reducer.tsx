@@ -12,9 +12,12 @@ const reducerQuestions = (state: any, action: any) => {
         questions: action.questions,
       };
     case questionsTypes.UPDATE_QUESTION:
+      let allButUpdatedQuestion = state.questions.filter(
+        (el: any) => el.id !== action.question.id
+      );
       return {
         ...state,
-        question: action.question,
+        questions: [...allButUpdatedQuestion, action.question],
       };
     default:
       return state ?? {};

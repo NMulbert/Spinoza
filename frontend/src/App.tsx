@@ -15,7 +15,7 @@ import OpenQuestion from "./components/Questions/OpenQuestion";
 function App() {
   const dispatch = useDispatch();
   useEffect(() => {
-    let url = "http://localhost:50000/v1.0/invoke/catalogmanager/method/tags";
+    let url = `${process.env.REACT_APP_BACKEND_URI}/tags`;
     fetch(url)
       .then((res) => res.json())
       .then((result) => {

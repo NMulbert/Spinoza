@@ -101,7 +101,7 @@ const TestCard = ({
           </Button>
         </Link>
         <CopyToClipboard
-          text={`http://localhost:3000/tests/${id}`}
+          text={`${process.env.REACT_APP_WEBSITE_URI}/${id}`}
           onCopy={() => {
             setCopied(true);
             setTimeout(() => setCopied(false), 1000);

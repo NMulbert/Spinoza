@@ -103,7 +103,9 @@ question
         <Group style={{ color: "#444848" }} spacing="xs">
           <CalendarTime size={18} />
           <Text size="xs" weight={700}>
-            {question.lastUpdateCreationTimeUTC.slice(0, 19).replace("T", " | ")}
+            {question.lastUpdateCreationTimeUTC
+              .slice(0, 19)
+              .replace("T", " | ")}
           </Text>
         </Group>
 
@@ -130,7 +132,7 @@ question
           </Link>
 
           <CopyToClipboard
-            text={`http://localhost:3000/questions/${question.id}`}
+            text={`${process.env.REACT_APP_WEBSITE_URI}/questions/${question.id}`}
             onCopy={() => {
               setCopied(true);
               setTimeout(() => setCopied(false), 1000);

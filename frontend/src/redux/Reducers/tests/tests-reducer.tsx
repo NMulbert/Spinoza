@@ -12,9 +12,12 @@ const reducerTests = (state: any, action: any) => {
         tests: action.tests,
       };
     case testsTypes.UPDATE_TEST:
+      let allButUpdatedTest = state.tests.filter(
+        (el: any) => el.id !== action.test.id
+      );
       return {
         ...state,
-        test: action.test,
+        tests: [...allButUpdatedTest, action.test],
       };
     default:
       return state ?? {};

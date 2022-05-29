@@ -27,7 +27,7 @@ function ViewTest() {
   const [validateTitle, setValidateTitle] = useState("");
   let [questions, setQuestions] = useState([]);
   useEffect(() => {
-    let url = `http://localhost:50000/v1.0/invoke/catalogmanager/method/testquestions/${id}`;
+    let url = `${process.env.REACT_APP_BACKEND_URI}/testquestions/${id}`;
     fetch(url)
       .then((res) => res.json())
       .then((result) => {
@@ -46,13 +46,12 @@ function ViewTest() {
   });
 
   useEffect(() => {
-    let url = `http://localhost:50000/v1.0/invoke/catalogmanager/method/test/${id}`;
+    let url = `${process.env.REACT_APP_BACKEND_URI}/test/${id}`;
     fetch(url)
       .then((res) => res.json())
       .then((result) => {
         setTest({ ...result, questions: [...questions] });
-      })
-      .then(() => console.log([...questions]));
+      });
   }, []);
 
   const [editMode, setEditMode] = useState(false);
@@ -212,25 +211,22 @@ function ViewTest() {
             Tags:
           </Title>
           {editMode ? (
-            (console.log(tags),
-            (
-              <MultiSelect
-                data={[...tags, ...dataHash]}
-                style={{ width: "90%", textAlign: "left" }}
-                placeholder="#Tags"
-                radius="xs"
-                searchable
-                creatable
-                getCreateLabel={(query) => `+ Create ${query}`}
-                onCreate={(query) =>
-                  setHashData((current: any) => [...current, query])
-                }
-                value={test.tags}
-                onChange={(e: any) => {
-                  setTest({ ...test, tags: e });
-                }}
-              />
-            ))
+            <MultiSelect
+              data={[...tags, ...dataHash]}
+              style={{ width: "90%", textAlign: "left" }}
+              placeholder="#Tags"
+              radius="xs"
+              searchable
+              creatable
+              getCreateLabel={(query) => `+ Create ${query}`}
+              onCreate={(query) =>
+                setHashData((current: any) => [...current, query])
+              }
+              value={test.tags}
+              onChange={(e: any) => {
+                setTest({ ...test, tags: e });
+              }}
+            />
           ) : (
             <Group spacing="xs">
               {test.tags?.map((i: any) => {
@@ -278,20 +274,18 @@ function ViewTest() {
           <></>
         )}
 
-        {questions.length > 0
-          ? questions.map((question: any) => {
-              console.log(question);
-              return (
-                <Grid.Col md={12} key={question.id}>
-                  <QuestionInTest
-                    removeQuestion={removeQuestion}
-                    question={question}
-                    editMode={editMode}
-                  />
-                </Grid.Col>
-              );
-            })
-          : console.log(questions)}
+        {questions.length > 0 &&
+          questions.map((question: any) => {
+            return (
+              <Grid.Col md={12} key={question.id}>
+                <QuestionInTest
+                  removeQuestion={removeQuestion}
+                  question={question}
+                  editMode={editMode}
+                />
+              </Grid.Col>
+            );
+          })}
         <Grid.Col span={12}>
           <Group spacing="sm">
             <Button
@@ -301,8 +295,10 @@ function ViewTest() {
               onClick={async () => {
                 if (test.title.trim().length !== 0) {
                   try {
+                    let url = `${process.env.REACT_APP_BACKEND_URI}/test`;
+
                     const response = await axios.put(
-                      "http://localhost:50000/v1.0/invoke/catalogmanager/method/test",
+                      url,
                       JSON.stringify({
                         messageType: "UpdateTest",
                         ...test,

@@ -95,8 +95,9 @@ function CreateTest() {
               onClick={async () => {
                 if (testValues.title.trim().length !== 0) {
                   try {
+                    let url = `${process.env.REACT_APP_BACKEND_URI}/test`;
                     const response = await axios.post(
-                      "http://localhost:50000/v1.0/invoke/catalogmanager/method/test",
+                      url,
                       JSON.stringify({ ...testValues })
                     );
                     setTestsValues({

@@ -80,7 +80,6 @@ function ExistingQuestion({
         <Space h="md" />
         <Button
           onClick={() => {
-            console.log(selectedQuestions);
             setSelected(!selected);
             selected
               ? setSelectedQuestions(

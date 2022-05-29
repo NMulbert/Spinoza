@@ -163,8 +163,9 @@ function NewQuestion({ UpdateQuestions, setOpenedNQ }: any) {
               onClick={async () => {
                 if (questionValues.name.trim().length !== 0) {
                   try {
+                    let url = `${process.env.REACT_APP_BACKEND_URI}/question`;
                     const response = await axios.post(
-                      "http://localhost:50000/v1.0/invoke/catalogmanager/method/question",
+                      url,
                       JSON.stringify({ ...questionValues })
                     );
                     setQuestionValues({
