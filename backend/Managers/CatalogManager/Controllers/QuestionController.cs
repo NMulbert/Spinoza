@@ -186,7 +186,19 @@ namespace CatalogManager.Controllers
         {
             try
             {
-                var dbTotalQuestions = await _daprClient.InvokeMethodAsync<int>(HttpMethod.Get, "questionaccessor", "/questions/count");
+                var queryTags = Request.Query["tag"];
+                var tags = (queryTags.Any()
+                    ? "?tags=" + queryTags.Aggregate(new StringBuilder(), (sb, t) => sb.Append($"'{t}',"),
+                        sb =>
+                        {
+                            sb.Length--;
+                            return sb.ToString();
+                        }) : string.Empty);
+                
+                var methodName = $"questionaccessor/questions/count{tags}";
+                _logger.LogInformation($"GetTotalQuestionCount: calling method : {methodName}");
+                
+                var dbTotalQuestions = await _daprClient.InvokeMethodAsync<int>(HttpMethod.Get, "questionaccessor", $"/questions/count{tags}");
                 _logger.LogInformation($"GetTotalQuestionCount: accessor returns {dbTotalQuestions}");
                 return new OkObjectResult(dbTotalQuestions);
             }

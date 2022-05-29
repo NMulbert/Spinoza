@@ -284,15 +284,32 @@ namespace Spinoza.Backend.Accessor.QuestionCatalog.Controllers
         [HttpGet("/questions/count")]
         public async Task<IActionResult> GetTotalQuestionCount()
         {
+            var tags = Request.Query["tags"].ToString();
+            _logger.LogInformation($"the tags are: {tags}");
+            
             try
             {
-                int? dbTotalQuestions = await _cosmosDBWrapper.GetScalarCosmosQueryResult<int?>(new QueryDefinition("SELECT VALUE COUNT(1) FROM c"));
-                if (dbTotalQuestions == null)
+               
+                if (string.IsNullOrEmpty(tags))
                 {
+                    var dbTotalQuestionsCount =
+                        await _cosmosDBWrapper.GetScalarCosmosQueryResult<int>(
+                            new QueryDefinition($"SELECT VALUE COUNT(1) FROM c"));
+                    return new OkObjectResult(dbTotalQuestionsCount);
+                }
+                //else
+                var totalQuestionsByTags = await _cosmosDBWrapper.GetScalarCosmosQueryResult<JsonNode>(new QueryDefinition
+                    ($"SELECT DISTINCT COUNT(1) question FROM question JOIN tag IN question.tags WHERE tag IN ({tags})")
+                );
+                if (totalQuestionsByTags == null)
+                {
+                    _logger.LogWarning("GetTotalQuestionCount : No Questions found");
                     return new NotFoundObjectResult("No Questions found");
                 }
                 //else
-                return new OkObjectResult(dbTotalQuestions);
+                _logger.LogInformation(totalQuestionsByTags.ToJsonString());
+                 int count = totalQuestionsByTags["question"]!.GetValue<int>();
+                return new OkObjectResult(count);
 
             }
             catch (Exception ex)
