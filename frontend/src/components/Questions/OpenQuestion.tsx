@@ -10,7 +10,7 @@ import {
   Radio,
   SegmentedControl,
   RadioGroup,
-  Modal
+  Modal,
 } from "@mantine/core";
 import { CalendarTime, Edit, UserCircle } from "tabler-icons-react";
 import NewQuestion from "../Questions/NewQuestion";
@@ -29,10 +29,7 @@ function OpenQuestion() {
   const [answerType, setAnswerType] = useState("");
   const [questionTxt, setQuestionTxt] = useState("");
   const [multiArr, setMultiArr] = useState([]);
-  const [checkboxMode, setCheckboxMode] = useState(false);
-    const [correctAnswers, setCorrectAnswers] = useState(false);
-
-
+  const [validateName, setValidateName] = useState("");
 
   let protoType: any =
     answerType === "OpenTextQuestion"
@@ -106,6 +103,7 @@ function OpenQuestion() {
           {editMode ? (
             <TextInput
               style={{ width: "90%" }}
+              error={validateName}
               value={question.name}
               onChange={(e) => {
                 setQuestion({ ...question, name: e.target.value });
@@ -297,16 +295,20 @@ function OpenQuestion() {
               variant="gradient"
               gradient={{ from: "#838685", to: "#cfd0d0" }}
               onClick={async () => {
-                try {
-                  const response = await axios.put(
-                    "http://localhost:50000/v1.0/invoke/catalogmanager/method/question",
-                    JSON.stringify({
-                      messageType: "UpdateQuestion",
-                      ...question,
-                    })
-                  );
-                } catch (err) {
-                  alert(err);
+                if (question.name.trim().length !== 0) {
+                  try {
+                    const response = await axios.put(
+                      "http://localhost:50000/v1.0/invoke/catalogmanager/method/question",
+                      JSON.stringify({
+                        messageType: "UpdateQuestion",
+                        ...question,
+                      })
+                    );
+                  } catch (err) {
+                    alert(err);
+                  }
+                } else {
+                  setValidateName("Question name is a required field");
                 }
               }}
             >

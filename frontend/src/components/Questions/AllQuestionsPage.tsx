@@ -1,19 +1,36 @@
 import React, { useState, useEffect } from "react";
-import { Modal, Grid, Card, Text, Loader, Button, Center, Pagination } from "@mantine/core";
+import {
+  Modal,
+  Grid,
+  Card,
+  Text,
+  Loader,
+  Button,
+  Center,
+  Pagination,
+  MultiSelect,
+} from "@mantine/core";
 import QuestionCard from "../Questions/QuestionCard";
 import NewQuestion from "./NewQuestion";
 import { useDispatch, useSelector } from "react-redux";
 import { loadQuestions } from "../../redux/Reducers/questions/questions-actions";
-import { Writing } from "tabler-icons-react";
+import { Hash, Writing } from "tabler-icons-react";
 interface QuestionsState {
   questions: { questions: [] };
 }
 
+interface TagsState {
+  tags: { tags: [] };
+}
+
 function AllQuestionsPage() {
+  let tags = useSelector((s: TagsState) => s.tags.tags);
+  let tagsData = tags || [];
   // Pagination
   const [limit] = useState(11);
   const [offset, setOffset] = useState(0);
   const [pageCount, setPageCount] = useState(0);
+  const [questionsTags, setQuestionsTags] = useState<string[]>([]);
 
   const dispatch = useDispatch();
   let questions = useSelector((s: QuestionsState) => s.questions.questions);
@@ -21,12 +38,17 @@ function AllQuestionsPage() {
   // Get limited quantity of tests
   useEffect(() => {
     let url2 = `http://localhost:50000/v1.0/invoke/catalogmanager/method/allquestions?offset=${offset}&limit=${limit}`;
+    if (questionsTags.length > 0) {
+      for (let tag of questionsTags) {
+        url2 = url2 + `&tag=${tag}`;
+      }
+    }
     fetch(url2)
       .then((res) => res.json())
       .then((result) => {
         dispatch(loadQuestions(result));
       });
-  }, [offset]);
+  }, [offset, questionsTags]);
 
   useEffect(() => {
     let url =
@@ -63,6 +85,32 @@ function AllQuestionsPage() {
         {<NewQuestion UpdateQuestions={null} setOpenedNQ={setOpenedNQ} />}
       </Modal>
       <Grid>
+        <Grid.Col span={12}>
+          <MultiSelect
+            size="lg"
+            data={tagsData}
+            placeholder="Select tags"
+            icon={<Hash />}
+            radius="xl"
+            style={{ width: "97%" }}
+            styles={{
+              value: {
+                backgroundColor: "#EEFAEF",
+                color: "#48B440",
+                fontWeight: "700",
+              },
+              defaultValueRemove: { color: "#48B440" },
+            }}
+            searchable
+            limit={20}
+            nothingFound="Nothing found"
+            clearButtonLabel="Clear selection"
+            clearable
+            value={questionsTags}
+            onChange={setQuestionsTags}
+            maxDropdownHeight={100}
+          />
+        </Grid.Col>
         <Grid.Col md={6} lg={6} xl={3}>
           <Card
             withBorder
