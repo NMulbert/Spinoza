@@ -390,5 +390,681 @@ namespace Spinoza.Backend.Managers.TestCatalog.Tests
             Assert.Equal(3, savedQuestion.Content.AnswerOptions.Length);
         }
 
+        [Fact]
+        public async Task TestMissingOpenTextQuestionId()
+        {
+            var openTextQuestion = new OpenTextQuestion
+            {
+                AuthorId = "question@question.com",
+                Content = $"This is an open text question - {DateTimeOffset.UtcNow}",
+                DifficultyLevel = "5",
+                Name = "Q" + DateTimeOffset.UtcNow,
+                PreviousVersionId = "F317129A-FFFF-4772-3344-A166C5808998",
+                QuestionVersion = "1.0",
+                SchemaVersion = "1.0",
+                Tags = new[] { "tag4", "tag5", "tag6" },
+                Type = "OpenTextQuestion"
+            };
+
+            var serializeOptions = new JsonSerializerOptions
+            {
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                WriteIndented = true
+            };
+
+            var json = JsonSerializer.Serialize(openTextQuestion, serializeOptions);
+            var data = new StringContent(json, Encoding.UTF8, "application/json");
+
+            var response = await _httpClient.PostAsync("question", data);
+            Assert.NotNull(response);
+            Assert.Equal(400, (int)response.StatusCode);
+            string result = await response.Content.ReadAsStringAsync();
+            Assert.Equal("Errors: \nthe Id is missing", result);
+        }
+
+        [Fact]
+        public async Task TestMissingOpenTextAuthorId()
+        {
+            var openTextQuestion = new OpenTextQuestion
+            {
+                Content = $"This is an open text question - {DateTimeOffset.UtcNow}",
+                DifficultyLevel = "5",
+                Name = "Q" + DateTimeOffset.UtcNow,
+                PreviousVersionId = "F317129A-FFFF-4772-3344-A166C5808998",
+                QuestionVersion = "1.0",
+                Id = Guid.NewGuid().ToString().ToUpper(),
+                SchemaVersion = "1.0",
+                Tags = new[] { "tag4", "tag5", "tag6" },
+                Type = "OpenTextQuestion"
+            };
+
+            var serializeOptions = new JsonSerializerOptions
+            {
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                WriteIndented = true
+            };
+
+            var json = JsonSerializer.Serialize(openTextQuestion, serializeOptions);
+            var data = new StringContent(json, Encoding.UTF8, "application/json");
+
+            var response = await _httpClient.PostAsync("question", data);
+            Assert.NotNull(response);
+            Assert.Equal(400, (int)response.StatusCode);
+            string result = await response.Content.ReadAsStringAsync();
+            Assert.Equal("Errors: \nThe Author Id is missing", result);
+        }
+
+
+        [Fact]
+        public async Task TestMissingOpenTextContent()
+        {
+            var openTextQuestion = new OpenTextQuestion
+            {
+                AuthorId = "question@question.com",
+                DifficultyLevel = "5",
+                Name = "Q" + DateTimeOffset.UtcNow,
+                PreviousVersionId = "F317129A-FFFF-4772-3344-A166C5808998",
+                QuestionVersion = "1.0",
+                Id = Guid.NewGuid().ToString().ToUpper(),
+                SchemaVersion = "1.0",
+                Tags = new[] { "tag4", "tag5", "tag6" },
+                Type = "OpenTextQuestion"
+            };
+
+            var serializeOptions = new JsonSerializerOptions
+            {
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                WriteIndented = true
+            };
+
+            var json = JsonSerializer.Serialize(openTextQuestion, serializeOptions);
+            var data = new StringContent(json, Encoding.UTF8, "application/json");
+
+            var response = await _httpClient.PostAsync("question", data);
+            Assert.NotNull(response);
+            Assert.Equal(400, (int)response.StatusCode);
+            string result = await response.Content.ReadAsStringAsync();
+            Assert.Equal("Errors: \nPlease write your question content", result);
+        }
+
+        [Fact]
+        public async Task TestMissingOpenTextMissingDifficultyLevel()
+        {
+            var openTextQuestion = new OpenTextQuestion
+            {
+                AuthorId = "question@question.com",
+                Content = $"This is an open text question - {DateTimeOffset.UtcNow}",
+                Name = "Q" + DateTimeOffset.UtcNow,
+                PreviousVersionId = "F317129A-FFFF-4772-3344-A166C5808998",
+                QuestionVersion = "1.0",
+                Id = Guid.NewGuid().ToString().ToUpper(),
+                SchemaVersion = "1.0",
+                Tags = new[] { "tag4", "tag5", "tag6" },
+                Type = "OpenTextQuestion"
+            };
+
+            var serializeOptions = new JsonSerializerOptions
+            {
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                WriteIndented = true
+            };
+
+            var json = JsonSerializer.Serialize(openTextQuestion, serializeOptions);
+            var data = new StringContent(json, Encoding.UTF8, "application/json");
+
+            var response = await _httpClient.PostAsync("question", data);
+            Assert.NotNull(response);
+            Assert.Equal(400, (int)response.StatusCode);
+            string result = await response.Content.ReadAsStringAsync();
+            Assert.Equal("Errors: \nPlease enter question difficulty", result);
+        }
+
+        [Fact]
+        public async Task TestMissingOpenTextDifficultyLevelOutOfRange()
+        {
+            var openTextQuestion = new OpenTextQuestion
+            {
+                AuthorId = "question@question.com",
+                Content = $"This is an open text question - {DateTimeOffset.UtcNow}",
+                DifficultyLevel = "6",
+                Name = "Q" + DateTimeOffset.UtcNow,
+                PreviousVersionId = "F317129A-FFFF-4772-3344-A166C5808998",
+                QuestionVersion = "1.0",
+                Id = Guid.NewGuid().ToString().ToUpper(),
+                SchemaVersion = "1.0",
+                Tags = new[] { "tag4", "tag5", "tag6" },
+                Type = "OpenTextQuestion"
+            };
+
+            var serializeOptions = new JsonSerializerOptions
+            {
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                WriteIndented = true
+            };
+
+            var json = JsonSerializer.Serialize(openTextQuestion, serializeOptions);
+            var data = new StringContent(json, Encoding.UTF8, "application/json");
+
+            var response = await _httpClient.PostAsync("question", data);
+            Assert.NotNull(response);
+            Assert.Equal(400, (int)response.StatusCode);
+            string result = await response.Content.ReadAsStringAsync();
+            Assert.Equal("Errors: \nPlease enter question difficulty btewwen 1-5", result);
+        }
+
+        [Fact]
+        public async Task TestOpenTextMissingQuestionName()
+        {
+            var openTextQuestion = new OpenTextQuestion
+            {
+                AuthorId = "question@question.com",
+                Content = $"This is an open text question - {DateTimeOffset.UtcNow}",
+                DifficultyLevel = "5",
+                PreviousVersionId = "F317129A-FFFF-4772-3344-A166C5808998",
+                QuestionVersion = "1.0",
+                Id = Guid.NewGuid().ToString().ToUpper(),
+                SchemaVersion = "1.0",
+                Tags = new[] { "tag4", "tag5", "tag6" },
+                Type = "OpenTextQuestion"
+            };
+
+            var serializeOptions = new JsonSerializerOptions
+            {
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                WriteIndented = true
+            };
+
+            var json = JsonSerializer.Serialize(openTextQuestion, serializeOptions);
+            var data = new StringContent(json, Encoding.UTF8, "application/json");
+
+            var response = await _httpClient.PostAsync("question", data);
+            Assert.NotNull(response);
+            Assert.Equal(400, (int)response.StatusCode);
+            string result = await response.Content.ReadAsStringAsync();
+            Assert.Equal("Errors: \nThe question name is missing", result);
+        }
+        [Fact]
+        public async Task TestOpenTextToShortQuestionName()
+        {
+            var openTextQuestion = new OpenTextQuestion
+            {
+                AuthorId = "question@question.com",
+                Content = $"This is an open text question - {DateTimeOffset.UtcNow}",
+                DifficultyLevel = "5",
+                Name = "Q",
+                PreviousVersionId = "F317129A-FFFF-4772-3344-A166C5808998",
+                QuestionVersion = "1.0",
+                Id = Guid.NewGuid().ToString().ToUpper(),
+                SchemaVersion = "1.0",
+                Tags = new[] { "tag4", "tag5", "tag6" },
+                Type = "OpenTextQuestion"
+            };
+
+            var serializeOptions = new JsonSerializerOptions
+            {
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                WriteIndented = true
+            };
+
+            var json = JsonSerializer.Serialize(openTextQuestion, serializeOptions);
+            var data = new StringContent(json, Encoding.UTF8, "application/json");
+
+            var response = await _httpClient.PostAsync("question", data);
+            Assert.NotNull(response);
+            Assert.Equal(400, (int)response.StatusCode);
+            string result = await response.Content.ReadAsStringAsync();
+            Assert.Equal("Errors: \nThe title is less than 3 characters", result);
+        }
+
+        [Fact]
+        public async Task TestOpenTextToLongQuestionName()
+        {
+            var openTextQuestion = new OpenTextQuestion
+            {
+                AuthorId = "question@question.com",
+                Content = $"This is an open text question - {DateTimeOffset.UtcNow}",
+                DifficultyLevel = "5",
+                Name = "abcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghij",
+                PreviousVersionId = "F317129A-FFFF-4772-3344-A166C5808998",
+                QuestionVersion = "1.0",
+                Id = Guid.NewGuid().ToString().ToUpper(),
+                SchemaVersion = "1.0",
+                Tags = new[] { "tag4", "tag5", "tag6" },
+                Type = "OpenTextQuestion"
+            };
+
+            var serializeOptions = new JsonSerializerOptions
+            {
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                WriteIndented = true
+            };
+
+            var json = JsonSerializer.Serialize(openTextQuestion, serializeOptions);
+            var data = new StringContent(json, Encoding.UTF8, "application/json");
+
+            var response = await _httpClient.PostAsync("question", data);
+            Assert.NotNull(response);
+            Assert.Equal(400, (int)response.StatusCode);
+            string result = await response.Content.ReadAsStringAsync();
+            Assert.Equal("Errors: \nThe title is  bigger than 100 characters", result);
+        }
+
+        [Fact]
+        public async Task TestMissingMultipleChoiceQuestionAuthorId()
+        {
+            var openTextQuestion = new MultipleChoiceQuestion
+            {
+                DifficultyLevel = "5",
+                Name = "Q" + DateTimeOffset.UtcNow,
+                PreviousVersionId = "F317129A-FFFF-4772-3344-A166C5808998",
+                QuestionVersion = "1.0",
+                Id = Guid.NewGuid().ToString().ToUpper(),
+                SchemaVersion = "1.0",
+                Tags = new[] { "tag4", "tag5", "tag6" },
+                Type = "MultipleChoiceQuestion",
+                Content = new Content
+                {
+                    QuestionText = $"This is a question - {DateTimeOffset.UtcNow}",
+                    AnswerOptions = new[]
+                    {
+                        new AnswerOption
+                        {
+                            Description = "Option 1",
+                            IsCorrect = false
+                        },
+                        new AnswerOption
+                        {
+                            Description = "Option 2",
+                            IsCorrect = true
+                        },
+                        new AnswerOption
+                        {
+                            Description = "Option 3",
+                            IsCorrect = false
+                        }
+                    }
+                }
+            };
+
+            var serializeOptions = new JsonSerializerOptions
+            {
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                WriteIndented = true
+            };
+
+            var json = JsonSerializer.Serialize(openTextQuestion, serializeOptions);
+            var data = new StringContent(json, Encoding.UTF8, "application/json");
+
+            var response = await _httpClient.PostAsync("question", data);
+            Assert.NotNull(response);
+            Assert.Equal(400, (int)response.StatusCode);
+            string result = await response.Content.ReadAsStringAsync();
+            Assert.Equal("Errors: \nThe Author Id is missing", result);
+        }
+
+        [Fact]
+        public async Task TestMissingMultipleChoiceQuestionId()
+        {
+            var openTextQuestion = new MultipleChoiceQuestion
+            {
+                AuthorId = "question@question.com",
+                DifficultyLevel = "5",
+                Name = "Q" + DateTimeOffset.UtcNow,
+                PreviousVersionId = "F317129A-FFFF-4772-3344-A166C5808998",
+                QuestionVersion = "1.0",
+                SchemaVersion = "1.0",
+                Tags = new[] { "tag4", "tag5", "tag6" },
+                Type = "MultipleChoiceQuestion",
+                Content = new Content
+                {
+                    QuestionText = $"This is a question - {DateTimeOffset.UtcNow}",
+                    AnswerOptions = new[]
+                    {
+                        new AnswerOption
+                        {
+                            Description = "Option 1",
+                            IsCorrect = false
+                        },
+                        new AnswerOption
+                        {
+                            Description = "Option 2",
+                            IsCorrect = true
+                        },
+                        new AnswerOption
+                        {
+                            Description = "Option 3",
+                            IsCorrect = false
+                        }
+                    }
+                }
+            };
+
+            var serializeOptions = new JsonSerializerOptions
+            {
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                WriteIndented = true
+            };
+
+            var json = JsonSerializer.Serialize(openTextQuestion, serializeOptions);
+            var data = new StringContent(json, Encoding.UTF8, "application/json");
+
+            var response = await _httpClient.PostAsync("question", data);
+            Assert.NotNull(response);
+            Assert.Equal(400, (int)response.StatusCode);
+            string result = await response.Content.ReadAsStringAsync();
+            Assert.Equal("Errors: \nthe Id is missing", result);
+        }
+
+        [Fact]
+        public async Task TestMissingMultipleChoiceQuestionQuestionText()
+        {
+            var openTextQuestion = new MultipleChoiceQuestion
+            {
+                AuthorId = "question@question.com",
+                DifficultyLevel = "5",
+                Name = "Q" + DateTimeOffset.UtcNow,
+                PreviousVersionId = "F317129A-FFFF-4772-3344-A166C5808998",
+                QuestionVersion = "1.0",
+                Id = Guid.NewGuid().ToString().ToUpper(),
+                SchemaVersion = "1.0",
+                Tags = new[] { "tag4", "tag5", "tag6" },
+                Type = "MultipleChoiceQuestion",
+                Content = new Content
+                {
+                    AnswerOptions = new[]
+                    {
+                        new AnswerOption
+                        {
+                            Description = "Option 1",
+                            IsCorrect = false
+                        },
+                        new AnswerOption
+                        {
+                            Description = "Option 2",
+                            IsCorrect = true
+                        },
+                        new AnswerOption
+                        {
+                            Description = "Option 3",
+                            IsCorrect = false
+                        }
+                    }
+                }
+            };
+
+            var serializeOptions = new JsonSerializerOptions
+            {
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                WriteIndented = true
+            };
+
+            var json = JsonSerializer.Serialize(openTextQuestion, serializeOptions);
+            var data = new StringContent(json, Encoding.UTF8, "application/json");
+
+            var response = await _httpClient.PostAsync("question", data);
+            Assert.NotNull(response);
+            Assert.Equal(400, (int)response.StatusCode);
+            string result = await response.Content.ReadAsStringAsync();
+            Assert.Equal("Errors: \nPlease write your question", result);
+        }
+
+        [Fact]
+        public async Task TestMultipleChoiceQuestionLessThanTwoQuestionsOptions()
+        {
+            var openTextQuestion = new MultipleChoiceQuestion
+            {
+                AuthorId = "question@question.com",
+                DifficultyLevel = "5",
+                Name = "Q" + DateTimeOffset.UtcNow,
+                PreviousVersionId = "F317129A-FFFF-4772-3344-A166C5808998",
+                QuestionVersion = "1.0",
+                Id = Guid.NewGuid().ToString().ToUpper(),
+                SchemaVersion = "1.0",
+                Tags = new[] { "tag4", "tag5", "tag6" },
+                Type = "MultipleChoiceQuestion",
+                Content = new Content
+                {
+                    QuestionText = $"This is a question - {DateTimeOffset.UtcNow}",
+                    AnswerOptions = new[]
+                    {
+                        new AnswerOption
+                        {
+                            Description = "Option 1",
+                            IsCorrect = false
+                        }
+                    }
+                }
+            };
+
+            var serializeOptions = new JsonSerializerOptions
+            {
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                WriteIndented = true
+            };
+
+            var json = JsonSerializer.Serialize(openTextQuestion, serializeOptions);
+            var data = new StringContent(json, Encoding.UTF8, "application/json");
+
+            var response = await _httpClient.PostAsync("question", data);
+            Assert.NotNull(response);
+            Assert.Equal(400, (int)response.StatusCode);
+            string result = await response.Content.ReadAsStringAsync();
+            Assert.Equal("Errors: \nPlease enter more than one option answer", result);
+        }
+
+        [Fact]
+        public async Task TestMultipleChoiceQuestionAtLeastOneTrueAnswer()
+        {
+            var openTextQuestion = new MultipleChoiceQuestion
+            {
+                AuthorId = "question@question.com",
+                DifficultyLevel = "5",
+                Name = "Q" + DateTimeOffset.UtcNow,
+                PreviousVersionId = "F317129A-FFFF-4772-3344-A166C5808998",
+                QuestionVersion = "1.0",
+                Id = Guid.NewGuid().ToString().ToUpper(),
+                SchemaVersion = "1.0",
+                Tags = new[] { "tag4", "tag5", "tag6" },
+                Type = "MultipleChoiceQuestion",
+                Content = new Content
+                {
+                    QuestionText = $"This is a question - {DateTimeOffset.UtcNow}",
+                    AnswerOptions = new[]
+                    {
+                        new AnswerOption
+                        {
+                            Description = "Option 1",
+                            IsCorrect = false
+                        },
+                        new AnswerOption
+                        {
+                            Description = "Option 2",
+                            IsCorrect = false
+                        },
+                        new AnswerOption
+                        {
+                            Description = "Option 3",
+                            IsCorrect = false
+                        }
+                    }
+                }
+            };
+
+            var serializeOptions = new JsonSerializerOptions
+            {
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                WriteIndented = true
+            };
+
+            var json = JsonSerializer.Serialize(openTextQuestion, serializeOptions);
+            var data = new StringContent(json, Encoding.UTF8, "application/json");
+
+            var response = await _httpClient.PostAsync("question", data);
+            Assert.NotNull(response);
+            Assert.Equal(400, (int)response.StatusCode);
+            string result = await response.Content.ReadAsStringAsync();
+            Assert.Equal("Errors: \nthere is no correct answers please correct you multipalcechoise question", result);
+        }
+
+        [Fact]
+        public async Task TestMissingMultipleChoiceQuestionName()
+        {
+            var openTextQuestion = new MultipleChoiceQuestion
+            {
+                AuthorId = "question@question.com",
+                DifficultyLevel = "5",
+                PreviousVersionId = "F317129A-FFFF-4772-3344-A166C5808998",
+                QuestionVersion = "1.0",
+                Id = Guid.NewGuid().ToString().ToUpper(),
+                SchemaVersion = "1.0",
+                Tags = new[] { "tag4", "tag5", "tag6" },
+                Type = "MultipleChoiceQuestion",
+                Content = new Content
+                {
+                    QuestionText = $"This is a question - {DateTimeOffset.UtcNow}",
+                    AnswerOptions = new[]
+                    {
+                        new AnswerOption
+                        {
+                            Description = "Option 1",
+                            IsCorrect = true
+                        },
+                        new AnswerOption
+                        {
+                            Description = "Option 2",
+                            IsCorrect = false
+                        },
+                        new AnswerOption
+                        {
+                            Description = "Option 3",
+                            IsCorrect = false
+                        }
+                    }
+                }
+            };
+
+            var serializeOptions = new JsonSerializerOptions
+            {
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                WriteIndented = true
+            };
+
+            var json = JsonSerializer.Serialize(openTextQuestion, serializeOptions);
+            var data = new StringContent(json, Encoding.UTF8, "application/json");
+
+            var response = await _httpClient.PostAsync("question", data);
+            Assert.NotNull(response);
+            Assert.Equal(400, (int)response.StatusCode);
+            string result = await response.Content.ReadAsStringAsync();
+            Assert.Equal("Errors: \nThe question name is missing", result);
+        }
+
+        [Fact]
+        public async Task TestMultipleChoiceQuestionToShortName()
+        {
+            var openTextQuestion = new MultipleChoiceQuestion
+            {
+                AuthorId = "question@question.com",
+                DifficultyLevel = "5",
+                Name = "Q",
+                PreviousVersionId = "F317129A-FFFF-4772-3344-A166C5808998",
+                QuestionVersion = "1.0",
+                Id = Guid.NewGuid().ToString().ToUpper(),
+                SchemaVersion = "1.0",
+                Tags = new[] { "tag4", "tag5", "tag6" },
+                Type = "MultipleChoiceQuestion",
+                Content = new Content
+                {
+                    QuestionText = $"This is a question - {DateTimeOffset.UtcNow}",
+                    AnswerOptions = new[]
+                    {
+                        new AnswerOption
+                        {
+                            Description = "Option 1",
+                            IsCorrect = true
+                        },
+                        new AnswerOption
+                        {
+                            Description = "Option 2",
+                            IsCorrect = false
+                        },
+                        new AnswerOption
+                        {
+                            Description = "Option 3",
+                            IsCorrect = false
+                        }
+                    }
+                }
+            };
+
+            var serializeOptions = new JsonSerializerOptions
+            {
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                WriteIndented = true
+            };
+
+            var json = JsonSerializer.Serialize(openTextQuestion, serializeOptions);
+            var data = new StringContent(json, Encoding.UTF8, "application/json");
+
+            var response = await _httpClient.PostAsync("question", data);
+            Assert.NotNull(response);
+            Assert.Equal(400, (int)response.StatusCode);
+            string result = await response.Content.ReadAsStringAsync();
+            Assert.Equal("Errors: \nThe title is less than 3 characters", result);
+        }
+
+        [Fact]
+        public async Task TestMultipleChoiceQuestionToLongName()
+        {
+            var openTextQuestion = new MultipleChoiceQuestion
+            {
+                AuthorId = "question@question.com",
+                DifficultyLevel = "5",
+                Name = "abcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcd",
+                PreviousVersionId = "F317129A-FFFF-4772-3344-A166C5808998",
+                QuestionVersion = "1.0",
+                Id = Guid.NewGuid().ToString().ToUpper(),
+                SchemaVersion = "1.0",
+                Tags = new[] { "tag4", "tag5", "tag6" },
+                Type = "MultipleChoiceQuestion",
+                Content = new Content
+                {
+                    QuestionText = $"This is a question - {DateTimeOffset.UtcNow}",
+                    AnswerOptions = new[]
+                    {
+                        new AnswerOption
+                        {
+                            Description = "Option 1",
+                            IsCorrect = true
+                        },
+                        new AnswerOption
+                        {
+                            Description = "Option 2",
+                            IsCorrect = false
+                        },
+                        new AnswerOption
+                        {
+                            Description = "Option 3",
+                            IsCorrect = false
+                        }
+                    }
+                }
+            };
+
+            var serializeOptions = new JsonSerializerOptions
+            {
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                WriteIndented = true
+            };
+
+            var json = JsonSerializer.Serialize(openTextQuestion, serializeOptions);
+            var data = new StringContent(json, Encoding.UTF8, "application/json");
+
+            var response = await _httpClient.PostAsync("question", data);
+            Assert.NotNull(response);
+            Assert.Equal(400, (int)response.StatusCode);
+            string result = await response.Content.ReadAsStringAsync();
+            Assert.Equal("Errors: \nThe title is  bigger than 100 characters", result);
+        }
     }
 }
