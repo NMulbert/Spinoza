@@ -6,3 +6,24 @@ export const loadTests = (tests: any) => {
     tests: tests,
   };
 };
+
+export const loadTest = (test: any) => {
+  return {
+    type: testsTypes.LOAD_TEST,
+    test: test,
+  };
+};
+
+export const addTest = (tests: any) => {
+  return {
+    type: testsTypes.ADD_TEST,
+    tests: tests,
+  };
+};
+
+export const updateTest = (test: any) => {
+  return {
+    type: testsTypes.UPDATE_TEST,
+    test: test,
+  };
+};

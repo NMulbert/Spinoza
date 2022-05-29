@@ -1,34 +1,55 @@
 import React, { useEffect, useState } from "react";
-import { Grid, Card, Pagination, Loader, Button, Center } from "@mantine/core";
+import {
+  Grid,
+  Card,
+  Pagination,
+  Loader,
+  Button,
+  Center,
+  MultiSelect,
+} from "@mantine/core";
 import { useDispatch, useSelector } from "react-redux";
 import TestCard from "./TestCard";
 import { loadTests } from "../../redux/Reducers/tests/tests-actions";
 import { Link } from "react-router-dom";
-import { Writing } from "tabler-icons-react";
+import { Hash, Writing } from "tabler-icons-react";
 import { ConsoleLogger } from "@microsoft/signalr/dist/esm/Utils";
 
 interface TestsState {
   tests: { tests: [] };
 }
 
+interface TagsState {
+  tags: { tags: [] };
+}
+
 function AllTestsPage() {
+  let tags = useSelector((s: TagsState) => s.tags.tags);
+  let tagsData = tags || [];
+
   // Pagination
   const [limit] = useState(11);
   const [offset, setOffset] = useState(0);
   const [pageCount, setPageCount] = useState(0);
+  const [testTags, setTestTags] = useState<string[]>([]);
 
   const dispatch = useDispatch();
   let tests = useSelector((s: TestsState) => s.tests.tests);
 
-  // Get limited quantity of tests
+  // Get limited quantity of tests with option to get by specific tag.
   useEffect(() => {
     let url2 = `http://localhost:50000/v1.0/invoke/catalogmanager/method/tests?offset=${offset}&limit=${limit}`;
+    if (testTags.length > 0) {
+      for (let tag of testTags) {
+        url2 = url2 + `&tag=${tag}`;
+      }
+    }
     fetch(url2)
       .then((res) => res.json())
       .then((result) => {
         dispatch(loadTests(result));
       });
-  }, [offset]);
+  }, [offset, testTags]);
 
   useEffect(() => {
     let url =
@@ -55,6 +76,32 @@ function AllTestsPage() {
       }}
     >
       <Grid>
+        <Grid.Col span={12}>
+          <MultiSelect
+            size="lg"
+            data={tagsData}
+            placeholder="Select tags"
+            icon={<Hash />}
+            radius="xl"
+            style={{ width: "97%" }}
+            styles={{
+              value: {
+                backgroundColor: "#EEFAEF",
+                color: "#48B440",
+                fontWeight: "700",
+              },
+              defaultValueRemove: { color: "#48B440" },
+            }}
+            searchable
+            limit={20}
+            nothingFound="Nothing found"
+            clearButtonLabel="Clear selection"
+            clearable
+            value={testTags}
+            onChange={setTestTags}
+            maxDropdownHeight={100}
+          />
+        </Grid.Col>
         <Grid.Col md={6} lg={6} xl={3}>
           <Card
             withBorder
@@ -90,7 +137,6 @@ function AllTestsPage() {
 
         {tests ? (
           tests.map((i: any) => {
-
             return (
               <Grid.Col key={i.id} md={6} lg={6} xl={3}>
                 <TestCard

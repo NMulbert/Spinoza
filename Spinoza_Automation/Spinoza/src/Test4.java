@@ -8,12 +8,13 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
+import org.testng.Assert;
 
 public class Test4 {
 
 	public static void main(String[] args) throws InterruptedException {
 		// Invoke Browser
-		// Test Create Questions
+		// Tests Create Question
 
 		System.setProperty("webdriver.chrome.driver", ".\\lib\\chromedriver.exe");
 		WebDriver driver = new ChromeDriver();
@@ -22,35 +23,85 @@ public class Test4 {
 		driver.manage().window().maximize();
 		driver.get("http://localhost:3000/");
 
-		System.out.println("TEST START - QUESTION CREATE");
-		CreateNewQuestion(driver);
-		System.out.println("TEST END - QUESTION CREATE");
+		System.out.println("TEST START - QUESTION'S CREATE");
 
+		System.out.println("-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-");
+
+		System.out.println("TEST START - TEST 1");
+		CreateNewQuestion(driver, 1);
+		System.out.println("TEST END - TEST 1");
+
+		System.out.println("-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-");
+
+		System.out.println("TEST START - TEST 2");
+		CreateNewQuestion(driver, 2);
+		System.out.println("TEST END - TEST 2");
+
+		System.out.println("-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-");
+		
+		System.out.println("TEST END - QUESTION'S CREATE");
+		
 		Thread.sleep(5000);
 		driver.quit();
+
 	}
 
-	public static void CreateNewQuestion(WebDriver driver) throws InterruptedException {
-		driver.findElement(By.xpath("//span[contains(text(),'Questions')]")).click();
-		driver.findElement(By.xpath("//span[contains(text(),'NEW QUESTION')]")).click();
+	public static void CreateNewQuestion(WebDriver driver, int type) throws InterruptedException {
+		try {
+			// CREATE QUESTION WITH SPECIFIC TYPE
 
-		// TITLE
-		AddTitle(driver);
+			driver.findElement(By.xpath("//span[contains(text(),'Questions')]")).click();
+			driver.findElement(By.xpath("//span[contains(text(),'NEW QUESTION')]")).click();
 
-		// TAGS
-		AddTags(driver);
+			// TITLE
+			AddTitle(driver);
 
-		// DESCRIPTION
-		AddDescription(driver);
+			// TAGS
+			AddTags(driver);
 
-		// ANSWER TYPE
-		AddAnswerType(driver);
+			// DESCRIPTION
+			AddDescription(driver);
 
-		// SELECT TYPE
-		AddSelectLevel(driver);
+			// ANSWER TYPE
+			switch (type) {
+			case 1: {
+				AddAnswerType(driver, type);
+				break;
+			}
+			case 2: {
+				AddAnswerType(driver, type);
+				MultipleChoice(driver, type, 1);
+				break;
+			}
+			default:
+				throw new IllegalArgumentException("Unexpected value: " + type);
+			}
 
-		// SAVE
-		SaveTest(driver);
+			// SELECT TYPE
+			AddSelectLevel(driver);
+
+			// SAVE AS DRAFT
+			driver.findElement(By.cssSelector(
+					"button[class='mantine-Button-gradient mantine-Button-root mantine-Group-child mantine-1m2tbz']"))
+					.click();
+
+			WebDriverWait wait = new WebDriverWait(driver, 15);
+			wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("div[role='alert']")));
+
+			CreateNewQuestion_Check(driver);
+
+			driver.findElement(By.cssSelector(
+					"button[class='mantine-ActionIcon-hover mantine-ActionIcon-root mantine-Modal-close mantine-vao037']"))
+					.click();
+
+			// RE-ENTER TO QUESTIONS
+			driver.findElement(By.xpath("//span[contains(text(),'Tests')]")).click();
+			driver.findElement(By.xpath("//span[contains(text(),'Questions')]")).click();
+
+		} catch (Exception e) {
+			System.out.println("Error = CreateNewQuestion_Test" + type);
+			System.out.println(e);
+		}
 	}
 
 	private static void AddTitle(WebDriver driver) {
@@ -97,11 +148,24 @@ public class Test4 {
 		}
 	}
 
-	private static void AddAnswerType(WebDriver driver) {
+	private static void AddAnswerType(WebDriver driver, int type) {
 		try {
-			// CHOICE 'TEXT' TYPE
-			driver.findElement(By.xpath("//label[contains(text(),'Text')]")).click();
-			System.out.println("ANSWER TYPE = 'TEXT'");
+			switch (type) {
+			case 1: {
+				// CHOICE 'TEXT' TYPE
+				driver.findElement(By.xpath("//label[contains(text(),'Text')]")).click();
+				System.out.println("ANSWER TYPE = 'TEXT'");
+				break;
+			}
+			case 2: {
+				// CHOICE 'MULTIPLE' TYPE
+				driver.findElement(By.xpath("//label[contains(text(),'Multiple')]")).click();
+				System.out.println("ANSWER TYPE = 'TEXT'");
+				break;
+			}
+			default:
+				throw new IllegalArgumentException("Unexpected value: " + type);
+			}
 
 		} catch (Exception e) {
 			System.out.println("Error = Answer Type");
@@ -127,39 +191,37 @@ public class Test4 {
 		}
 	}
 
-	private static void SaveTest(WebDriver driver) {
+	private static void MultipleChoice(WebDriver driver, int choices, int correct) {
 		try {
-			// SAVE AS DRAFT
-			driver.findElement(By.cssSelector(
-					"button[class='mantine-Button-gradient mantine-Button-root mantine-Group-child mantine-1m2tbz']"))
-					.click();
+			// ADD OPTTIONS
+			for (int i = 1; i <= choices; i++) {
+				driver.findElement(By.xpath("//span[contains(text(),'+ Add option')]")).click();
 
-			WebDriverWait wait = new WebDriverWait(driver, 15);
-			wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("div[role='alert']")));
-
-			String alert = driver.findElement(By.cssSelector("div[role='alert']")).getText();
-
-			if (alert.contains("InternalServerError")) {
-				System.out.println("TEST FAILED");
-				driver.findElement(By.cssSelector(
-						"button[class='mantine-ActionIcon-hover mantine-ActionIcon-root mantine-Modal-close mantine-vao037']"))
-						.click();
-			} else {
-				System.out.println("TEST SUCCESS");
-				driver.findElement(By.cssSelector(
-						"button[class='mantine-ActionIcon-hover mantine-ActionIcon-root mantine-Modal-close mantine-vao037']"))
-						.click();
-
-				// RE-ENTER TO QUESTIONS
-				driver.findElement(By.xpath("//span[contains(text(),'Tests')]")).click();
-				driver.findElement(By.xpath("//span[contains(text(),'Questions')]")).click();
+				driver.findElement(By.xpath("(//textarea[@placeholder='Add option'])[" + i + "]"))
+						.sendKeys("QUESTION OPTION " + i);
 			}
 
+			// SET CORRECT ANSWER
+			driver.findElement(By.xpath("//span[contains(text(),'Correct answer')]")).click();
+
+			driver.findElement(By.xpath("(//input[@name='Answer'])[" + correct + "]"));
+			
+			driver.findElement(By.xpath("//span[contains(text(),'Done')]")).click();
+
 		} catch (Exception e) {
-			System.out.println("Error = Save As Draft");
+			System.out.println("Error = Multiple Choice");
 			System.out.println(e);
 		}
 
 	}
 
+	private static void CreateNewQuestion_Check(WebDriver driver) {
+		try {
+			Assert.assertTrue(driver.findElement(By.xpath("//div[@role='alert']")).getText().contains("created"));
+			System.out.println("Create Test2 = SUCCESS");
+		} catch (Exception e) {
+			System.out.println("Create Test2 = FAILED");
+			System.out.println(e);
+		}
+	}
 }

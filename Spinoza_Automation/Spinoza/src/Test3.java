@@ -1,93 +1,82 @@
 import java.util.concurrent.TimeUnit;
 import org.openqa.selenium.By;
+import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
-import org.openqa.selenium.support.ui.ExpectedConditions;
-import org.openqa.selenium.support.ui.WebDriverWait;
+import org.testng.Assert;
 
 public class Test3 {
 
 	public static void main(String[] args) throws InterruptedException {
 		// Invoke Browser
-		// Test For Add Question To Test
-		
+		// Tests Search Test
+
 		System.setProperty("webdriver.chrome.driver", ".\\lib\\chromedriver.exe");
 		WebDriver driver = new ChromeDriver();
-		driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
+		driver.manage().timeouts().implicitlyWait(15, TimeUnit.SECONDS);
 
 		driver.manage().window().maximize();
 		driver.get("http://localhost:3000/");
 
-		System.out.println("TEST START - ADD QUESTION TO TEST");
-		EditTest(driver);
-		System.out.println("TEST END - ADD QUESTION TO TEST");
+		System.out.println("TEST START - TEST'S SEARCH");
+
+		System.out.println("-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-");
+
+		System.out.println("TEST START - TEST 1");
+		SearchTestsByTag(driver, "Python");
+		System.out.println("TEST END - TEST 1");
+
+		System.out.println("-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-");
+
+		System.out.println("TEST END - TEST'S SEARCH");
 
 		Thread.sleep(3000);
 		driver.quit();
-
 	}
 
-	public static void EditTest(WebDriver driver) throws InterruptedException {
+	public static void SearchTestsByTag(WebDriver driver, String tag) {
 		try {
-			driver.findElement(By.xpath("//span[contains(text(),'Tests')]")).click();
+			// GET TESTS COUNT BY TAG
+			int count = GetTestsByTag(driver, tag);
 
-			int TestCount = driver.findElements(By.xpath("//div[@class='mantine-Col-root mantine-1akkebb']")).size()
-					- 1;
-			System.out.println("TEST's COUNT = " + TestCount);
+			// SEARCH TESTS BY TAG
+			WebElement Search = driver.findElement(By.xpath("//input[@placeholder='Select tags']"));
+			Search.sendKeys(tag, Keys.ENTER);
 
-			driver.findElement(By.xpath("(//button[@class='mantine-Button-light mantine-Button-root mantine-5l7wha'])["
-					+ (TestCount) + "]")).click();
+			Thread.sleep(2500);
+			int result = driver.findElements(By.xpath("//div[@class='mantine-Col-root mantine-1akkebb']")).size() - 1;
 
-			driver.findElement(By.xpath(".//*[@class='icon icon-tabler icon-tabler-edit']")).click();
-
-			// CHOOSE FROM CATALOG
-			driver.findElement(By.xpath(
-					"//button[@class='mantine-Button-outline mantine-Button-root mantine-Group-child mantine-4sv719']"))
-					.click();
-
-			// SELECT QUESTION
-			int QuestionCount = driver
-					.findElements(By.xpath("//div[@class='mantine-Paper-root mantine-Card-root mantine-199wbki']"))
-					.size();
-
-			if (QuestionCount > 0) {
-				for (int i = 1; i <= QuestionCount; i++) {
-					driver.findElement(
-							By.xpath("(//button[@class='mantine-Button-outline mantine-Button-root mantine-da2sop'])["
-									+ (i) + "]"))
-							.click();
-				}
-			}
-			driver.findElement(By.cssSelector(
-					"button[class='mantine-Button-filled mantine-Button-root mantine-Group-child mantine-9uo5n1']"))
-					.click();
-
-			// SAVE AS DRAFT
-			driver.findElement(By.cssSelector(
-					"button[class='mantine-Button-gradient mantine-Button-root mantine-Group-child mantine-1m2tbz']"))
-					.click();
-
-			WebDriverWait wait = new WebDriverWait(driver, 15);
-			wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//div[@role='alert']")));
-
-			String alert = driver.findElement(By.xpath("//div[@role='alert']")).getText();
-
-			if (alert.contains("InternalServerError")) {
-				System.out.println("TEST FAILED");
-			} else {
-				System.out.println("TEST SUCCESS");
-			}
-
-			driver.findElement(By.xpath("//span[contains(text(),'Tests')]")).click();
-
-			// RE-ENTER TO TEST
-			driver.findElement(By.xpath("(//button[@class='mantine-Button-light mantine-Button-root mantine-5l7wha'])["
-					+ (TestCount) + "]")).click();
-
+			SearchTestsByTag_Check(count,result);
+			
+			driver.findElement(By.xpath("//button[@class='mantine-ActionIcon-transparent mantine-ActionIcon-root mantine-MultiSelect-defaultValueRemove mantine-cc6qwu']")).click();
+			Search.click();
+			
 		} catch (Exception e) {
+			System.out.println("Search Tests By Tag = FAILED");
 			System.out.println(e);
 		}
-
 	}
 
+	private static int GetTestsByTag(WebDriver driver, String tag) {
+		try {
+			// GET TESTS BY TAG
+			return driver.findElements(By.xpath("//span[contains(text(),'" + tag + "')]")).size();
+
+		} catch (Exception e) {
+			System.out.println("Get Tests By Tag = FAILED");
+			System.out.println(e);
+			return -1;
+		}
+	}
+
+	private static void SearchTestsByTag_Check(int count, int result) {
+		try {
+			Assert.assertEquals(count, result);
+			System.out.println("Search Tests By Tag = SUCCESS");
+		} catch (Exception e) {
+			System.out.println("Search Tests By Tag = FAILED");
+			System.out.println(e);
+		}
+	}
 }

@@ -12,30 +12,38 @@ import {
   Divider,
   Loader,
 } from "@mantine/core";
+import { useDispatch, useSelector } from "react-redux";
 import ExistingQuestion from "./ExistingQuestion";
 interface QuestionsState {
   UpdateQuestions: (questions: any) => any;
   setOpenedEQ: (boolean: boolean) => void;
 }
 
+interface TagsState {
+  tags: { tags: [] };
+}
+
 function ChooseQuestion({ UpdateQuestions, setOpenedEQ }: QuestionsState) {
-  const [dataHash, setHashData] = useState([
-    "React",
-    "C#",
-    "JavaScript",
-    "Python",
-  ]);
+  let tags = useSelector((s: TagsState) => s.tags.tags);
+  let tagsData = tags || [];
+  const [questionsTags, setQuestionsTags] = useState<string[]>([]);
+
   const [selectedQuestions, setSelectedQuestions] = useState([]);
   const [questions, setQuestions] = useState([]);
   useEffect(() => {
     let url =
-      "http://localhost:50000/v1.0/invoke/catalogmanager/method/allquestions";
+      "http://localhost:50000/v1.0/invoke/catalogmanager/method/allquestions?";
+    if (questionsTags.length > 0) {
+      for (let tag of questionsTags) {
+        url = url + `tag=${tag}`;
+      }
+    }
     fetch(url)
       .then((res) => res.json())
       .then((result) => {
         setQuestions(result);
       });
-  }, []);
+  }, [questionsTags]);
 
   return (
     <div>
@@ -59,17 +67,19 @@ function ChooseQuestion({ UpdateQuestions, setOpenedEQ }: QuestionsState) {
         <div>
           <Group position="center" spacing="xs">
             <MultiSelect
-              data={dataHash}
+              data={tagsData}
               placeholder="Select tags"
               icon={<Hash />}
               radius="lg"
               style={{ width: "70%" }}
               searchable
-              creatable
-              getCreateLabel={(query) => `+ Create ${query}`}
-              onCreate={(query) =>
-                setHashData((current) => [...current, query])
-              }
+              limit={20}
+              nothingFound="Nothing found"
+              clearButtonLabel="Clear selection"
+              clearable
+              value={questionsTags}
+              onChange={setQuestionsTags}
+              maxDropdownHeight={100}
             />
           </Group>
         </div>
