@@ -165,10 +165,21 @@ namespace CatalogManager.Controllers
         [HttpGet("/tests/count")]
         public async Task<IActionResult> GetTotalTests()
         {
+           
+                var queryTags = Request.Query["tag"];
+                var tags = (queryTags.Any()
+                    ? "?tags=" + queryTags.Aggregate(new StringBuilder(), (sb, t) => sb.Append($"'{t}',"),
+                        sb =>
+                        {
+                            sb.Length--;
+                            return sb.ToString();
+                        }) : string.Empty);
 
+                var methodName = $"testaccessor/tests/count{tags}";
+                _logger.LogInformation($"GetTotalTests: calling method : {methodName}");
             try
             {
-                var dbTotalTests = await _daprClient.InvokeMethodAsync<int>(HttpMethod.Get, "testaccessor", "/tests/count");
+                var dbTotalTests = await _daprClient.InvokeMethodAsync<int>(HttpMethod.Get, "testaccessor", $"/tests/count{tags}");
 
                 _logger.LogInformation($"GetTotalTests: accessor returns {dbTotalTests}");
 

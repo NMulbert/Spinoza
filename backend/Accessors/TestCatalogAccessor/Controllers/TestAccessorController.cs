@@ -223,16 +223,29 @@ namespace Spinoza.Backend.Accessor.TestCatalog.Controllers
         [HttpGet("/tests/count")]
         public async Task<IActionResult> GetTotalTests()
         {
+            var tags = Request.Query["tags"].ToString();
+            _logger.LogInformation($"the tags are: {tags}");
             try
-            {
-                int? dbTotalTests = await _cosmosDBWrapper.GetScalarCosmosQueryResult<int?>(new QueryDefinition("SELECT VALUE COUNT(1) FROM c"));
-
-                if (dbTotalTests == null)
+            { if (string.IsNullOrEmpty(tags))
                 {
+                    var dbTotalTestsCount =
+                        await _cosmosDBWrapper.GetScalarCosmosQueryResult<int>(
+                            new QueryDefinition($"SELECT VALUE COUNT(1) FROM c"));
+                    return new OkObjectResult(dbTotalTestsCount);
+                }
+                //else
+                var totalTestsByTags = await _cosmosDBWrapper.GetScalarCosmosQueryResult<JsonNode>(new QueryDefinition
+                    ($"SELECT DISTINCT COUNT(1) test FROM test JOIN tag IN test.tags WHERE tag IN ({tags})")
+                );
+                if (totalTestsByTags == null)
+                {
+                    _logger.LogWarning("GetTotalTests : No Tests found");
                     return new NotFoundObjectResult("No Tests found");
                 }
                 //else
-                return new OkObjectResult(dbTotalTests);
+                _logger.LogInformation(totalTestsByTags.ToJsonString());
+                int count = totalTestsByTags["test"]!.GetValue<int>();
+                return new OkObjectResult(count);
             }
             catch (Exception ex)
             {
