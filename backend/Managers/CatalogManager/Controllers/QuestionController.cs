@@ -148,9 +148,33 @@ namespace CatalogManager.Controllers
                 {
                   
                     var questionRequest = JsonConvert.DeserializeObject<TQuestion>(body);
-
+                    if (questionRequest == null)
+                    {
+                        var error = "Incorrect Test data";
+                        _logger.LogError(error);
+                        return BadRequest(error);
+                    }
+                    TryValidateModel(questionRequest);
+                    if (!ModelState.IsValid)
+                    {
+                        string errors = "Errors: ";
+                        foreach (var error in ModelState.Root.Children!)
+                        {
+                            if (error.Children?.Count > 0)
+                            {
+                                errors += $"\n{ error.Children?[0].Errors[0].ErrorMessage}";
+                            }
+                            else
+                            {
+                                errors += $"\n{error.Errors[0].ErrorMessage}";
+                            }   
+                        }
+                        _logger.LogError(errors);
+                        return BadRequest(errors);
+                    }
+                    //else
                     var questionModel = _mapper.Map<TQuestion>(questionRequest);
-
+                   
                     _logger.LogInformation("the message is going to queue");
 
                     questionModel.QuestionVersion = "1.0";
