@@ -28,4 +28,5 @@
     <fullyQualifiedTypeName name="org.openqa.selenium.Alert"/>
     <fullyQualifiedTypeName name="java.lang.AssertionError"/>
     <fullyQualifiedTypeName name="org.testng.Assert"/>
+    <fullyQualifiedTypeName name="org.checkerframework.checker.units.qual.s"/>
 </qualifiedTypeNameHistroy>
