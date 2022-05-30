@@ -101,10 +101,15 @@ question
         </Title>
         <Divider my="sm" color="blue" />
 
-        <Card.Section style={{ margin: 5, height: 80 }}>
+        <Card.Section style={{ margin: 5}}>
           <Text lineClamp={3} size="md" weight={500}>
             <MDEditor.Markdown
-              style={{ backgroundColor: "white", color: "black" }}
+              style={{
+                backgroundColor: "white",
+                color: "black",
+                width: "100%",
+                maxHeight: 100,
+              }}
               source={
                 question.type === "MultipleChoiceQuestion" ? (
                   question.content.questionText
