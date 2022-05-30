@@ -3,11 +3,16 @@ import React, { useEffect, useState } from "react";
 import Snackbar from "@mui/material/Snackbar";
 import MuiAlert from "@mui/material/Alert";
 import { useDispatch, useSelector } from "react-redux";
-import { addTest, updateTest } from "../redux/Reducers/tests/tests-actions";
+import {
+  addTest,
+  updateTest,
+  deleteTest,
+} from "../redux/Reducers/tests/tests-actions";
 import { addTags } from "../redux/Reducers/tags/tags-actions";
 import {
   addQuestion,
   updateQuestion,
+  deleteQuestion,
 } from "../redux/Reducers/questions/questions-actions";
 
 export const Notify = () => {
@@ -39,7 +44,6 @@ export const Notify = () => {
     };
 
     const fetchTestById = async (id: string) => {
-
       try {
         let url = `${process.env.REACT_APP_BACKEND_URI}/test/${id}`;
         let res = await fetch(url);
@@ -51,7 +55,6 @@ export const Notify = () => {
     };
 
     const fetchQuestionById = async (id: string) => {
-
       try {
         let url = `${process.env.REACT_APP_BACKEND_URI}/question/${id}`;
         let res = await fetch(url);
@@ -67,13 +70,18 @@ export const Notify = () => {
       if (testInfo.actionResult !== "Success") {
         return;
       }
-      let test = await fetchTestById(testInfo.id);
       switch (testInfo.messageType) {
         case "Update":
+          let test = await fetchTestById(testInfo.id);
           dispatch(updateTest(test));
           break;
         case "Create":
+          test = await fetchTestById(testInfo.id);
           dispatch(addTest([...tests, test]));
+          break;
+        case "Deleted":
+          let deletedTest = { id: testInfo.id };
+          dispatch(deleteTest(deletedTest));
           break;
         default:
           console.log("Hendle test update: Unknown Message Type");
@@ -85,13 +93,20 @@ export const Notify = () => {
       if (questionInfo.actionResult !== "Success") {
         return;
       }
-      let question = await fetchQuestionById(questionInfo.id);
       switch (questionInfo.messageType) {
         case "Update":
+                let question = await fetchQuestionById(questionInfo.id);
+
           dispatch(updateQuestion(question));
           break;
         case "Create":
+                 question = await fetchQuestionById(questionInfo.id);
+
           dispatch(addQuestion([...questions, question]));
+          break;
+        case "Deleted":
+          let deletedQuesiton = { id: questionInfo.id}
+          dispatch(deleteQuestion(deletedQuesiton));
           break;
         default:
           console.log("Hendle question update: Unknown Message Type");

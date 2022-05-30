@@ -19,6 +19,14 @@ const reducerQuestions = (state: any, action: any) => {
         ...state,
         questions: [...allButUpdatedQuestion, action.question],
       };
+    case questionsTypes.DELETE_QUESTION:
+      let allButDeletedQuestion = state.questions.filter(
+        (el: any) => el.id !== action.question.id
+      );
+      return {
+        ...state,
+        questions: [...allButDeletedQuestion],
+      };
     default:
       return state ?? {};
   }

@@ -9,6 +9,7 @@ import {
   MultiSelect,
   Modal,
   TypographyStylesProvider,
+  ActionIcon,
 } from "@mantine/core";
 import { CalendarTime, Edit, UserCircle } from "tabler-icons-react";
 import NewQuestion from "../Questions/NewQuestion";
@@ -134,6 +135,7 @@ function ViewTest() {
         }
       </Modal>
 
+
       <Grid
         style={{
           paddingLeft: "250px",
@@ -142,14 +144,18 @@ function ViewTest() {
         }}
       >
         <Grid.Col span={12}>
-          <Edit
-            size={60}
-            strokeWidth={2}
+          <ActionIcon
+            size="xl"
+            color="blue"
+            variant="hover"
+            radius="lg"
             style={{ float: "right", cursor: "pointer" }}
-            onClick={(e) => {
+            onClick={() => {
               setEditMode(!editMode);
             }}
-          />
+          >
+            <Edit size={50} />
+          </ActionIcon>
 
           {editMode ? (
             <TextInput

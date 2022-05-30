@@ -19,6 +19,14 @@ const reducerTests = (state: any, action: any) => {
         ...state,
         tests: [...allButUpdatedTest, action.test],
       };
+    case testsTypes.DELETE_TEST:
+      let allButDeletedTest = state.tests.filter(
+        (el: any) => el.id !== action.test.id,
+        console.log(action.test.id)
+      );
+      return {
+        ...state, tests: [...allButDeletedTest]
+      }
     default:
       return state ?? {};
   }

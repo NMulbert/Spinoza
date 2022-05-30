@@ -12,8 +12,10 @@ import MDEditor from "@uiw/react-md-editor";
 import { useState } from "react";
 import CopyToClipboard from "react-copy-to-clipboard";
 import { Link } from "react-router-dom";
-import { CalendarTime, UserCircle, Link as LinkIcon, Stars, Copy } from "tabler-icons-react";
+import { CalendarTime, UserCircle, Link as LinkIcon, Stars, Copy, Trash } from "tabler-icons-react";
 import OpenQuestion from "./OpenQuestion";
+import axios from "axios";
+
 
 type QuestionData = {
   question:{
@@ -35,6 +37,8 @@ question
 }: QuestionData) {
   const [openedQuestion, setOpenedQuestion] = useState(false);
  const [copied, setCopied] = useState(false);
+   const [deleteModal, setDeleteModal] = useState(false);
+
   return (
     <>
       <Modal
@@ -44,6 +48,40 @@ question
         size="100%"
       >
         {<OpenQuestion />}
+      </Modal>
+      <Modal
+        centered
+        opened={deleteModal}
+        onClose={() => setDeleteModal(false)}
+        title="Are you sure you want to delete this question?"
+        withCloseButton={false}
+      >
+        {
+          <Group position="center">
+            <Button
+              radius="lg"
+              color="red"
+              onClick={async () => {
+                try {
+                  let url = `${process.env.REACT_APP_BACKEND_URI}/question/${question.id}`;
+                  const response = await axios.delete(url);
+                } catch (err) {
+                  console.log(err);
+                }
+              }}
+            >
+              Yes
+            </Button>
+            <Button
+              radius="lg"
+              onClick={() => {
+                setDeleteModal(false);
+              }}
+            >
+              No
+            </Button>
+          </Group>
+        }
       </Modal>
       <Card
         withBorder
@@ -147,6 +185,17 @@ question
               {copied ? <Copy color="#40c057" /> : <LinkIcon />}
             </Button>
           </CopyToClipboard>
+          <Button
+            color="red"
+            variant="light"
+            radius="lg"
+            style={{ float: "right", cursor: "pointer", marginTop: 14 }}
+            onClick={() => {
+              setDeleteModal(true);
+            }}
+          >
+            <Trash />
+          </Button>
         </Group>
       </Card>
     </>

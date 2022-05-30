@@ -27,3 +27,10 @@ export const updateTest = (test: any) => {
     test: test,
   };
 };
+
+export const deleteTest = (test: any) => {
+  return {
+    type: testsTypes.DELETE_TEST,
+    test: test,
+  };
+};
