@@ -9,7 +9,7 @@ import {
   Divider,
   Badge,
   Checkbox,
-  Modal,
+  Center,
 } from "@mantine/core";
 import MDEditor from "@uiw/react-md-editor";
 import React, { useEffect, useState } from "react";
@@ -17,12 +17,14 @@ import { CalendarTime, Stars, UserCircle, X } from "tabler-icons-react";
 import OpenQuestion from "../Questions/OpenQuestion";
 
 type QuestionData = {
+
   question: {
     id: string;
     name: string;
     type: string;
     tags: string[];
     content: {
+      questionText?: string;
       answerOptions?: any;
     };
     authorId: string;
@@ -79,7 +81,10 @@ function Preview({ question, removeQuestion, editMode }: QuestionData) {
         <Divider my="xs" color="blue" />
 
         <div data-color-mode="light">
-          <MDEditor.Markdown source={question.content as string} />
+            <MDEditor.Markdown
+              style={{ width: "30%" }}
+              source={question.content.questionText || (question.content).toString()}
+            />
         </div>
 
         {question.type === "MultipleChoiceQuestion" ? (

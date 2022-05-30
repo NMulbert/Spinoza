@@ -150,7 +150,7 @@ function OpenQuestion() {
             />
           ) : (
             <MDEditor.Markdown
-              style={{ backgroundColor: "#f0f0f0", color: "black" }}
+              style={{ width: "30%", backgroundColor: "#f0f0f0", color: "black" }}
               source={questionTxt}
             />
           )}
