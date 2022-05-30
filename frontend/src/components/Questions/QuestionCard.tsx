@@ -7,37 +7,40 @@ import {
   Title,
   Divider,
   Modal,
+  Grid,
 } from "@mantine/core";
 import MDEditor from "@uiw/react-md-editor";
 import { useState } from "react";
 import CopyToClipboard from "react-copy-to-clipboard";
 import { Link } from "react-router-dom";
-import { CalendarTime, UserCircle, Link as LinkIcon, Stars, Copy, Trash } from "tabler-icons-react";
+import {
+  CalendarTime,
+  UserCircle,
+  Link as LinkIcon,
+  Stars,
+  Copy,
+  Trash,
+} from "tabler-icons-react";
 import OpenQuestion from "./OpenQuestion";
 import axios from "axios";
 
-
 type QuestionData = {
-  question:{
-  id: string;
-  name: string;
-  content: any;
-  authorId: any;
-  difficultyLevel: string;
-  type: string
-  tags: any;
-  lastUpdateCreationTimeUTC: string;
-  }
-
-
+  question: {
+    id: string;
+    name: string;
+    content: any;
+    authorId: any;
+    difficultyLevel: string;
+    type: string;
+    tags: any;
+    lastUpdateCreationTimeUTC: string;
+  };
 };
 
-function QuestionCard({
-question
-}: QuestionData) {
+function QuestionCard({ question }: QuestionData) {
   const [openedQuestion, setOpenedQuestion] = useState(false);
- const [copied, setCopied] = useState(false);
-   const [deleteModal, setDeleteModal] = useState(false);
+  const [copied, setCopied] = useState(false);
+  const [deleteModal, setDeleteModal] = useState(false);
 
   return (
     <>
@@ -101,7 +104,7 @@ question
         </Title>
         <Divider my="sm" color="blue" />
 
-        <Card.Section style={{ margin: 5}}>
+        <Card.Section style={{ margin: 5, minHeight: 100 }}>
           <Text lineClamp={3} size="md" weight={500}>
             <MDEditor.Markdown
               style={{
@@ -173,34 +176,35 @@ question
               Open
             </Button>
           </Link>
-
-          <CopyToClipboard
-            text={`${process.env.REACT_APP_WEBSITE_URI}/questions/${question.id}`}
-            onCopy={() => {
-              setCopied(true);
-              setTimeout(() => setCopied(false), 1000);
-            }}
-          >
-            <Button
-              radius="lg"
-              variant="light"
-              color="gray"
-              style={{ marginTop: 14 }}
+          <Group position="right" spacing="xs">
+            <CopyToClipboard
+              text={`${process.env.REACT_APP_WEBSITE_URI}/questions/${question.id}`}
+              onCopy={() => {
+                setCopied(true);
+                setTimeout(() => setCopied(false), 1000);
+              }}
             >
-              {copied ? <Copy color="#40c057" /> : <LinkIcon />}
+              <Button
+                radius="lg"
+                variant="light"
+                color="gray"
+                style={{ marginTop: 14 }}
+              >
+                {copied ? <Copy color="#40c057" /> : <LinkIcon />}
+              </Button>
+            </CopyToClipboard>
+            <Button
+              color="red"
+              variant="light"
+              radius="lg"
+              style={{ cursor: "pointer", marginTop: 14 }}
+              onClick={() => {
+                setDeleteModal(true);
+              }}
+            >
+              <Trash />
             </Button>
-          </CopyToClipboard>
-          <Button
-            color="red"
-            variant="light"
-            radius="lg"
-            style={{ float: "right", cursor: "pointer", marginTop: 14 }}
-            onClick={() => {
-              setDeleteModal(true);
-            }}
-          >
-            <Trash />
-          </Button>
+          </Group>
         </Group>
       </Card>
     </>
