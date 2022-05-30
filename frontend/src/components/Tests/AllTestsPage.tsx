@@ -53,12 +53,18 @@ function AllTestsPage() {
 
   useEffect(() => {
     let url = `${process.env.REACT_APP_BACKEND_URI}/tests/count`;
+    if (testTags.length > 0) {
+      for (let tag of testTags) {
+        url = url + `?tag=${tag}`;
+      }
+    }
     fetch(url)
       .then((res) => res.json())
       .then((result) => {
         setPageCount(Math.ceil(result / limit));
+        setOffset(0);
       });
-  }, []);
+  }, [testTags]);
 
   const handlePageClick = (e: any) => {
     setOffset((e - 1) * limit);
