@@ -8,19 +8,19 @@ namespace CatalogManager.Models.FrontendRequests
 
     public interface IQuestion
     {
-         string Type { get; set; }
-         string MessageType { get; set; }
-         string QuestionVersion { get; set; }
-         
-          string[] Tags { get; set; }
+        string Type { get; set; }
+        string MessageType { get; set; }
+        string QuestionVersion { get; set; }
+        string[] Tags { get; set; }
+        string Status { get; set; }
     }
     public class CommonQuestion : IQuestion
     {
         public string Type { get; set; }
         public string MessageType { get; set; }
         public string QuestionVersion { get; set; }
-        
         public string[] Tags { get; set; }
+        public string Status { get; set; }
     }
 
     // ReSharper disable ClassNeverInstantiated.Global
@@ -31,8 +31,11 @@ namespace CatalogManager.Models.FrontendRequests
 
         [Required(ErrorMessage = "the Id is missing")]
         public string Id { get; set; }
+        [ValidateNever]
         public string SchemaVersion { get; set; }
+        [ValidateNever]
         public string QuestionVersion { get; set; }
+        [ValidateNever]
         public string PreviousVersionId { get; set; }
 
         [Required(ErrorMessage = "The Author Id is missing")]
@@ -43,9 +46,12 @@ namespace CatalogManager.Models.FrontendRequests
         [MinLength(3, ErrorMessage = "The title is less than 3 characters")]
         public string Name { get; set; }
         public string Type { get; set; }
+        [ValidateNever]
+        public string Status { get; set; }
         [Required(ErrorMessage = "Please enter question difficulty")]
         [Range(typeof(int), "1", "5", ErrorMessage = "Please enter question difficulty btewwen 1-5")]
         public string DifficultyLevel { get; set; }
+        [ValidateNever]
         public string[] Tags { get; set; }
         public Content Content { get; set; }
     }
@@ -55,7 +61,7 @@ namespace CatalogManager.Models.FrontendRequests
         [Required(ErrorMessage = "Please write your question")]
         public string QuestionText { get; set; }
 
-        [MinLength(2,ErrorMessage ="Please enter more than one option answer")]
+        [MinLength(2, ErrorMessage = "Please enter more than one option answer")]
         [AtLeastOneRightOption]
         public AnswerOption[] AnswerOptions { get; set; }
     }
@@ -73,8 +79,11 @@ namespace CatalogManager.Models.FrontendRequests
 
         [Required(ErrorMessage = "the Id is missing")]
         public string Id { get; set; }
+        [ValidateNever]
         public string SchemaVersion { get; set; }
+        [ValidateNever]
         public string QuestionVersion { get; set; }
+        [ValidateNever]
         public string PreviousVersionId { get; set; }
         [Required(ErrorMessage = "The Author Id is missing")]
         public string AuthorId { get; set; }
@@ -87,6 +96,9 @@ namespace CatalogManager.Models.FrontendRequests
         [Required(ErrorMessage = "Please enter question difficulty")]
         [Range(typeof(int), "1", "5", ErrorMessage = "Please enter question difficulty btewwen 1-5")]
         public string DifficultyLevel { get; set; }
+        [ValidateNever]
+        public string Status { get; set; }
+        [ValidateNever]
         public string[] Tags { get; set; }
 
         [Required(ErrorMessage = "Please write your question content")]

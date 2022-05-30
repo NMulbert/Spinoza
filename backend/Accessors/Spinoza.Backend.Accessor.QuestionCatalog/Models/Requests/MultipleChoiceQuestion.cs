@@ -6,6 +6,16 @@
     {
         string Type { get; set; }
         string MessageType { get; set; }
+
+        public string QuestionVersion { get; set; }
+    }
+
+    public class CommonQuestion : IQuestion
+    {
+        public string Id { get; set; }
+        public string Type { get; set; }
+        public string MessageType { get; set; }
+        public string QuestionVersion { get; set; }
     }
 
     // ReSharper disable ClassNeverInstantiated.Global
@@ -20,6 +30,7 @@
         public string Name { get; set; }
         public string Type { get; set; }
         public string DifficultyLevel { get; set; }
+        public string Status { get; set; }
         public string[] Tags { get; set; }
         public Content Content { get; set; }
     }

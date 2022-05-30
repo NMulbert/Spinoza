@@ -116,6 +116,40 @@ namespace CatalogManager.Controllers
             return Problem(statusCode: StatusCodes.Status500InternalServerError);
         }
 
+        [HttpDelete("/test/{id:Guid}")]
+
+        public async Task<IActionResult> DeleteTest(Guid id)
+        { 
+            try
+            {
+               
+                var accessorTest = await _daprClient.InvokeMethodAsync<Models.AccessorResults.Test>(HttpMethod.Get, "testaccessor", $"test/{id.ToString().ToUpper()}");
+
+                if (accessorTest == null)
+                {
+                    var error = $"Test {id} does not exist";
+                    _logger.LogError(error);
+                    return BadRequest(error);
+                }
+
+                if (accessorTest.Status == "Published")
+                {
+                    var error = $"Test {id} is published, can't delete it";
+                    _logger.LogError(error);
+                    return BadRequest(error);
+                }
+                var submitTestModel = new Models.AccessorSubmits.Test() { Id = id.ToString().ToUpper(), TestVersion = accessorTest.TestVersion, MessageType = "DeleteTest" };
+                await _daprClient.InvokeBindingAsync("testaccessorrequestqueue", "create", submitTestModel);
+                _logger.LogInformation($"DeleteTest: Test id: {id} accepted for deletion");
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Error while deleting test: {id} Error: {ex.Message}");
+            }
+            return Problem(statusCode: StatusCodes.Status500InternalServerError);
+        }
+
         private async Task<IActionResult> PostNewOrUpdateTestToQueue(bool isUpdate)
         {
             try
@@ -129,6 +163,15 @@ namespace CatalogManager.Controllers
                     _logger.LogError(error);
                     return BadRequest(error);
                 }
+
+                if (requestTestModel.Status == "Published")
+                {
+                    var error = "Can't create or update a published test";
+                    _logger.LogError(error);
+                    return BadRequest(error);
+                }
+                requestTestModel.Status = "Draft";
+
                 TryValidateModel(requestTestModel);
                 if(!ModelState.IsValid)
                 {
@@ -145,6 +188,7 @@ namespace CatalogManager.Controllers
                 _logger.LogInformation("the message is going to queue");
                 var submitTestModel = _mapper.Map<Models.AccessorSubmits.Test>(requestTestModel);
                 submitTestModel.TestVersion = "1.0";
+                
                 submitTestModel.MessageType = isUpdate ? "UpdateTest" : "CreateTest";
                 await _daprClient.InvokeBindingAsync("testaccessorrequestqueue", "create", submitTestModel);
                 if (submitTestModel.Tags.Length != 0)

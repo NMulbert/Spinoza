@@ -13,6 +13,7 @@
         public string AuthorId { get; set; }
         public string Description { get; set; }
         public string[] Tags { get; set; }
+        public string Status { get; set; }
         public string[] QuestionsRefs { get; set; }
     }
 

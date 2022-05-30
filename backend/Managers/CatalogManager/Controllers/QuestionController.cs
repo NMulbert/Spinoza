@@ -118,7 +118,40 @@ namespace CatalogManager.Controllers
             return Problem(statusCode: StatusCodes.Status500InternalServerError);
         }
 
+        [HttpDelete("/question/{id:Guid}")]
 
+        public async Task<IActionResult> DeleteQuestion(Guid id)
+        {
+            try
+            {
+                var accessorQuestion = await _daprClient.InvokeMethodAsync<Models.AccessorResults.CommonQuestion>(HttpMethod.Get, "questionaccessor", $"question/{id.ToString().ToUpper()}");
+
+                if (accessorQuestion == null)
+                {
+                    var error = $"Question {id} does not exist";
+                    _logger.LogError(error);
+                    return BadRequest(error);
+                }
+
+                if (accessorQuestion.Status == "Published")
+                {
+                    var error = $"Question {id} is published, can't delete it";
+                    _logger.LogError(error);
+                    return BadRequest(error);
+                }
+
+                var submitQuestion = _mapper.Map<Models.AccessorSubmits.CommonQuestion>(accessorQuestion);
+                submitQuestion.MessageType = "DeleteQuestion";
+                await _daprClient.InvokeBindingAsync("questionaccessorrequestqueue", "create", submitQuestion);
+                _logger.LogInformation($"DeleteQuestion: Question id: {id} accepted for deletion");
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Error while deleting Question: {id} Error: {ex.Message}");
+            }
+            return Problem(statusCode: StatusCodes.Status500InternalServerError);
+        }
         private async Task<IActionResult> PostNewOrUpdateQuestionToQueue(bool isUpdate)
         {
             try
@@ -179,6 +212,7 @@ namespace CatalogManager.Controllers
 
                     questionModel.QuestionVersion = "1.0";
                     questionModel.MessageType = isUpdate ? "UpdateQuestion" : "AddQuestion";
+                    questionModel.Status = "Draft";
                     
                     await _daprClient.InvokeBindingAsync("questionaccessorrequestqueue", "create", questionModel);
 

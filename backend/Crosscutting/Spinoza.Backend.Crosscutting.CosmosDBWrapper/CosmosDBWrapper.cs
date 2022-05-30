@@ -295,4 +295,18 @@ public class CosmosDBWrapper : ICosmosDBWrapper
 
     }
 
+    public async Task<bool> DeleteItemAsync(string id, string partitionKey)
+    {
+        using (ResponseMessage response = await Container.DeleteItemStreamAsync(id, new PartitionKey(partitionKey)))
+        {
+            if (!response.IsSuccessStatusCode)
+            {
+                _logger.LogWarning($"Failed to delete the Item, id: {id} Error code:{response.StatusCode}");
+                return false;
+            }
+            _logger.LogInformation($"Item {id} was deleted");
+            return true;
+        }
+    }
+
 }

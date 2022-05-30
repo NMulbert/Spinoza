@@ -10,7 +10,10 @@
     // ReSharper disable ClassNeverInstantiated.Global
     public class CommonQuestion : IQuestion
     {
+        public string Id { get; set; }
         public string Type { get; set; }
+        public string Status { get; set; }
+        public string QuestionVersion { get; set; }
     }
 
     public class MultipleChoiceQuestion : IQuestion
@@ -25,6 +28,7 @@
         public DateTimeOffset CreationTimeUTC { get; set; }
         public DateTimeOffset LastUpdateCreationTimeUTC { get; set; }
         public string DifficultyLevel { get; set; }
+        public string Status { get; set; }
         public string[] Tags { get; set; }
         public Content Content { get; set; }
     }
@@ -53,6 +57,7 @@
         public DateTimeOffset CreationTimeUTC { get; set; }
         public DateTimeOffset LastUpdateCreationTimeUTC { get; set; }
         public string DifficultyLevel { get; set; }
+        public string Status { get; set; }
         public string[] Tags { get; set; }
         public string Content { get; set; }
     }

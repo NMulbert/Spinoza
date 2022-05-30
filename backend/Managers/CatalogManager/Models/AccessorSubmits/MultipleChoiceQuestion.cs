@@ -1,7 +1,6 @@
 ﻿namespace CatalogManager.Models.AccessorSubmits
 {
 #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
-
     public class MultipleChoiceQuestion
     {
         public string MessageType { get; set; } = "";
@@ -14,6 +13,7 @@
         public string Type { get; set; }
         public string DifficultyLevel { get; set; }
         public string[] Tags { get; set; }
+        public string Status { get; set; }
         public Content Content { get; set; }
     }
 
