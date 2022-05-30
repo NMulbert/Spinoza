@@ -152,33 +152,35 @@ const TestCard = ({
                 Open
               </Button>
             </Link>
-            <CopyToClipboard
-              text={`${process.env.REACT_APP_WEBSITE_URI}/${id}`}
-              onCopy={() => {
-                setCopied(true);
-                setTimeout(() => setCopied(false), 1000);
-              }}
-            >
-              <Button
-                radius="lg"
-                variant="light"
-                color="gray"
-                style={{ marginTop: 14 }}
+            <Group position="right" spacing="xs">
+              <CopyToClipboard
+                text={`${process.env.REACT_APP_WEBSITE_URI}/${id}`}
+                onCopy={() => {
+                  setCopied(true);
+                  setTimeout(() => setCopied(false), 1000);
+                }}
               >
-                {copied ? <Copy color="#40c057" /> : <LinkIcon />}
+                <Button
+                  radius="lg"
+                  variant="light"
+                  color="gray"
+                  style={{ marginTop: 14 }}
+                >
+                  {copied ? <Copy color="#40c057" /> : <LinkIcon />}
+                </Button>
+              </CopyToClipboard>
+              <Button
+                color="red"
+                variant="light"
+                radius="lg"
+                style={{ float: "right", cursor: "pointer", marginTop: 14 }}
+                onClick={() => {
+                  setDeleteModal(true);
+                }}
+              >
+                <Trash />
               </Button>
-            </CopyToClipboard>
-            <Button
-              color="red"
-              variant="light"
-              radius="lg"
-              style={{ float: "right", cursor: "pointer", marginTop: 14 }}
-              onClick={() => {
-                setDeleteModal(true);
-              }}
-            >
-              <Trash />
-            </Button>
+            </Group>
           </Group>
         </Card.Section>
       </Card>
