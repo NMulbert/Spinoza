@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
+using System.ComponentModel.DataAnnotations;
 
 namespace CatalogManager.Models.FrontendRequests
 {
@@ -12,13 +13,18 @@ namespace CatalogManager.Models.FrontendRequests
         [MaxLength(100,ErrorMessage ="The title is  bigger than 100 characters")]
         [MinLength(3,ErrorMessage = "The title is less than 3 characters")]
         public string Title { get; set; }
+        [ValidateNever]
         public string SchemaVersion { get; set; }
+        [ValidateNever]
         public string TestVersion { get; set; }
+        [ValidateNever]
         public string? PreviousVersionId { get; set; }
         [Required(ErrorMessage = "The Author Id is missing")]
         public string AuthorId { get; set; }
+        [ValidateNever]
         public string Description { get; set; }
         public string[] Tags { get; set; }
+        [ValidateNever]
         public string[] QuestionsRefs { get; set; }
     }
 

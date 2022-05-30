@@ -31,8 +31,11 @@ namespace CatalogManager.Models.FrontendRequests
 
         [Required(ErrorMessage = "the Id is missing")]
         public string Id { get; set; }
+        [ValidateNever]
         public string SchemaVersion { get; set; }
+        [ValidateNever]
         public string QuestionVersion { get; set; }
+        [ValidateNever]
         public string PreviousVersionId { get; set; }
 
         [Required(ErrorMessage = "The Author Id is missing")]
@@ -46,7 +49,9 @@ namespace CatalogManager.Models.FrontendRequests
         [Required(ErrorMessage = "Please enter question difficulty")]
         [Range(typeof(int), "1", "5", ErrorMessage = "Please enter question difficulty btewwen 1-5")]
         public string DifficultyLevel { get; set; }
+        [ValidateNever]
         public string[] Tags { get; set; }
+
         public Content Content { get; set; }
     }
 
@@ -73,8 +78,11 @@ namespace CatalogManager.Models.FrontendRequests
 
         [Required(ErrorMessage = "the Id is missing")]
         public string Id { get; set; }
+        [ValidateNever]
         public string SchemaVersion { get; set; }
+        [ValidateNever]
         public string QuestionVersion { get; set; }
+        [ValidateNever]
         public string PreviousVersionId { get; set; }
         [Required(ErrorMessage = "The Author Id is missing")]
         public string AuthorId { get; set; }
@@ -87,6 +95,7 @@ namespace CatalogManager.Models.FrontendRequests
         [Required(ErrorMessage = "Please enter question difficulty")]
         [Range(typeof(int), "1", "5", ErrorMessage = "Please enter question difficulty btewwen 1-5")]
         public string DifficultyLevel { get; set; }
+        [ValidateNever]
         public string[] Tags { get; set; }
 
         [Required(ErrorMessage = "Please write your question content")]
