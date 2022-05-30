@@ -52,12 +52,18 @@ function AllQuestionsPage() {
 
   useEffect(() => {
     let url = `${process.env.REACT_APP_BACKEND_URI}/questions/count`;
+    if (questionsTags.length > 0) {
+      for (let tag of questionsTags) {
+        url = url + `?tag=${tag}`;
+      }
+    }
     fetch(url)
       .then((res) => res.json())
       .then((result) => {
         setPageCount(Math.ceil(result / limit));
+        setOffset(0);
       });
-  }, []);
+  }, [questionsTags]);
 
   const handlePageClick = (e: any) => {
     setOffset((e - 1) * limit);

@@ -34,7 +34,7 @@ function ChooseQuestion({ UpdateQuestions, setOpenedEQ }: QuestionsState) {
     let url = `${process.env.REACT_APP_BACKEND_URI}/allquestions`;
     if (questionsTags.length > 0) {
       for (let tag of questionsTags) {
-        url = url + `tag=${tag}`;
+        url = url + `?tag=${tag}`;
       }
     }
     fetch(url)
