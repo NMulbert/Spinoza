@@ -10,11 +10,9 @@ import {
   Radio,
   SegmentedControl,
   RadioGroup,
-  Modal,
+  ActionIcon,
 } from "@mantine/core";
 import { CalendarTime, Edit, UserCircle } from "tabler-icons-react";
-import NewQuestion from "../Questions/NewQuestion";
-import ChooseQuestion from "../Questions/ChooseQuestion";
 import MDEditor from "@uiw/react-md-editor";
 import { useParams } from "react-router-dom";
 import axios from "axios";
@@ -91,14 +89,18 @@ function OpenQuestion() {
         }}
       >
         <Grid.Col span={12}>
-          <Edit
-            size={60}
-            strokeWidth={2}
+          <ActionIcon
+            size="xl"
+            color="blue"
+            variant="hover"
+            radius="lg"
             style={{ float: "right", cursor: "pointer" }}
-            onClick={(e) => {
+            onClick={() => {
               setEditMode(!editMode);
             }}
-          />
+          >
+            <Edit size={50} />
+          </ActionIcon>
 
           {editMode ? (
             <TextInput

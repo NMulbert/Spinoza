@@ -27,3 +27,10 @@ export const updateQuestion = (question: any) => {
     question: question,
   };
 };
+
+export const deleteQuestion = (question: any) => {
+  return {
+    type: questionsTypes.DELETE_QUESTION,
+    question: question,
+  };
+};
