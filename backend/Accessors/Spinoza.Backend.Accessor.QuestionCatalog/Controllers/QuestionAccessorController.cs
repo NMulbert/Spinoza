@@ -183,6 +183,10 @@ namespace Spinoza.Backend.Accessor.QuestionCatalog.Controllers
                 {
                     result = await UpdateQuestionsAsync(question);
                 }
+                else if ((string)question["messageType"]! == "DeleteQuestion")
+                {
+                    result = await DeleteQuestionAsync(question);
+                }
                 else
                 {
                     result = CreateQuestionResult((string)question["id"]!, "UnknownRequest", "Understand only CreateQuestion or UpdateQuestion", 1, false);
@@ -281,15 +285,56 @@ namespace Spinoza.Backend.Accessor.QuestionCatalog.Controllers
             }
         }
 
+        public async Task<Models.Responses.QuestionChangeResult> DeleteQuestionAsync(JsonNode? questionDeleteInfo)
+        {
+            var response = new Models.Responses.QuestionChangeResult()
+            {
+                Id = questionDeleteInfo?["id"]?.GetValue<string>() ?? "Unknown",
+                MessageType = "Deleted",
+                ActionResult = "Error",
+                Reason = "Delete question",
+                Sender = "Catalog",
+                ReasonId = 13,
+                ResourceType = "Question"
+            };
+
+            var questionVersion = questionDeleteInfo?["QuestionVersion"]?.GetValue<string>();
+
+            if (questionDeleteInfo == null || questionVersion == null)
+            {
+                return response;
+            }
+
+            try
+            {
+                bool result = await _cosmosDBWrapper.DeleteItemAsync(response.Id, questionVersion);
+                if (result == false)
+                {
+                    return response;
+                }
+                response.ActionResult = "Success";
+                //else
+                return response;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Error while deleting a question: {ex.Message}");
+
+            }
+            response.ActionResult = "Error";
+            return response;
+        }
+
+
         [HttpGet("/questions/count")]
         public async Task<IActionResult> GetTotalQuestionCount()
         {
             var tags = Request.Query["tags"].ToString();
             _logger.LogInformation($"the tags are: {tags}");
-            
+
             try
             {
-               
+
                 if (string.IsNullOrEmpty(tags))
                 {
                     var dbTotalQuestionsCount =
@@ -308,7 +353,7 @@ namespace Spinoza.Backend.Accessor.QuestionCatalog.Controllers
                 }
                 //else
                 _logger.LogInformation(totalQuestionsByTags.ToJsonString());
-                 int count = totalQuestionsByTags["question"]!.GetValue<int>();
+                int count = totalQuestionsByTags["question"]!.GetValue<int>();
                 return new OkObjectResult(count);
 
             }

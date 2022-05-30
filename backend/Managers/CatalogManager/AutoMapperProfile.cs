@@ -35,5 +35,7 @@ internal class AutoMapperProfile : Profile
         
         CreateMap<Models.AccessorResults.TagChangeResult, Models.FrontendResponses.TagChangeResult>();
 
+        CreateMap<Models.AccessorResults.CommonQuestion, Models.AccessorSubmits.CommonQuestion>()
+            .ForMember(dest=>dest.MessageType, opt => opt.Ignore());
     }
 }

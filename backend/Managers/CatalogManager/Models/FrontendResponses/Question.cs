@@ -20,6 +20,7 @@
         public string DifficultyLevel { get; set; }
         public string[] Tags { get; set; }
         public Content Content { get; set; }
+        public string Status { get; set; }
     }
 
     public class Content
@@ -45,6 +46,7 @@
         public string Type { get; set; }
         public DateTimeOffset CreationTimeUTC { get; set; }
         public DateTimeOffset LastUpdateCreationTimeUTC { get; set; }
+        public string Status { get; set; }
         public string DifficultyLevel { get; set; }
         public string[] Tags { get; set; }
         public string Content { get; set; }

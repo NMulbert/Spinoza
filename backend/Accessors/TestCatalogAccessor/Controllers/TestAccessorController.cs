@@ -110,7 +110,46 @@ namespace Spinoza.Backend.Accessor.TestCatalog.Controllers
             }
             return Problem(statusCode: StatusCodes.Status500InternalServerError);
         }
-        
+
+
+        public async Task<Models.Responses.TestChangeResult> DeleteTestAsync(Models.Requests.Test? testDeleteInfo)
+        {
+            var response = new Models.Responses.TestChangeResult()
+            {
+                Id = testDeleteInfo?.Id ?? "Unknown",
+                MessageType = "Deleted",
+                ActionResult = "Error", 
+                Reason = "Delete test",
+                Sender = "Catalog",
+                ReasonId = 12,
+                ResourceType = "Test"
+            };
+
+            if (testDeleteInfo == null)
+            {
+                return response;
+            }
+
+            try
+            {
+                bool result = await _cosmosDBWrapper.DeleteItemAsync(testDeleteInfo.Id, testDeleteInfo.TestVersion);
+                if (result == false)
+                {
+                    return response;
+                }
+                response.ActionResult = "Success";
+                //else
+                return response;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Error while deleting a test: {ex.Message}");
+
+            }
+            response.ActionResult = "Error";
+            return response;
+        }
+
 
         [HttpPost("/testaccessorrequestqueue")]
         public async Task<IActionResult> GetTestDataInputFromQueueBinding()
@@ -127,6 +166,10 @@ namespace Spinoza.Backend.Accessor.TestCatalog.Controllers
                 else if (testRequest.MessageType == "UpdateTest")
                 {
                     result = await UpdateTestAsync(testRequest);
+                }
+                else if (testRequest.MessageType == "DeleteTest")
+                {
+                    result = await DeleteTestAsync(testRequest);
                 }
                 else
                 {

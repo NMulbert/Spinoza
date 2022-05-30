@@ -53,6 +53,7 @@ namespace Spinoza.Backend.Managers.TestCatalog.Tests
         async Task<bool> ISignalRWrapper.WaitForSignalREventAsync(int timeoutInSeconds)
         {
             var isSucceeded = await _signalRMessageReceived.WaitAsync(timeoutInSeconds * 1000);
+            await Task.Delay(1000);
             return isSucceeded;
         }
 
