@@ -154,7 +154,7 @@ const TestCard = ({
             </Link>
             <Group position="right" spacing="xs">
               <CopyToClipboard
-                text={`${process.env.REACT_APP_WEBSITE_URI}/${id}`}
+                text={`${process.env.REACT_APP_WEBSITE_URI}/tests/${id}`}
                 onCopy={() => {
                   setCopied(true);
                   setTimeout(() => setCopied(false), 1000);
