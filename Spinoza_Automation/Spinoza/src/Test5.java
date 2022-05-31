@@ -123,7 +123,7 @@ public class Test5 {
 
 	private static void AddTags(WebDriver driver) {
 		try {
-			WebElement Tags = driver.findElement(By.xpath("//input[@placeholder='Select tags']"));
+			WebElement Tags = driver.findElement(By.xpath("(//input[@placeholder='Select tags'])[2]"));
 //			Tags.click();
 			Tags.sendKeys("React", Keys.ENTER);
 			Tags.sendKeys("C#", Keys.ENTER);
