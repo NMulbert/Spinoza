@@ -1,6 +1,4 @@
-import java.time.Duration;
 import java.util.Date;
-import java.util.NoSuchElementException;
 import java.util.concurrent.TimeUnit;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
@@ -8,12 +6,8 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.support.ui.ExpectedConditions;
-import org.openqa.selenium.support.ui.FluentWait;
-import org.openqa.selenium.support.ui.Wait;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.testng.Assert;
-
-import com.google.common.base.Function;
 
 public class Test1 {
 
@@ -26,37 +20,43 @@ public class Test1 {
 		driver.manage().timeouts().implicitlyWait(15, TimeUnit.SECONDS);
 
 		driver.manage().window().maximize();
-		driver.get("http://localhost:3000/");
-		
-		System.out.println("TEST START - TEST'S CREATE");
+//		driver.get("http://localhost:3000/");
+		driver.get("https://www.zionetapp.com/");
 
+		
+		// TEST'S CREATE TEST
+		System.out.println("-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-");
+		System.out.println("TEST START - TEST'S CREATE");
 		System.out.println("-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-");
 
 		System.out.println("TEST START - TEST 1");
-		CreateNewTest(driver);
+		CreateNewTest(driver);  // CREATE TEST AND CHECK TITLE CONFLICT
 		System.out.println("TEST END - TEST 1");
 
 		System.out.println("-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-");
+		Thread.sleep(5000);
 
 		System.out.println("TEST START - TEST 2");
-		CreateNewTest_Test1(driver);
+		CreateNewTest_Test1(driver); // CREATE TEST WITHOUT DATA
 		System.out.println("TEST END - TEST 2");
 
 		System.out.println("-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-");
+		Thread.sleep(5000);
 
 		System.out.println("TEST START - TEST 3");
-		CreateNewTest_Test2(driver);
+		CreateNewTest_Test2(driver); // CREATE TEST WITH TITLE ONLY
 		System.out.println("TEST END - TEST 3");
 
 		System.out.println("-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-");
+		Thread.sleep(5000);
 
-		System.out.println("TEST END - TEST 4");
-		CreateNewTest_Test3(driver);
+		System.out.println("TEST START - TEST 4");
+		CreateNewTest_Test3(driver); // CREATE TEST WITH ALL DATA FIELDS
 		System.out.println("TEST END - TEST 4");
 
 		System.out.println("-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-");
-
 		System.out.println("TEST END - TEST'S CREATE");
+		System.out.println("-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-");
 
 		Thread.sleep(5000);
 		driver.quit();
@@ -104,6 +104,7 @@ public class Test1 {
 		try {
 			// CREATE TEST WITHOUT DATA
 			driver.findElement(By.xpath("//span[contains(text(),'Tests')]")).click();
+			Thread.sleep(5000);
 			driver.findElement(By.xpath("//span[contains(text(),'NEW TEST')]")).click();
 
 			driver.findElement(By.cssSelector(
@@ -112,6 +113,8 @@ public class Test1 {
 
 			CreateTest1_Check(driver);
 
+			Thread.sleep(3000);
+			
 			driver.findElement(By.xpath("//span[contains(text(),'Tests')]")).click();
 
 		} catch (Exception e) {
@@ -124,6 +127,7 @@ public class Test1 {
 		try {
 			// CREATE TEST WITH TITLE ONLY
 			driver.findElement(By.xpath("//span[contains(text(),'Tests')]")).click();
+			Thread.sleep(5000);
 			driver.findElement(By.xpath("//span[contains(text(),'NEW TEST')]")).click();
 
 			AddTitle(driver);
@@ -149,6 +153,7 @@ public class Test1 {
 		try {
 			// CREATE TEST WITH ALL DATA FIELDS
 			driver.findElement(By.xpath("//span[contains(text(),'Tests')]")).click();
+			Thread.sleep(5000);
 			driver.findElement(By.xpath("//span[contains(text(),'NEW TEST')]")).click();
 
 			// TITLE
@@ -218,6 +223,7 @@ public class Test1 {
 			Tags.sendKeys("C#", Keys.ENTER);
 			Tags.sendKeys("JavaScript", Keys.ENTER);
 			Tags.sendKeys("Python", Keys.ENTER);
+			Tags.click();
 			System.out.println("TAGS = ['React','C#','JavaScript','Python']");
 
 		} catch (Exception e) {

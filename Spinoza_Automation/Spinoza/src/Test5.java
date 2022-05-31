@@ -1,5 +1,8 @@
+import java.util.Date;
+import java.util.Random;
 import java.util.concurrent.TimeUnit;
 import org.openqa.selenium.By;
+import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
@@ -11,59 +14,73 @@ public class Test5 {
 
 	public static void main(String[] args) throws InterruptedException {
 		// Invoke Browser
-		// Tests Edit Question
+		// Tests Create Question
 
 		System.setProperty("webdriver.chrome.driver", ".\\lib\\chromedriver.exe");
 		WebDriver driver = new ChromeDriver();
 		driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
 
 		driver.manage().window().maximize();
-		driver.get("http://localhost:3000/");
-		driver.findElement(By.xpath("//span[contains(text(),'Questions')]")).click();
+//		driver.get("http://localhost:3000/");
+		driver.get("https://www.zionetapp.com/");
 
-		System.out.println("TEST START - QUESTION'S EDIT");
-
+		System.out.println("-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-");
+		System.out.println("TEST START - QUESTION'S CREATE");
 		System.out.println("-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-");
 
 		System.out.println("TEST START - TEST 1");
-		EditQuestionTitle(driver);
+		CreateNewQuestion(driver, 2); // CREATE QUESTION WITH 'MULTIPLE' ANSWERS
 		System.out.println("TEST END - TEST 1");
 
 		System.out.println("-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-");
 
 		System.out.println("TEST START - TEST 2");
-		EditQuestionDescription(driver);
+		CreateNewQuestion(driver, 1); // CREATE QUESTION WITH 'TEXT' ANSWERS
 		System.out.println("TEST END - TEST 2");
 
 		System.out.println("-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-");
-
-		System.out.println("TEST START - TEST 3");
-		EditQuestionTags(driver);
-		System.out.println("TEST END - TEST 3");
-
+		System.out.println("TEST END - QUESTION'S CREATE");
 		System.out.println("-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-");
-
-		System.out.println("TEST END - QUESTION'S EDIT");
 
 		Thread.sleep(5000);
 		driver.quit();
 
 	}
 
-	public static void EditQuestionTitle(WebDriver driver) {
+	public static void CreateNewQuestion(WebDriver driver, int type) throws InterruptedException {
 		try {
-			// EDIT QUESTION TITLE
+			// CREATE QUESTION WITH SPECIFIC TYPE
 
-			// EDIT TEST
-			EditTest(driver);
+			driver.findElement(By.xpath("//span[contains(text(),'Questions')]")).click();
+			Thread.sleep(5000);
+			driver.findElement(By.xpath("//span[contains(text(),'NEW QUESTION')]")).click();
 
-			// EDIT TITLE
-			WebElement Title = driver.findElement(By.xpath(
-					"//input[@class='mantine-TextInput-defaultVariant mantine-TextInput-input mantine-us7vc8']"));
-			Title.click();
-			Title.clear();
-			Title.sendKeys("NEW TITLE");
-			System.out.println("TITLE = 'NEW TITLE'");
+			// TITLE
+			AddTitle(driver);
+
+			// TAGS
+			AddTags(driver);
+
+			// DESCRIPTION
+			AddDescription(driver);
+
+			// ANSWER TYPE
+			switch (type) {
+			case 1: {
+				AddAnswerType(driver, type);
+				break;
+			}
+			case 2: {
+				AddAnswerType(driver, type);
+				MultipleChoice(driver, type, 1);
+				break;
+			}
+			default:
+				throw new IllegalArgumentException("Unexpected value: " + type);
+			}
+
+			// SELECT TYPE
+			AddSelectLevel(driver);
 
 			// SAVE AS DRAFT
 			driver.findElement(By.cssSelector(
@@ -71,157 +88,143 @@ public class Test5 {
 					.click();
 
 			WebDriverWait wait = new WebDriverWait(driver, 15);
-			wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//div[@role='alert']")));
+			wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("div[role='alert']")));
 
-			String alert = driver.findElement(By.xpath("//div[@role='alert']")).getText();
+			CreateNewQuestion_Check(driver);
 
-			if (alert.contains("InternalServerError")) {
-				System.out.println("TEST EDIT TITLE FAILED");
-			} else {
-				EditQuestionTitle_Check(driver);
-			}
-			
-			Thread.sleep(500);
+			driver.findElement(By.cssSelector(
+					"button[class='mantine-ActionIcon-hover mantine-ActionIcon-root mantine-Modal-close mantine-vao037']"))
+					.click();
+			Thread.sleep(5000);
+			// RE-ENTER TO QUESTIONS
+			driver.findElement(By.xpath("//span[contains(text(),'Tests')]")).click();
 			driver.findElement(By.xpath("//span[contains(text(),'Questions')]")).click();
 
 		} catch (Exception e) {
-			System.out.println("Error = EditQuestionTitle");
+			System.out.println("Error = CreateNewQuestion_Test" + type);
 			System.out.println(e);
-			
 		}
 	}
-	
-	public static void EditQuestionDescription(WebDriver driver) {
+
+	private static void AddTitle(WebDriver driver) {
 		try {
-			// EDIT TEST DESCRIPTION
+			Date date = new Date();
+			String s = date.toLocaleString();
+			WebElement TestTitle = driver.findElement(By.xpath("//input[@placeholder='Question Name']"));
+			TestTitle.clear();
+			TestTitle.sendKeys("Automation QUESTION | " + s);
+			System.out.println("TITLE = 'NEW QUESTION' | " + s);
 
-			// EDIT TEST
-			EditTest(driver);
+		} catch (Exception e) {
+			System.out.println("Error = Question Title");
+			System.out.println(e);
+		}
+	}
 
-			// EDIT DESCRIPTION
+	private static void AddTags(WebDriver driver) {
+		try {
+			WebElement Tags = driver.findElement(By.xpath("//input[@placeholder='Select tags']"));
+//			Tags.click();
+			Tags.sendKeys("React", Keys.ENTER);
+			Tags.sendKeys("C#", Keys.ENTER);
+			Tags.sendKeys("JavaScript", Keys.ENTER);
+			Tags.sendKeys("Python", Keys.ENTER);
+			Tags.click();
+			System.out.println("TAGS = ['React','C#','JavaScript','Python']");
+
+		} catch (Exception e) {
+			System.out.println("Error = Tags");
+			System.out.println(e);
+		}
+	}
+
+	private static void AddDescription(WebDriver driver) {
+		try {
 			WebElement Description = driver.findElement(By.cssSelector(".w-md-editor-text-input"));
 			Description.click();
 			Description.clear();
-			Description.sendKeys("NEW EDIT DESCRIPTION");
-			System.out.println("DESCRIPTION = 'NEW EDIT DESCRIPTION'");
-
-			// SAVE AS DRAFT
-			driver.findElement(By.cssSelector(
-					"button[class='mantine-Button-gradient mantine-Button-root mantine-Group-child mantine-1m2tbz']"))
-					.click();
-
-			WebDriverWait wait = new WebDriverWait(driver, 15);
-			wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//div[@role='alert']")));
-
-			String alert = driver.findElement(By.xpath("//div[@role='alert']")).getText();
-
-			if (alert.contains("InternalServerError")) {
-				System.out.println("TEST EDIT DESCRIPTION FAILED");
-			} else {
-				EditQuestionDescription_Check(driver);
-			}
-
-			driver.findElement(By.xpath("//span[contains(text(),'Tests')]")).click();
+			Description.sendKeys("QUESTION DESCRIPTION");
+			System.out.println("DESCRIPTION = 'QUESTION DESCRIPTION'");
 
 		} catch (Exception e) {
-			System.out.println("Error = EditTestDescription");
+			System.out.println("Error = Description");
 			System.out.println(e);
 		}
-
 	}
 
-	public static void EditQuestionTags(WebDriver driver) {
+	private static void AddAnswerType(WebDriver driver, int type) {
 		try {
-			// EDIT TAGS
+			switch (type) {
+			case 1: {
+				// CHOICE 'TEXT' TYPE
+				driver.findElement(By.xpath("//label[contains(text(),'Text')]")).click();
+				System.out.println("ANSWER TYPE = 'TEXT'");
+				break;
+			}
+			case 2: {
+				// CHOICE 'MULTIPLE' TYPE
+				driver.findElement(By.xpath("//label[contains(text(),'Multiple')]")).click();
+				System.out.println("ANSWER TYPE = 'TEXT'");
+				break;
+			}
+			default:
+				throw new IllegalArgumentException("Unexpected value: " + type);
+			}
 
-			// EDIT TEST
-			EditTest(driver);
+		} catch (Exception e) {
+			System.out.println("Error = Answer Type");
+			System.out.println(e);
+		}
+	}
 
-			// EDIT TAGS
-			int TagsCount = driver.findElements((By.xpath(
-					"//button[@class='mantine-ActionIcon-transparent mantine-ActionIcon-root mantine-MultiSelect-defaultValueRemove mantine-9kufq0']")))
+	private static void AddSelectLevel(WebDriver driver) {
+		try {
+			// GENERATE RANDOM NUMBER FOR LEVEL
+			int levels = driver.findElements(By.xpath("//input[@class='mantine-1ll72zi mantine-RadioGroup-radio']"))
 					.size();
+			Random rnd = new Random();
+			int select = rnd.nextInt((levels - (levels - 1)), levels);
 
-			if (TagsCount > 1) {
-				driver.findElement(By.xpath(
-						"(//button[@class='mantine-ActionIcon-transparent mantine-ActionIcon-root mantine-MultiSelect-defaultValueRemove mantine-9kufq0'])[1]"))
-						.click();
-				System.out.println("TAGS = " + (driver
-						.findElement(By.cssSelector(".mantine-1kunnmy.mantine-MultiSelect-values")).getText()));
-			}
-
-			driver.findElement(By.cssSelector(".w-md-editor-text-input")).click();
-
-			// SAVE AS DRAFT
-			driver.findElement(By.cssSelector(
-					"button[class='mantine-Button-gradient mantine-Button-root mantine-Group-child mantine-1m2tbz']"))
+			driver.findElement(By.xpath("(//input[@class='mantine-1ll72zi mantine-RadioGroup-radio'])[" + select + "]"))
 					.click();
+			System.out.println("SELECT LEVEL = 'QUESTION LEVEL' (" + select + ")");
 
-			WebDriverWait wait = new WebDriverWait(driver, 15);
-			wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//div[@role='alert']")));
+		} catch (Exception e) {
+			System.out.println("Error = Select Type");
+			System.out.println(e);
+		}
+	}
 
-			String alert = driver.findElement(By.xpath("//div[@role='alert']")).getText();
+	private static void MultipleChoice(WebDriver driver, int choices, int correct) {
+		try {
+			// ADD OPTTIONS
+			for (int i = 1; i <= choices; i++) {
+				driver.findElement(By.xpath("//span[contains(text(),'+ Add option')]")).click();
 
-			if (alert.contains("InternalServerError")) {
-				System.out.println("TEST EDIT DESCRIPTION FAILED");
-			} else {
-				EditQuestionTags_Check(driver);
+				driver.findElement(By.xpath("(//textarea[@placeholder='Add option'])[" + i + "]"))
+						.sendKeys("QUESTION OPTION " + i);
 			}
 
-			driver.findElement(By.xpath("//span[contains(text(),'Tests')]")).click();
+			// SET CORRECT ANSWER
+			driver.findElement(By.xpath("//span[contains(text(),'Correct answer')]")).click();
+
+			driver.findElement(By.xpath("(//input[@name='Answer'])[" + correct + "]")).click();
+			
+			driver.findElement(By.xpath("//span[contains(text(),'Done')]")).click();
 
 		} catch (Exception e) {
-			System.out.println("Error = EditTestTags");
+			System.out.println("Error = Multiple Choice");
 			System.out.println(e);
 		}
+
 	}
 
-
-	private static void EditTest(WebDriver driver) {
+	private static void CreateNewQuestion_Check(WebDriver driver) {
 		try {
-			// EDITE TEST
-
-			int QuestionCount = driver.findElements(By.xpath("//div[@class='mantine-Col-root mantine-1akkebb']")).size()
-					- 1;
-			System.out.println("TEST's COUNT = " + QuestionCount);
-
-			driver.findElement(By.xpath("(//button[@class='mantine-Button-light mantine-Button-root mantine-5l7wha'])["
-					+ (QuestionCount) + "]")).click();
-
-			driver.findElement(By.xpath(".//*[@class='icon icon-tabler icon-tabler-edit']")).click();
-
+			Assert.assertTrue(driver.findElement(By.xpath("//div[@role='alert']")).getText().contains("created"));
+			System.out.println("Create Test2 = SUCCESS");
 		} catch (Exception e) {
-			System.out.println("Error = EditTestButton");
-			System.out.println(e);
-		}
-	}
-	
-	private static void EditQuestionTitle_Check(WebDriver driver) {
-		try {
-			Assert.assertTrue(driver.findElement(By.xpath("//div[@role='alert']")).getText().contains("updated"));
-			System.out.println("Edit Test Title = SUCCESS");
-		} catch (Exception e) {
-			System.out.println("Edit Test Title = FAILED");
-			System.out.println(e);
-		}
-	}
-	
-	private static void EditQuestionDescription_Check(WebDriver driver) {
-		try {
-			Assert.assertTrue(driver.findElement(By.xpath("//div[@role='alert']")).getText().contains("updated"));
-			System.out.println("Edit Test Description = SUCCESS");
-		} catch (Exception e) {
-			System.out.println("Edit Test Description = FAILED");
-			System.out.println(e);
-		}
-	}
-
-	private static void EditQuestionTags_Check(WebDriver driver) {
-		try {
-			Assert.assertTrue(driver.findElement(By.xpath("//div[@role='alert']")).getText().contains("updated"));
-			System.out.println("Edit Test Tags = SUCCESS");
-		} catch (Exception e) {
-			System.out.println("Edit Test Tags = FAILED");
+			System.out.println("Create Test2 = FAILED");
 			System.out.println(e);
 		}
 	}

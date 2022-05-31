@@ -1,226 +1,70 @@
-import java.util.Date;
-import java.util.Random;
 import java.util.concurrent.TimeUnit;
 import org.openqa.selenium.By;
-import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
-import org.openqa.selenium.support.ui.ExpectedConditions;
-import org.openqa.selenium.support.ui.WebDriverWait;
-import org.testng.Assert;
 
 public class Test4 {
 
 	public static void main(String[] args) throws InterruptedException {
 		// Invoke Browser
-		// Tests Create Question
+		// Tests Delete Test
 
 		System.setProperty("webdriver.chrome.driver", ".\\lib\\chromedriver.exe");
 		WebDriver driver = new ChromeDriver();
-		driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
+		driver.manage().timeouts().implicitlyWait(15, TimeUnit.SECONDS);
 
 		driver.manage().window().maximize();
-		driver.get("http://localhost:3000/");
+//		driver.get("http://localhost:3000/");
+		driver.get("https://www.zionetapp.com/");
 
-		System.out.println("TEST START - QUESTION'S CREATE");
-
+		System.out.println("-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-");
+		System.out.println("TEST START - TEST'S DELETE");
 		System.out.println("-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-");
 
 		System.out.println("TEST START - TEST 1");
-		CreateNewQuestion(driver, 1);
+		DeleteAutomationTest(driver); // DELETE AUTOMATION TEST'S
 		System.out.println("TEST END - TEST 1");
 
 		System.out.println("-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-");
-
-		System.out.println("TEST START - TEST 2");
-		CreateNewQuestion(driver, 2);
-		System.out.println("TEST END - TEST 2");
-
-		System.out.println("-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-");
-		
-		System.out.println("TEST END - QUESTION'S CREATE");
-		
 		Thread.sleep(5000);
 		driver.quit();
-
 	}
 
-	public static void CreateNewQuestion(WebDriver driver, int type) throws InterruptedException {
+	// TEST'S DELETE TEST
+	public static void DeleteAutomationTest(WebDriver driver) {
 		try {
-			// CREATE QUESTION WITH SPECIFIC TYPE
+			// DELETE AUTOMATION TEST'S
 
-			driver.findElement(By.xpath("//span[contains(text(),'Questions')]")).click();
-			driver.findElement(By.xpath("//span[contains(text(),'NEW QUESTION')]")).click();
-
-			// TITLE
-			AddTitle(driver);
-
-			// TAGS
-			AddTags(driver);
-
-			// DESCRIPTION
-			AddDescription(driver);
-
-			// ANSWER TYPE
-			switch (type) {
-			case 1: {
-				AddAnswerType(driver, type);
-				break;
-			}
-			case 2: {
-				AddAnswerType(driver, type);
-				MultipleChoice(driver, type, 1);
-				break;
-			}
-			default:
-				throw new IllegalArgumentException("Unexpected value: " + type);
-			}
-
-			// SELECT TYPE
-			AddSelectLevel(driver);
-
-			// SAVE AS DRAFT
-			driver.findElement(By.cssSelector(
-					"button[class='mantine-Button-gradient mantine-Button-root mantine-Group-child mantine-1m2tbz']"))
-					.click();
-
-			WebDriverWait wait = new WebDriverWait(driver, 15);
-			wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("div[role='alert']")));
-
-			CreateNewQuestion_Check(driver);
-
-			driver.findElement(By.cssSelector(
-					"button[class='mantine-ActionIcon-hover mantine-ActionIcon-root mantine-Modal-close mantine-vao037']"))
-					.click();
-
-			// RE-ENTER TO QUESTIONS
 			driver.findElement(By.xpath("//span[contains(text(),'Tests')]")).click();
-			driver.findElement(By.xpath("//span[contains(text(),'Questions')]")).click();
+			Thread.sleep(3000);
+			int TestCount = driver.findElements(By.xpath("//div[@class='mantine-Col-root mantine-1akkebb']")).size()
+					- 1;
+			System.out.println("TEST's COUNT = " + TestCount);
 
-		} catch (Exception e) {
-			System.out.println("Error = CreateNewQuestion_Test" + type);
-			System.out.println(e);
-		}
-	}
+			int count = driver.findElements(By.xpath("//h4[contains(text(),'Automation')]")).size();
 
-	private static void AddTitle(WebDriver driver) {
-		try {
-			Date date = new Date();
-			String s = date.toLocaleString();
-			WebElement TestTitle = driver.findElement(By.xpath("//input[@placeholder='Question Name']"));
-			TestTitle.clear();
-			TestTitle.sendKeys("Automation QUESTION | " + s);
-			System.out.println("TITLE = 'NEW QUESTION' | " + s);
+			System.out.println("TEST's AUTOMATION COUNT = " + count);
 
-		} catch (Exception e) {
-			System.out.println("Error = Question Title");
-			System.out.println(e);
-		}
-	}
+			while (count != 0) {
+				driver.findElement(By.xpath(
+						"(//button[@class='mantine-Button-light mantine-Button-root mantine-Group-child mantine-1q8ef6b'])["
+								+ (TestCount) + "]"))
+						.click();
 
-	private static void AddTags(WebDriver driver) {
-		try {
-			WebElement Tags = driver.findElement(By.xpath("//input[@placeholder='Select tags']"));
-			Tags.sendKeys("React", Keys.ENTER);
-			Tags.sendKeys("C#", Keys.ENTER);
-			Tags.sendKeys("JavaScript", Keys.ENTER);
-			Tags.sendKeys("Python", Keys.ENTER);
-			System.out.println("TAGS = ['React','C#','JavaScript','Python']");
+				driver.findElement(By.cssSelector(
+						"div.mantine-Modal-root.mantine-bsiqi3 div.mantine-16pg774.mantine-Modal-inner div.mantine-Paper-root.mantine-Modal-modal.mantine-vos779:nth-child(1) div.mantine-l553vn.mantine-Modal-body div.mantine-Group-root.mantine-1u7f61y > button.mantine-Button-filled.mantine-Button-root.mantine-Group-child.mantine-6nsk2i:nth-child(1)"))
+						.click();
 
-		} catch (Exception e) {
-			System.out.println("Error = Tags");
-			System.out.println(e);
-		}
-	}
+				count--;
+				TestCount--;
 
-	private static void AddDescription(WebDriver driver) {
-		try {
-			WebElement Description = driver.findElement(By.cssSelector(".w-md-editor-text-input"));
-			Description.click();
-			Description.clear();
-			Description.sendKeys("QUESTION DESCRIPTION");
-			System.out.println("DESCRIPTION = 'QUESTION DESCRIPTION'");
+				Thread.sleep(1000);
 
-		} catch (Exception e) {
-			System.out.println("Error = Description");
-			System.out.println(e);
-		}
-	}
-
-	private static void AddAnswerType(WebDriver driver, int type) {
-		try {
-			switch (type) {
-			case 1: {
-				// CHOICE 'TEXT' TYPE
-				driver.findElement(By.xpath("//label[contains(text(),'Text')]")).click();
-				System.out.println("ANSWER TYPE = 'TEXT'");
-				break;
-			}
-			case 2: {
-				// CHOICE 'MULTIPLE' TYPE
-				driver.findElement(By.xpath("//label[contains(text(),'Multiple')]")).click();
-				System.out.println("ANSWER TYPE = 'TEXT'");
-				break;
-			}
-			default:
-				throw new IllegalArgumentException("Unexpected value: " + type);
+				System.out.println("Delete Automation Tests = SUCCESS");
 			}
 
 		} catch (Exception e) {
-			System.out.println("Error = Answer Type");
-			System.out.println(e);
-		}
-	}
-
-	private static void AddSelectLevel(WebDriver driver) {
-		try {
-			// GENERATE RANDOM NUMBER FOR LEVEL
-			int levels = driver.findElements(By.xpath("//input[@class='mantine-1ll72zi mantine-RadioGroup-radio']"))
-					.size();
-			Random rnd = new Random();
-			int select = rnd.nextInt((levels - (levels - 1)), levels);
-
-			driver.findElement(By.xpath("(//input[@class='mantine-1ll72zi mantine-RadioGroup-radio'])[" + select + "]"))
-					.click();
-			System.out.println("SELECT LEVEL = 'QUESTION LEVEL' (" + select + ")");
-
-		} catch (Exception e) {
-			System.out.println("Error = Select Type");
-			System.out.println(e);
-		}
-	}
-
-	private static void MultipleChoice(WebDriver driver, int choices, int correct) {
-		try {
-			// ADD OPTTIONS
-			for (int i = 1; i <= choices; i++) {
-				driver.findElement(By.xpath("//span[contains(text(),'+ Add option')]")).click();
-
-				driver.findElement(By.xpath("(//textarea[@placeholder='Add option'])[" + i + "]"))
-						.sendKeys("QUESTION OPTION " + i);
-			}
-
-			// SET CORRECT ANSWER
-			driver.findElement(By.xpath("//span[contains(text(),'Correct answer')]")).click();
-
-			driver.findElement(By.xpath("(//input[@name='Answer'])[" + correct + "]"));
-			
-			driver.findElement(By.xpath("//span[contains(text(),'Done')]")).click();
-
-		} catch (Exception e) {
-			System.out.println("Error = Multiple Choice");
-			System.out.println(e);
-		}
-
-	}
-
-	private static void CreateNewQuestion_Check(WebDriver driver) {
-		try {
-			Assert.assertTrue(driver.findElement(By.xpath("//div[@role='alert']")).getText().contains("created"));
-			System.out.println("Create Test2 = SUCCESS");
-		} catch (Exception e) {
-			System.out.println("Create Test2 = FAILED");
+			System.out.println("Error = DeleteAutomationTest");
 			System.out.println(e);
 		}
 	}

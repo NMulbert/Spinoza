@@ -17,19 +17,20 @@ public class Test3 {
 		driver.manage().timeouts().implicitlyWait(15, TimeUnit.SECONDS);
 
 		driver.manage().window().maximize();
-		driver.get("http://localhost:3000/");
+//		driver.get("http://localhost:3000/");
+		driver.get("https://www.zionetapp.com/");
 
+		System.out.println("-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-");
 		System.out.println("TEST START - TEST'S SEARCH");
-
 		System.out.println("-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-");
 
 		System.out.println("TEST START - TEST 1");
-		SearchTestsByTag(driver, "Python");
+		SearchTestsByTag(driver, "Python"); // SEARCH TESTS BY TAG
 		System.out.println("TEST END - TEST 1");
 
 		System.out.println("-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-");
-
 		System.out.println("TEST END - TEST'S SEARCH");
+		System.out.println("-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-");
 
 		Thread.sleep(3000);
 		driver.quit();
