@@ -44,7 +44,7 @@ public class Test2 {
 		Thread.sleep(5000);
 
 		System.out.println("TEST START - TEST 3");
-		EditTestTags(driver); // EDIT TEST TAGS
+		//EditTestTags(driver); // EDIT TEST TAGS
 		System.out.println("TEST END - TEST 3");
 
 		System.out.println("-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-");
@@ -496,7 +496,7 @@ public class Test2 {
 					.size();
 			Assert.assertEquals(count, expected, "CURRENT != EXPECTED");
 
-			System.out.println(actual + "|" + expected);
+			//System.out.println(actual + "|" + expected);
 			
 			driver.findElement(By.cssSelector(
 					"button[class='mantine-Button-gradient mantine-Button-root mantine-Group-child mantine-1m2tbz']"))

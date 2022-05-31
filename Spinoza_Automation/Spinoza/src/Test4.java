@@ -58,7 +58,7 @@ public class Test4 {
 				count--;
 				TestCount--;
 
-				Thread.sleep(1000);
+				Thread.sleep(3000);
 
 				System.out.println("Delete Automation Tests = SUCCESS");
 			}
