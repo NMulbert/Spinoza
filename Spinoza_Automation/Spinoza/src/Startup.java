@@ -41,7 +41,7 @@ public class Startup {
 		System.out.println("-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-");
 
 		Test2 t2 = new Test2();
-		t2.EditTestTitle(driver,"NEW TITLE"); // EDIT TEST TITLE
+		t2.EditTestTitle(driver, "NEW TITLE"); // EDIT TEST TITLE
 		Thread.sleep(3000);
 		t2.EditTestDescription(driver); // EDIT TEST DESCRIPTION
 		Thread.sleep(3000);
@@ -70,22 +70,22 @@ public class Startup {
 		System.out.println("-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-");
 		System.out.println("TEST END - SEARCH TEST'S BY TAG");
 		System.out.println("-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-");
-		
+
 		Thread.sleep(5000);
 
 		// TEST'S DELETE TEST
 		System.out.println("-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-");
 		System.out.println("TEST START - TEST'S DELETE TEST");
 		System.out.println("-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-");
-		
+
 		Test4 t4 = new Test4();
 		t4.DeleteAutomationTest(driver);// DELETE AUTOMATION TEST'S
 		Thread.sleep(3000);
-		
+
 		System.out.println("-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-");
 		System.out.println("TEST END - TEST'S DELETE TEST");
 		System.out.println("-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-");
-		
+
 		// TEST'S CREATE QUESTION
 		System.out.println("-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-");
 		System.out.println("TEST START - TEST'S CREATE QUESTION");
@@ -118,6 +118,21 @@ public class Startup {
 
 		System.out.println("-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-");
 		System.out.println("TEST END - TEST'S EDIT QUESTION");
+		System.out.println("-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-");
+
+		Thread.sleep(5000);
+
+		// TEST'S DELETE TEST
+		System.out.println("-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-");
+		System.out.println("TEST START - TEST'S DELETE QUESTION");
+		System.out.println("-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-");
+
+		Test7 t7 = new Test7();
+		t7.DeleteAutomationQuestion(driver);// DELETE AUTOMATION QUESTION'S
+		Thread.sleep(3000);
+
+		System.out.println("-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-");
+		System.out.println("TEST END - TEST'S DELETE QUESTION");
 		System.out.println("-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-");
 
 		driver.quit();

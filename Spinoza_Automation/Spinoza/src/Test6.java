@@ -154,7 +154,7 @@ public class Test6 {
 						.findElement(By.cssSelector(".mantine-1kunnmy.mantine-MultiSelect-values")).getText()));
 			}
 
-			driver.findElement(By.cssSelector(".w-md-editor-text-input")).click();
+			driver.findElement(By.cssSelector(".mantine-1kunnmy.mantine-MultiSelect-values")).click();
 
 			// SAVE AS DRAFT
 			driver.findElement(By.cssSelector(
