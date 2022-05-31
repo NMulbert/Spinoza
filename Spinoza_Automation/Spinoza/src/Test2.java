@@ -22,68 +22,68 @@ public class Test2 {
 		driver.manage().timeouts().implicitlyWait(15, TimeUnit.SECONDS);
 
 		driver.manage().window().maximize();
-		driver.get("http://localhost:3000/");
+//		driver.get("http://localhost:3000/");
+		driver.get("https://www.zionetapp.com/");
 
+		System.out.println("-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-");
 		System.out.println("TEST START - TEST'S EDIT");
-
 		System.out.println("-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-");
 
 		System.out.println("TEST START - TEST 1");
-		EditTestTitle(driver);
+		EditTestTitle(driver, "NEW TITLE"); // EDIT TEST TITLE
 		System.out.println("TEST END - TEST 1");
 
 		System.out.println("-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-");
+		Thread.sleep(5000);
 
 		System.out.println("TEST START - TEST 2");
-		EditTestTitle_Test1(driver);
+		EditTestDescription(driver); // EDIT TEST DESCRIPTION
 		System.out.println("TEST END - TEST 2");
 
 		System.out.println("-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-");
+		Thread.sleep(5000);
 
 		System.out.println("TEST START - TEST 3");
-		EditTestDescription(driver);
+		EditTestTags(driver); // EDIT TEST TAGS
 		System.out.println("TEST END - TEST 3");
 
 		System.out.println("-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-");
+		Thread.sleep(5000);
 
 		System.out.println("TEST START - TEST 4");
-		EditTestTags(driver);
+		EditTestQuestions_CreateNewQuestion(driver); // EDIT TEST BY CREATE NEW QUESTION
 		System.out.println("TEST END - TEST 4");
 
 		System.out.println("-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-");
+		Thread.sleep(5000);
 
 		System.out.println("TEST START - TEST 5");
-		EditTestQuestions_CreateNewQuestion(driver);
+		EditTestQuestion_ChooseFromCatalog(driver); // EDIT TEST BY CHOSING QUESTION FORM CATALOG
 		System.out.println("TEST END - TEST 5");
 
 		System.out.println("-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-");
-
-		System.out.println("TEST START - TEST 6");
-		EditTestQuestion_ChooseFromCatalog(driver);
-		System.out.println("TEST END - TEST 6");
-
+		System.out.println("TEST END - TEST'S EDIT");
 		System.out.println("-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-");
 
-		System.out.println("TEST END - TEST'S EDIT");
-
-		Thread.sleep(3000);
+		Thread.sleep(5000);
 		driver.quit();
 
 	}
 
-	public static void EditTestTitle(WebDriver driver) {
+	public static void EditTestTitle(WebDriver driver, String title) {
 		try {
 			// EDIT TEST TITLE
 
 			// EDIT TEST
 			EditTest(driver);
+			Thread.sleep(3000);
 
 			// EDIT TITLE
 			WebElement Title = driver.findElement(By.xpath(
 					"//input[@class='mantine-TextInput-defaultVariant mantine-TextInput-input mantine-us7vc8']"));
 			Title.click();
 			Title.clear();
-			Title.sendKeys("NEW TITLE");
+			Title.sendKeys("Automation TEST | " + title);
 			System.out.println("TITLE = 'NEW TITLE'");
 
 			// SAVE AS DRAFT
@@ -110,39 +110,13 @@ public class Test2 {
 		}
 	}
 
-	public static void EditTestTitle_Test1(WebDriver driver) {
-		try {
-			// EDIT TEST WITHOUT TITLE
-
-			// EDIT TEST
-			EditTest(driver);
-
-			// EDIT TITLE
-			WebElement Title = driver.findElement(By.xpath(
-					"//input[@class='mantine-TextInput-defaultVariant mantine-TextInput-input mantine-us7vc8']"));
-			Title.clear();
-
-			// SAVE AS DRAFT
-			driver.findElement(By.cssSelector(
-					"button[class='mantine-Button-gradient mantine-Button-root mantine-Group-child mantine-1m2tbz']"))
-					.click();
-
-			EditTestTitle_Test1_Check(driver);
-
-			driver.findElement(By.xpath("//span[contains(text(),'Tests')]")).click();
-
-		} catch (Exception e) {
-			System.out.println("Error = EditTestTitle_Test1");
-			System.out.println(e);
-		}
-	}
-
 	public static void EditTestDescription(WebDriver driver) {
 		try {
 			// EDIT TEST DESCRIPTION
 
 			// EDIT TEST
 			EditTest(driver);
+			Thread.sleep(3000);
 
 			// EDIT DESCRIPTION
 			WebElement Description = driver.findElement(By.cssSelector(".w-md-editor-text-input"));
@@ -182,6 +156,7 @@ public class Test2 {
 
 			// EDIT TEST
 			EditTest(driver);
+			Thread.sleep(3000);
 
 			// EDIT TAGS
 			int TagsCount = driver.findElements((By.xpath(
@@ -228,6 +203,7 @@ public class Test2 {
 
 			// EDIT TEST
 			EditTest(driver);
+			Thread.sleep(3000);
 
 			// CREATE NEW QUESTION
 			driver.findElement(By.cssSelector(
@@ -282,8 +258,12 @@ public class Test2 {
 
 			// EDIT TEST
 			EditTest(driver);
+			Thread.sleep(3000);
 
-			// CREATE NEW QUESTION
+			int count = driver.findElements(By.cssSelector(".mantine-Paper-root.mantine-Card-root.mantine-txe1qr"))
+					.size();
+
+			// CHOOSE QUESTIONS FROM CATALOG
 			driver.findElement(By.cssSelector(
 					"button[class='mantine-Button-outline mantine-Button-root mantine-Group-child mantine-4sv719']"))
 					.click();
@@ -291,8 +271,15 @@ public class Test2 {
 			// SELECT QUESTIONS
 			QuestionSelectQuestions(driver);
 			
-			EditTestQuestions_ChooseFromCatalog(driver);
+			// GET QUESTION COUNT
+			driver.findElement(By.cssSelector(
+					"button[class='mantine-Button-outline mantine-Button-root mantine-Group-child mantine-4sv719']"))
+					.click();
 			
+			int questions = GetQuestionsFromCatalog(driver);
+
+			EditTestQuestions_ChooseFromCatalog_Check(driver, count, questions);
+
 		} catch (Exception e) {
 			System.out.println("Error = EditTestQuestion_ChooseFromCatalog");
 			System.out.println(e);
@@ -303,7 +290,7 @@ public class Test2 {
 		try {
 			// EDITE TEST
 			driver.findElement(By.xpath("//span[contains(text(),'Tests')]")).click();
-
+			Thread.sleep(3000);
 			int TestCount = driver.findElements(By.xpath("//div[@class='mantine-Col-root mantine-1akkebb']")).size()
 					- 1;
 			System.out.println("TEST's COUNT = " + TestCount);
@@ -341,6 +328,7 @@ public class Test2 {
 			Tags.sendKeys("C#", Keys.ENTER);
 			Tags.sendKeys("JavaScript", Keys.ENTER);
 			Tags.sendKeys("Python", Keys.ENTER);
+			Tags.click();
 			System.out.println("TAGS = ['React','C#','JavaScript','Python']");
 
 		} catch (Exception e) {
@@ -407,7 +395,19 @@ public class Test2 {
 		}
 	}
 
-	private static void QuestionSelectQuestions(WebDriver driver) {
+	private static int GetQuestionsFromCatalog(WebDriver driver) throws InterruptedException {
+		Thread.sleep(5000);
+		int QuestionCount = driver
+				.findElements(By.xpath("//div[@class='mantine-Paper-root mantine-Card-root mantine-199wbki']")).size();
+
+		driver.findElement(By.cssSelector(
+				"button[class='mantine-Button-filled mantine-Button-root mantine-Group-child mantine-9uo5n1']"))
+				.click();
+		return QuestionCount;
+	}
+	
+	private static void QuestionSelectQuestions(WebDriver driver) throws InterruptedException {
+		Thread.sleep(5000);
 		int QuestionCount = driver
 				.findElements(By.xpath("//div[@class='mantine-Paper-root mantine-Card-root mantine-199wbki']")).size();
 
@@ -489,13 +489,15 @@ public class Test2 {
 			System.out.println(e);
 		}
 	}
-	
-	private static void EditTestQuestions_ChooseFromCatalog(WebDriver driver) {
+
+	private static void EditTestQuestions_ChooseFromCatalog_Check(WebDriver driver,int actual, int expected) {
 		try {
 			int count = driver.findElements(By.cssSelector(".mantine-Paper-root.mantine-Card-root.mantine-txe1qr"))
 					.size();
-			Assert.assertEquals(count, 1);
+			Assert.assertEquals(count, expected, "CURRENT != EXPECTED");
 
+			System.out.println(actual + "|" + expected);
+			
 			driver.findElement(By.cssSelector(
 					"button[class='mantine-Button-gradient mantine-Button-root mantine-Group-child mantine-1m2tbz']"))
 					.click();
